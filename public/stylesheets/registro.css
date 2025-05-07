@@ -1,0 +1,204 @@
+/* Estilos base (los que ya tenemos) */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fcfd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-image: linear-gradient(135deg, #3aacf220, #10559a20);
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.register-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 600px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.register-container:hover {
+    transform: translateY(-5px);
+}
+
+.logo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 30px;
+    overflow: hidden;
+    background-image: linear-gradient(to right, #3aacf2, #10559a);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: #f9fcfd;
+    font-weight: bold;
+}
+
+.logo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: transparent;
+}
+
+h2 {
+    color: #10559a;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 1.5em;
+}
+
+.grid-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group.full-width {
+    grid-column: 1 / -1;
+}
+
+label {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: color 0.2s ease-in-out;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1.1em;
+    transition: border-color 0.2s ease-in-out;
+    color: #333;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus {
+    outline: none;
+    border-color: #3aacf2;
+    box-shadow: 0 0 0 0.2rem rgba(58, 170, 242, 0.25);
+}
+
+button {
+    background-color: #3aacf2;
+    color: #f9fcfd;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 600;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    grid-column: 1 / -1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+button:hover {
+    background-color: #2b8cc4;
+    transform: scale(1.02);
+}
+
+button:active {
+    transform: scale(1);
+}
+
+.login-link {
+    margin-top: 30px;
+    font-size: 1em;
+    color: #555;
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.login-link a {
+    color: #10559a;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s ease-in-out;
+}
+
+.login-link a:hover {
+    color: #125693;
+}
+
+/* Media Query para pantallas más pequeñas (móviles) */
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+        padding-top: 20px;
+        background-image: none;
+    }
+
+    .register-container {
+        width: 90%;
+        margin: 20px auto;
+        padding: 30px;
+    }
+
+    .logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .grid-form {
+        grid-template-columns: 1fr; /* Una sola columna en móviles */
+        gap: 15px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-size: 1em;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"] {
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    button {
+        padding: 14px 20px;
+        font-size: 1.1em;
+        margin-top: 20px;
+    }
+
+    .login-link {
+        font-size: 0.9em;
+        margin-top: 20px;
+    }
+}

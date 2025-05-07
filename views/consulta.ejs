@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta con la IA - AI Finance Solutions</title>
+    <link rel="stylesheet" href="/stylesheets/consulta.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="logo">
+                <img src="/images/Logoconsulta.jpg" alt="Logo de AI FINANCE SOLUTIONS">
+            </div>
+            <div class="user-info">
+                <span>Bienvenido, [Nombre de Usuario]</span>
+                <button class="logout-button">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <main class="query-interface-lateral">
+            <section class="query-options-sidebar">
+                <h2>Opciones de Consulta</h2>
+                <div class="options-container">
+                    <div class="option-group">
+                        <label for="tipo-analisis">Tipo de Análisis:</label>
+                        <select id="tipo-analisis">
+                            <option value="general">General</option>
+                            <option value="rendimiento">Rendimiento</option>
+                            <option value="riesgo">Riesgo</option>
+                            <option value="proyeccion">Proyección</option>
+                            <option value="comparativa">Comparativa</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label for="periodo">Periodo:</label>
+                        <select id="periodo">
+                            <option value="actual">Actual</option>
+                            <option value="ultimo_mes">Último Mes</option>
+                            <option value="ultimo_trimestre">Último Trimestre</option>
+                            <option value="ultimo_anio">Último Año</option>
+                            <option value="personalizado">Personalizado</option>
+                        </select>
+                        <div id="rango-fechas" style="display: none;">
+                            <label for="fecha-inicio">Desde:</label>
+                            <input type="date" id="fecha-inicio">
+                            <label for="fecha-fin">Hasta:</label>
+                            <input type="date" id="fecha-fin">
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label>Formato de Respuesta:</label>
+                        <div class="radio-group">
+                            <input type="radio" id="formato-texto" name="formato-respuesta" value="texto" checked>
+                            <label for="formato-texto">Texto</label>
+                            <input type="radio" id="formato-grafico" name="formato-respuesta" value="grafico">
+                            <label for="formato-grafico">Gráfico</label>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label for="documento-ia">Subir Documento Para Análisis:</label>
+                        <input type="file" id="documento-ia" accept=".pdf,.doc,.docx,.csv,.xlsx">
+                        <p class="file-upload-info">Formatos permitidos: PDF, DOC, DOCX, CSV, XLSX</p>
+                    </div>
+                    <div class="input-field">
+                        <label for="pregunta-ia">Tu Pregunta Principal (El tema que se va a tratar):</label>
+                        <textarea id="pregunta-ia" placeholder="Pregunta específica sobre el documento (opcional)"></textarea>
+                    </div>
+                    <button class="ask-button">Consultar a la IA</button>
+                </div>
+            </section>
+
+            <section class="ai-chat-sidebar">
+                <h2>Chat con la IA</h2>
+                <div id="chat-area">
+                    <div class="ai-message">
+                        <span class="ai-name">IA Financiera:</span>
+                        <p>¡Hola! ¿En qué puedo ayudarte hoy con tus finanzas?</p>
+                    </div>
+                    </div>
+                <div class="chat-input">
+                    <textarea id="chat-input" placeholder="Escribe tu mensaje a la IA..."></textarea>
+                    <button id="send-chat">Enviar</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+</body>
+</html>
