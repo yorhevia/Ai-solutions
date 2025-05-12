@@ -19,6 +19,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configuración de la sesión
+app.use(session({
+  secret: '5c43dce9d60c0ed885f5db5d5b6ff7775bb4f20280c1d7f385f13a6c73488066357fb0796046a6be07f2d4d58ddeeda0f797e94586929ca0a101834745fbcdfe', // ¡CAMBIA ESTO POR UNA CADENA SECRETA FUERTE!
+  resave: false,
+  saveUninitialized: false, 
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    maxAge: 3600000
+  }
+}));
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
