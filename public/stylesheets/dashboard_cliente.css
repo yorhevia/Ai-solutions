@@ -1,0 +1,30 @@
+/* Estilos para la tabla de inversiones del cliente */
+#tabla-inversiones-cliente table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tabla-inversiones-cliente th,
+#tabla-inversiones-cliente td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#tabla-inversiones-cliente th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+#tabla-inversiones-cliente td:last-child,
+#tabla-inversiones-cliente th:last-child {
+    text-align: right;
+}
+
+/* Estilos generales para los contenedores de gráficos */
+.area-grafico h3 {
+    font-size: 1em;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 10px;
+}

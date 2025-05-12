@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Financial Solutions - Registro de Cliente</title>
+    <link rel="stylesheet" href="/stylesheets/registro_cliente.css">
+</head>
+<body>
+    <div class="registration-container">
+        <header>
+            <div class="logo">
+            </div>
+            <h2>Bienvenido a AI Financial Solutions</h2>
+            <p>Por favor, completa el siguiente formulario para comenzar.</p>
+        </header>
+
+        <main class="registration-form">
+            <form id="registrationForm">
+                <section>
+                    <h3>Información Personal</h3>
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido">Apellido:</label>
+                        <input type="text" id="apellido" name="apellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono">
+                    </div>
+                    <div class="form-group">
+                        <label for="direccion">Dirección:</label>
+                        <textarea id="direccion" name="direccion"></textarea>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Información Financiera Básica</h3>
+                    <div class="form-group">
+                        <label for="ingresos">Ingresos Anuales (aproximado):</label>
+                        <input type="number" id="ingresos" name="ingresos">
+                    </div>
+                    <div class="form-group">
+                        <label for="ahorros">Ahorros Totales (aproximado):</label>
+                        <input type="number" id="ahorros" name="ahorros">
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Objetivos Financieros Iniciales</h3>
+                    <div class="form-group">
+                        <label for="objetivo_principal">Mi objetivo financiero principal es:</label>
+                        <select id="objetivo_principal" name="objetivo_principal">
+                            <option value="">-- Seleccionar --</option>
+                            <option value="jubilacion">Planificación para la jubilación</option>
+                            <option value="compra_vivienda">Compra de una vivienda</option>
+                            <option value="educacion_hijos">Educación de mis hijos</option>
+                            <option value="inversion_largo_plazo">Inversión a largo plazo</option>
+                            <option value="inversion_corto_plazo">Inversión a corto plazo</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="otro_objetivo_div" style="display: none;">
+                        <label for="otro_objetivo">Otro objetivo:</label>
+                        <input type="text" id="otro_objetivo" name="otro_objetivo">
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Perfil de Riesgo (Opcional)</h3>
+                    <p>¿Cómo te sientes con la posibilidad de que tus inversiones suban o bajen de valor?</p>
+                    <div class="form-group">
+                        <input type="radio" id="riesgo_conservador" name="perfil_riesgo" value="conservador">
+                        <label for="riesgo_conservador">Prefiero inversiones seguras con bajo riesgo.</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="radio" id="riesgo_moderado" name="perfil_riesgo" value="moderado">
+                        <label for="riesgo_moderado">Estoy dispuesto a asumir un riesgo moderado para obtener mayores rendimientos.</label>
+                    </div>
+                    <div class="form-group">
+                        <input type="radio" id="riesgo_agresivo" name="perfil_riesgo" value="agresivo">
+                        <label for="riesgo_agresivo">Busco el mayor rendimiento posible y estoy dispuesto a asumir un riesgo alto.</label>
+                    </div>
+                </section>
+
+                <button type="submit" class="submit-button">Registrarse</button>
+            </form>
+        </main>
+
+        <footer>
+            <p>© 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const objetivoPrincipalSelect = document.getElementById('objetivo_principal');
+            const otroObjetivoDiv = document.getElementById('otro_objetivo_div');
+
+            objetivoPrincipalSelect.addEventListener('change', function() {
+                otroObjetivoDiv.style.display = this.value === 'otro' ? 'block' : 'none';
+            });
+
+            const registrationForm = document.getElementById('registrationForm');
+            registrationForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                // Aquí se enviaría la información del formulario al backend
+                console.log('Formulario enviado:', new FormData(registrationForm));
+                alert('Registro completado. ¡Gracias!'); // Simulación
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,349 +1,351 @@
-/* Estilos base para asegurar legibilidad */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f7f6;
-    margin: 0;
-    color: #333; /* Contraste adecuado para texto principal */
-    font-size: 16px; /* Tamaño de fuente base legible */
-    line-height: 1.6; /* Espaciado entre líneas para facilitar la lectura */
-    overflow-x: hidden;
-}
-
-.dashboard-container {
+/* Estilos generales para la vista de consulta integrada */
+.consulta-integrada-view {
     display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    width: 100%;
+    height: calc(100vh - 60px - 50px); /* Ajustar por header y footer */
     overflow: hidden;
 }
 
+/* Estilos para la barra lateral izquierda */
+.sidebar-left {
+    width: 280px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #eee;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.sidebar-left h2 {
+    font-size: 1.1em;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+/* Estilos para la selección de cliente en la barra lateral */
+.client-selection select#cliente-selector-nueva {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+/* Estilos para la navegación en la barra lateral */
+.sidebar-left .navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-left .navigation li.nav-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: #555;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-left .navigation li.nav-item:hover,
+.sidebar-left .navigation li.nav-item.active {
+    background-color: #e9ecef;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Estilos para la sección principal de contenido */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.main-content h2 {
+    font-size: 1.5em;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+/* Estilos para la cuadrícula de tarjetas de información en el resumen general */
+.info-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.info-cards-grid .info-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.info-cards-grid .info-card h3 {
+    font-size: 1em;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.info-cards-grid .info-card .data {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Estilos para la tabla de inversiones */
+#tabla-inversiones table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tabla-inversiones th,
+#tabla-inversiones td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#tabla-inversiones th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Estilos para los controles de análisis */
+.analysis-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.analysis-controls select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.analysis-controls .analyze-button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.analysis-controls .analyze-button:hover {
+    background-color: #1e7e34;
+}
+
+/* Estilos para el panel de comunicación integrado */
+.communication-panel-integrated {
+    display: flex;
+    gap: 20px;
+}
+
+.call-section-integrated {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.call-section-integrated h3 {
+    color: #333;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+.call-representation-integrated {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.call-controls-integrated {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.chat-section-integrated {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-section-integrated h3 {
+    color: #333;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+#chat-messages-integrated {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
+}
+
+.chat-input-area textarea#message-input-integrated {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    resize: none;
+    box-sizing: border-box;
+    margin-right: 8px;
+}
+
+.chat-input-area {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.chat-input-area button#send-message-integrated {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.chat-input-area button#send-message-integrated:hover {
+    background-color: #0056b3;
+}
+
+/* Media query para pantallas más pequeñas */
+@media (max-width: 767px) {
+    .consulta-integrada-view {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .sidebar-left {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding: 15px;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 15px;
+    }
+
+    .sidebar-left .client-selection,
+    .sidebar-left .navigation {
+        flex-shrink: 0;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .communication-panel-integrated {
+        flex-direction: column;
+    }
+
+    .call-section-integrated {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+}
+/* Estilos para el header */
 header {
     background-color: #fff;
-    padding: 20px 30px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.logo img {
-    height: 90px; /* Ajusté el tamaño del logo para mejor equilibrio */
+header .logo img {
+    height: 70px; /* Ajusta este valor según el tamaño deseado */
 }
 
-.user-info {
+header .header-navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    align-items: center;
-}
-
-.user-info span {
-    margin-right: 20px;
-    font-weight: 500;
-    color: #555; /* Contraste adecuado */
-    font-size: 1.1em; /* Tamaño legible */
-}
-
-.logout-button {
-    background-color: #e74c3c;
-    color: #fff; /* Contraste adecuado */
-    border: none;
-    padding: 12px 18px; /* Ajusté el padding para mejor legibilidad */
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em; /* Tamaño legible */
-    transition: background-color 0.3s ease;
-}
-
-.logout-button:hover {
-    background-color: #c0392b;
-}
-
-main.query-interface-lateral {
-    padding: 20px;
-    display: flex;
-    flex-grow: 1;
     gap: 20px;
-    flex-direction: row;
-    align-items: stretch;
-    overflow: hidden;
 }
 
-.query-options-sidebar {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    width: 350px;
-    flex-shrink: 0;
-    box-sizing: border-box;
+header .header-navigation li a {
+    text-decoration: none;
+    color: #555;
+    font-size: 0.95em;
+    transition: color 0.3s ease;
 }
 
-.query-options-sidebar h2 {
-    color: #10559a;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 8px;
-    font-size: 1.5em; /* Título legible */
-    word-break: break-word;
+header .header-navigation li a:hover {
+    color: #007bff;
 }
 
-.options-container {
+header .user-info {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    align-items: center;
+    gap: 20px;
 }
 
-.option-group label {
-    display: block;
-    margin-bottom: 8px; /* Aumenté el margen inferior para mejor espaciado */
-    color: #555; /* Contraste adecuado */
-    font-weight: bold;
-    font-size: 1.1em; /* Tamaño legible */
-    word-break: break-word;
+header .user-info .welcome-message {
+    font-size: 0.9em;
+    color: #555;
 }
 
-.option-group select,
-.option-group input[type="date"],
-.query-options-sidebar .input-field textarea,
-.query-options-sidebar .option-group input[type="file"] {
-    width: 100%;
-    padding: 10px; /* Aumenté el padding para mejor legibilidad */
+header .user-info .logout-button {
+    background-color: #f8f9fa;
+    color: #555;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em; /* Tamaño legible */
-    box-sizing: border-box;
-    word-break: break-word;
-}
-
-.query-options-sidebar .input-field label {
-    margin-top: 15px; /* Aumenté el margen superior para mejor espaciado */
-    font-size: 1.1em; /* Tamaño legible */
-    word-break: break-word;
-}
-
-.query-options-sidebar .input-field label[for="pregunta-ia"] {
-    margin-top: 15px;
-    font-size: 1.2em; /* Aumentamos ligeramente el tamaño de la fuente */
-    font-weight: 700; /* Hacemos la letra más gruesa */
-    color: #10559a; /* Usamos el color primario para destacar */
-    margin-bottom: 10px; /* Añadimos un pequeño margen inferior */
-}
-
-.query-options-sidebar .ask-button {
-    background-color: #3aacf2;
-    color: #fff; /* Contraste adecuado */
-    border: none;
-    padding: 15px 25px; /* Ajusté el padding para mejor legibilidad */
-    border-radius: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 1.1em; /* Tamaño legible */
+    font-size: 0.9em;
     transition: background-color 0.3s ease;
-    margin-top: 20px;
-    width: 100%;
-    box-sizing: border-box;
-    word-break: break-word;
 }
 
-.query-options-sidebar .ask-button:hover {
-    background-color: #2b8cc4;
-}
-
-.ai-chat-sidebar {
-    background-color: #f9f9f9;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.ai-chat-sidebar h2 {
-    color: #10559a;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 8px;
-    font-size: 1.5em; /* Título legible */
-    word-break: break-word;
-}
-
-#chat-area {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-bottom: 20px;
-    word-break: break-word;
-}
-
-.ai-message {
-    background-color: #e6f7ff;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    word-break: break-word;
-}
-
-.ai-name {
-    font-weight: bold;
-    color: #3aacf2;
-    margin-right: 10px;
-    font-size: 1em; /* Nombre legible */
-    word-break: break-word;
-}
-
-.ai-message p {
-    font-size: 1em; /* Texto del mensaje legible */
-    color: #333; /* Contraste adecuado */
-}
-
-.chat-input {
-    display: flex;
-    margin-top: 20px;
-    gap: 10px;
-}
-
-.chat-input textarea {
-    flex-grow: 1;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em; /* Texto de entrada legible */
-    resize: none;
-    box-sizing: border-box;
-    word-break: break-word;
-}
-
-.chat-input button#send-chat {
-    background-color: #10559a;
-    color: #fff; /* Contraste adecuado */
-    border: none;
-    padding: 12px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em; /* Texto del botón legible */
-    transition: background-color 0.3s ease;
-    box-sizing: border-box;
-    word-break: break-word;
-}
-
-.chat-input button#send-chat:hover {
-    background-color: #125693;
-}
-
-footer {
-    background-color: #333;
-    color: #fff; /* Contraste adecuado */
-    text-align: center;
-    padding: 15px 0;
-    font-size: 0.9em; /* Texto del footer legible */
-    word-break: break-word;
-}
-
-#rango-fechas {
-    display: none;
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    word-break: break-word;
-}
-
-#rango-fechas label {
-    font-weight: normal;
-    font-size: 1em; /* Texto de la etiqueta legible */
-    word-break: break-word;
-}
-
-/* Estilo específico para .radio-group en PC (fuera de la media query) */
-.radio-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 15px; /* Ajusta el espacio si lo deseas diferente en PC */
-}
-
-.radio-group label {
-    margin-bottom: 0; /* Aseguramos que no haya margen inferior en PC */
-    font-size: 1em;
-}
-
-.radio-group input[type="radio"] {
-    margin-right: 5px;
-}
-
-/* Media Query para pantallas más pequeñas (móviles) */
-@media (max-width: 767px) {
-    main.query-interface-lateral {
-        flex-direction: column;
-    }
-
-    .query-options-sidebar {
-        width: 100%;
-        margin-bottom: 20px;
-        padding: 15px; /* Reduje un poco el padding en móviles */
-    }
-
-    .ai-chat-sidebar {
-        width: 100%;
-        padding: 15px; /* Reduje un poco el padding en móviles */
-    }
-
-    .query-options-sidebar h2,
-    .ai-chat-sidebar h2 {
-        font-size: 1.3em; /* Ajusté el tamaño del título en móviles */
-        margin-bottom: 10px;
-    }
-
-    .option-group label {
-        font-size: 1em; /* Aseguré un tamaño de fuente legible en móviles */
-        margin-bottom: 5px;
-    }
-
-    .option-group select,
-    .option-group input[type="date"],
-    .query-options-sidebar .input-field textarea,
-    .query-options-sidebar .option-group input[type="file"],
-    .query-options-sidebar .ask-button,
-    .chat-input textarea,
-    .chat-input button#send-chat {
-        font-size: 1em; /* Aseguré un tamaño de fuente legible en móviles */
-        padding: 10px; /* Ajusté el padding en móviles */
-    }
-
-    .query-options-sidebar .input-field label[for="pregunta-ia"] {
-        font-size: 1.1em; /* Ajustamos el tamaño para móviles si es necesario */
-        font-weight: 700;
-        color: #10559a;
-        margin-bottom: 8px;
-    }
-
-    .user-info span {
-        font-size: 1em; /* Aseguré un tamaño de fuente legible en móviles */
-    }
-
-    .logout-button {
-        font-size: 0.9em; /* Ajusté el tamaño del botón en móviles */
-        padding: 10px 15px;
-    }
-
-    /* Reafirmamos los estilos para móviles dentro de la media query */
-    .radio-group {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px; /* Ajusta el espacio si es necesario en móviles */
-    }
-
-    .radio-group label {
-        font-size: 1em; /* Aseguré un tamaño de fuente legible en móviles */
-        margin-bottom: 0;
-    }
-
-    .radio-group input[type="radio"] {
-        margin-right: 5px;
-    }
-
-    .file-upload-info {
-        font-size: 0.9em; /* Tamaño legible para la información del archivo */
-        color: #777;
-        margin-top: 5px;
-    }
+header .user-info .logout-button:hover {
+    background-color: #e9ecef;
 }

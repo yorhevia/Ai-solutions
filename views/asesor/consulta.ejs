@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Financial Solutions - Consulta Integrada</title>
+    <link rel="stylesheet" href="/stylesheets/consulta.css">
+    <link rel="stylesheet" href="/stylesheets/comunicacion.css">
+    <link rel="stylesheet" href="/stylesheets/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="logo">
+                <img src="/images/Logoconsulta.jpg" alt="Logo de AI FINANCE SOLUTIONS">
+            </div>
+            <div class="header-navigation">
+                <ul>
+                    <li><a href="#resumen">Resumen</a></li>
+                    <li><a href="#clientes">Clientes</a></li>
+                    <li><a href="#portafolios">Portafolios</a></li>
+                    <li><a href="#reportes">Reportes</a></li>
+                </ul>
+            </div>
+            <div class="user-info">
+                <span class="welcome-message">¡Hola, [Nombre de Asesor]!</span>
+                <button class="logout-button">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <main class="consulta-integrada-view">
+            <aside class="sidebar-left">
+                <div class="client-selection">
+                    <h2>Cliente</h2>
+                    <select id="cliente-selector-nueva">
+                        <option value="">-- Seleccionar Cliente --</option>
+                        <option value="cliente1">Cliente 1</option>
+                        <option value="cliente2">Cliente 2</option>
+                    </select>
+                    <div id="resumen-cliente-sidebar" class="resumen-cliente" style="display:none;">
+                        <h3>Resumen</h3>
+                        <p>Activos: <span id="activos-cliente-sidebar">$XXX,XXX</span></p>
+                        <p>Riesgo: <span id="riesgo-cliente-sidebar">Medio</span></p>
+                    </div>
+                </div>
+                <div class="navigation">
+                    <h2>Navegación</h2>
+                    <ul>
+                        <li class="nav-item active" data-section="resumen-general">Resumen General</li>
+                        <li class="nav-item" data-section="planificacion">Planificación</li>
+                        <li class="nav-item" data-section="inversiones">Inversiones</li>
+                        <li class="nav-item" data-section="analisis">Análisis</li>
+                        <li class="nav-item" data-section="comunicacion">Comunicación</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <section class="main-content">
+                <div id="resumen-general" class="content-section active">
+                    <h2>Resumen General del Cliente</h2>
+                    <div class="info-cards-grid">
+                        <div class="info-card">
+                            <h3>Activos Totales</h3>
+                            <span class="data">$XXX,XXX</span>
+                        </div>
+                        <div class="info-card">
+                            <h3>Perfil de Riesgo</h3>
+                            <span class="data">Medio</span>
+                        </div>
+                        <div class="info-card">
+                            <h3>Objetivo Principal</h3>
+                            <span class="data">Jubilación</span>
+                        </div>
+                        <div class="info-card">
+                            <h3>Rendimiento Anualizado</h3>
+                            <span class="data">X.XX%</span>
+                        </div>
+                    </div>
+                    <div id="grafico-resumen-cartera" class="area-grafico" style="margin-top: 20px;">
+                        <h3>Distribución de la Cartera</h3>
+                        <div style="height: 200px; background-color: #f0f0f0; text-align: center; line-height: 200px; color: #777;">
+                            [Gráfico de distribución de activos]
+                        </div>
+                    </div>
+                </div>
+
+                <div id="planificacion" class="content-section">
+                    <h2>Planificación Financiera</h2>
+                    <p>Aquí irán las herramientas y la información relacionada con la planificación financiera del cliente.</p>
+                    </div>
+
+                <div id="inversiones" class="content-section">
+                    <h2>Gestión de Inversiones</h2>
+                    <div id="resumen-inversion-main" class="resumen-inversion">
+                        <h3>Resumen de Cartera</h3>
+                        <p>Valor Total: <span id="valor-cartera-main">$YYY,YYY</span></p>
+                        <p>Rendimiento YTD: <span id="rendimiento-ytd">Y.YY%</span></p>
+                    </div>
+                    <div id="tabla-inversiones" style="margin-top: 20px; border: 1px solid #ccc; border-radius: 5px; overflow: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align: left;">Activo</th>
+                                    <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">Cantidad</th>
+                                    <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">Precio Unitario</th>
+                                    <th style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">Valor Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee;">Acción ABC</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">100</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$150.00</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$15,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee;">Fondo XYZ</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">50</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$200.50</td>
+                                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">$10,025.00</td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="analisis" class="content-section">
+                    <h2>Herramientas de Análisis</h2>
+                    <div class="analysis-controls">
+                        <select id="tipo-analisis-nueva">
+                            <option value="">-- Tipo de Análisis --</option>
+                            <option value="general">General</option>
+                            <option value="rendimiento">Rendimiento</option>
+                            <option value="riesgo">Riesgo</option>
+                            <option value="proyeccion">Proyección</option>
+                            <option value="comparativa">Comparativa</option>
+                        </select>
+                        <select id="periodo-nueva">
+                            <option value="">-- Periodo --</option>
+                            <option value="actual">Actual</option>
+                            <option value="ultimo_mes">Último Mes</option>
+                            <option value="ultimo_anio">Último Año</option>
+                        </select>
+                        <button class="analyze-button">Generar Análisis</button>
+                    </div>
+                    <div id="resultado-analisis" style="margin-top: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
+                        <h3>Resultado del Análisis</h3>
+                        <p>[Aquí se mostrarán los resultados del análisis seleccionado.]</p>
+                    </div>
+                </div>
+
+                <div id="comunicacion" class="content-section">
+                    <h2>Comunicación con el Cliente</h2>
+                    <div class="communication-panel-integrated">
+                        <div class="call-section-integrated">
+                            <h3>Llamada</h3>
+                            <div class="call-representation-integrated">
+                                <div class="call-box asesor">
+                                    <div class="avatar"></div>
+                                    <span class="username">Asesor</span>
+                                    <span class="call-status conectado"></span>
+                                </div>
+                                <div class="call-box cliente">
+                                    <div class="avatar"></div>
+                                    <span class="username" id="cliente-username-call">Cliente</span>
+                                    <span class="call-status desconectado"></span>
+                                </div>
+                            </div>
+                            <div class="call-controls-integrated">
+                                <button class="call-button start">Iniciar</button>
+                                <button class="call-button end" disabled>Finalizar</button>
+                                <button class="call-button mute">Micrófono</button>
+                                <button class="call-button camera">Cámara</button>
+                            </div>
+                        </div>
+                        <div class="chat-section-integrated">
+                            <h3>Chat</h3>
+                            <div id="chat-messages-integrated" class="chat-window">
+                                <div class="message system">Bienvenido al chat.</div>
+                            </div>
+                            <div class="chat-input-area">
+                                <textarea id="message-input-integrated" placeholder="Escribe tu mensaje..."></textarea>
+                                <button id="send-message-integrated" class="send-button">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clienteSelector = document.getElementById('cliente-selector-nueva');
+            const resumenClienteSidebar = document.getElementById('resumen-cliente-sidebar');
+            const activosClienteSidebar = document.getElementById('activos-cliente-sidebar');
+            const riesgoClienteSidebar = document.getElementById('riesgo-cliente-sidebar');
+            const clienteUsernameCall = document.getElementById('cliente-username-call');
+
+            const navItems = document.querySelectorAll('.nav-item');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            clienteSelector.addEventListener('change', function() {
+                const selectedClient = this.value;
+                if (selectedClient === 'cliente1') {
+                    activosClienteSidebar.textContent = '$500,000';
+                    riesgoClienteSidebar.textContent = 'Conservador';
+                    resumenClienteSidebar.style.display = 'block';
+                    clienteUsernameCall.textContent = 'Cliente 1';
+                } else if (selectedClient === 'cliente2') {
+                    activosClienteSidebar.textContent = '$1,200,000';
+                    riesgoClienteSidebar.textContent = 'Agresivo';
+                    resumenClienteSidebar.style.display = 'block';
+                    clienteUsernameCall.textContent = 'Cliente 2';
+                } else {
+                    resumenClienteSidebar.style.display = 'none';
+                    clienteUsernameCall.textContent = 'Cliente';
+                }
+                // Aquí se cargarían los datos reales del cliente
+            });
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    contentSections.forEach(section => section.classList.remove('active'));
+                    this.classList.add('active');
+                    const targetSectionId = this.getAttribute('data-section');
+                    document.getElementById(targetSectionId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

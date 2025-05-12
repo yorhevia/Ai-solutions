@@ -1,0 +1,97 @@
+/* Estilos para el panel de resumen del cliente */
+.resumen-cliente {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.resumen-cliente h3 {
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.resumen-cliente p {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 3px;
+}
+
+.resumen-cliente span {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Estilos para el indicador de estado de la llamada */
+.call-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+
+.call-status.conectado {
+    background-color: #28a745; /* Verde para conectado */
+}
+
+.call-status.desconectado {
+    background-color: #dc3545; /* Rojo para desconectado */
+}
+
+/* Estilos generales para los contenedores de gráficos */
+.area-grafico h3 {
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+/* Estilos para el panel de datos de inversión */
+.investment-data-panel {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    grid-column: 1 / 3; /* Ocupa todo el ancho por ahora, podemos ajustar */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.resumen-inversion h3 {
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.resumen-inversion p {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 3px;
+}
+
+.resumen-inversion span {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Media query para pantallas más grandes para disposición lado a lado */
+@media (min-width: 992px) {
+    .investment-data-panel {
+        grid-column: 1 / 2; /* Ocupa la primera columna en pantallas grandes */
+        grid-row: 3 / 4; /* Se coloca en una nueva fila */
+    }
+
+    .analysis-tools-panel {
+        grid-column: 2 / 3; /* Ocupa la segunda columna en pantallas grandes */
+        grid-row: 2 / 3;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Espacio entre opciones y gráfico */
+    }
+}

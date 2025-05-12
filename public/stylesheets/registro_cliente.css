@@ -1,0 +1,137 @@
+/* Estilos para el contenedor principal del registro */
+.registration-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background-color: #f4f4f4;
+    font-family: sans-serif;
+    min-height: 100vh;
+}
+
+.registration-container header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.registration-container header .logo img {
+    height: 50px;
+    margin-bottom: 10px;
+}
+
+.registration-container header h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.registration-container header p {
+    color: #666;
+    font-size: 0.95em;
+}
+
+/* Estilos para el formulario de registro */
+.registration-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.registration-form section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.registration-form section:last-child {
+    border-bottom: none;
+}
+
+.registration-form section h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-size: 0.95em;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg fill="%23555" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1.5em;
+    padding-right: 30px;
+}
+
+.form-group input[type="radio"] {
+    margin-right: 5px;
+}
+
+.registration-form section p {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 10px;
+}
+
+.submit-button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para el footer */
+.registration-container footer {
+    margin-top: 30px;
+    color: #777;
+    font-size: 0.8em;
+    text-align: center;
+}
+
+/* Estilos para el campo "Otro objetivo" */
+#otro_objetivo_div {
+    margin-top: 10px;
+}

@@ -1,0 +1,86 @@
+/* Estilos generales para el contenedor del dashboard */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Estilos para el header del dashboard */
+header {
+    background-color: #fff;
+    padding: 15px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header .logo img {
+    height: 70px;
+}
+
+header .user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+header .welcome-message {
+    font-size: 0.9em;
+    color: #555;
+}
+
+header .logout-button {
+    background-color: #f8f9fa;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+header .logout-button:hover {
+    background-color: #e9ecef;
+}
+
+/* Estilos para la navegación del header */
+header .header-navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+}
+
+header .header-navigation li a {
+    text-decoration: none;
+    color: #555;
+    font-size: 0.95em;
+    transition: color 0.3s ease;
+}
+
+header .header-navigation li a:hover,
+header .header-navigation li a.active {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Estilos para la sección principal (main) */
+main {
+    display: flex;
+    flex-grow: 1;
+}
+
+/* Estilos para el footer */
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    font-size: 0.8em;
+}

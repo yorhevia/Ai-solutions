@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Financial Solutions - Perfil del Cliente</title>
+    <link rel="stylesheet" href="/stylesheets/perfil_cliente.css">
+    <link rel="stylesheet" href="/stylesheets/dashboard_asesor.css">
+    <link rel="stylesheet" href="/stylesheets/editar_perfil_cliente.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="logo">
+                <img src="/images/Logoconsulta.jpg" alt="Logo de AI FINANCE SOLUTIONS">
+            </div>
+            <div class="user-info">
+                <span class="welcome-message">¡Hola, [Nombre de Asesor]!</span>
+                <button class="logout-button">Cerrar Sesión</button>
+            </div>
+            <nav class="header-navigation">
+                <ul>
+                    <li><a href="#resumen">Resumen</a></li>
+                    <li><a href="#clientes" class="active">Clientes</a></li>
+                    <li><a href="#portafolios">Portafolios</a></li>
+                    <li><a href="#reportes">Reportes</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="client-profile-view">
+            <aside class="sidebar-left">
+                <div class="client-list-panel">
+                    <h2>Lista de Clientes</h2>
+                    <input type="text" placeholder="Buscar cliente...">
+                    <ul class="client-list">
+                        <li class="client-item active" data-client-id="1">Cliente 1</li>
+                        <li class="client-item" data-client-id="2">Cliente 2</li>
+                        <li class="client-item" data-client-id="3">Cliente 3</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <section class="main-content">
+                <div class="client-profile-header">
+                    <h2>Perfil de Cliente: <span id="nombre-cliente-perfil">Cliente 1</span></h2>
+                    <div class="profile-actions">
+                        <button id="editar-perfil-btn">Editar Perfil</button>
+                        <button>Ver Historial</button>
+                        <button>Añadir Nota</button>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <div class="detail-section" id="datos-personales-section">
+                        <h3>Datos Personales</h3>
+                        <div class="detail-item editable">
+                            <label>Nombre:</label>
+                            <span id="nombre-completo">--</span>
+                            <input type="text" id="nombre-completo-edit" style="display: none;">
+                        </div>
+                        <div class="detail-item editable">
+                            <label>Email:</label>
+                            <span id="email-cliente">--</span>
+                            <input type="email" id="email-cliente-edit" style="display: none;">
+                        </div>
+                        <div class="detail-item editable">
+                            <label>Teléfono:</label>
+                            <span id="telefono-cliente">--</span>
+                            <input type="tel" id="telefono-cliente-edit" style="display: none;">
+                        </div>
+                        <div class="section-actions">
+                            <button class="edit-button" data-section="datos-personales">Editar</button>
+                            <button class="save-button" data-section="datos-personales">Guardar</button>
+                            <button class="cancel-button" data-section="datos-personales">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-section editing" id="objetivos-financieros-section">
+                        <h3>Objetivos Financieros</h3>
+                        <ul id="objetivos-cliente">
+                            <li>--</li>
+                        </ul>
+                        <div class="objetivos-edit-area" style="display: block;">
+                            <label>Objetivo 1:</label>
+                            <input type="text" class="objetivo-input" value="Jubilación a los 65 años"><br>
+                            <label>Objetivo 2:</label>
+                            <input type="text" class="objetivo-input" value="Compra de vivienda en 5 años"><br>
+                            <button class="add-objective-button">Añadir Objetivo</button>
+                        </div>
+                        <div class="section-actions">
+                            <button class="edit-button" data-section="objetivos-financieros">Editar</button>
+                            <button class="save-button" data-section="objetivos-financieros">Guardar</button>
+                            <button class="cancel-button" data-section="objetivos-financieros">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-section" id="perfil-riesgo-section">
+                        <h3>Perfil de Riesgo</h3>
+                        <div class="detail-item editable">
+                            <label>Tolerancia al Riesgo:</label>
+                            <span id="riesgo-cliente-perfil">--</span>
+                            <select id="riesgo-cliente-perfil-edit" style="display: none;">
+                                <option value="conservador">Conservador</option>
+                                <option value="moderado">Moderado</option>
+                                <option value="agresivo">Agresivo</option>
+                            </select>
+                        </div>
+                        <div class="detail-item editable">
+                            <label>Puntuación Riskalyze:</label>
+                            <span id="riskalyze-score">--</span>
+                            <input type="number" id="riskalyze-score-edit" style="display: none;">
+                        </div>
+                        <div class="section-actions">
+                            <button class="edit-button" data-section="perfil-riesgo">Editar</button>
+                            <button class="save-button" data-section="perfil-riesgo">Guardar</button>
+                            <button class="cancel-button" data-section="perfil-riesgo">Cancelar</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Historial de Interacciones</h3>
+                        <ul id="historial-interacciones">
+                            <li>[Fecha] - Llamada: Discusión sobre el plan de jubilación.</li>
+                            <li>[Fecha] - Chat: Pregunta sobre el rendimiento del fondo XYZ.</li>
+                        </ul>
+                        <button>Ver Historial Completo</button>
+                    </div>
+
+                    <div class="detail-section">
+                        <h3>Documentos Compartidos</h3>
+                        <ul id="documentos-compartidos">
+                            <li><a href="#">Informe de Inversión - Q1 2025</a></li>
+                            <li><a href="#">Plan Financiero Personalizado</a></li>
+                        </ul>
+                        <button>Gestionar Documentos</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientListItems = document.querySelectorAll('.client-list .client-item');
+            const nombreClientePerfil = document.getElementById('nombre-cliente-perfil');
+            const nombreCompletoSpan = document.getElementById('nombre-completo');
+            const emailClienteSpan = document.getElementById('email-cliente');
+            const telefonoClienteSpan = document.getElementById('telefono-cliente');
+            const objetivosClienteUl = document.getElementById('objetivos-cliente');
+            const riesgoClientePerfilSpan = document.getElementById('riesgo-cliente-perfil');
+            const riskalyzeScoreSpan = document.getElementById('riskalyze-score');
+
+            const editarPerfilBtn = document.getElementById('editar-perfil-btn');
+            const detailSections = document.querySelectorAll('.detail-section');
+
+            clientListItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    clientListItems.forEach(li => li.classList.remove('active'));
+                    this.classList.add('active');
+                    const clientId = this.getAttribute('data-client-id');
+                    cargarPerfilCliente(clientId);
+                });
+            });
+
+            function cargarPerfilCliente(clientId) {
+                // Simulación de carga de datos del cliente basado en el ID
+                if (clientId === '1') {
+                    nombreClientePerfil.textContent = 'Cliente 1';
+                    nombreCompletoSpan.textContent = 'Ana Pérez García';
+                    document.getElementById('nombre-completo-edit').value = 'Ana Pérez García';
+                    emailClienteSpan.textContent = 'ana.perez@email.com';
+                    document.getElementById('email-cliente-edit').value = 'ana.perez@email.com';
+                    telefonoClienteSpan.textContent = '+58 414 123 4567';
+                    document.getElementById('telefono-cliente-edit').value = '+58 414 123 4567';
+                    objetivosClienteUl.innerHTML = '<li>Jubilación a los 65 años</li><li>Compra de vivienda en 5 años</li>';
+                    riesgoClientePerfilSpan.textContent = 'Moderado';
+                    document.getElementById('riesgo-cliente-perfil-edit').value = 'moderado';
+                    riskalyzeScoreSpan.textContent = '65';
+                    document.getElementById('riskalyze-score-edit').value = '65';
+                }
+                // ... (simulación para otros clientes)
+            }
+
+            // Cargar el perfil del primer cliente por defecto
+            cargarPerfilCliente('1');
+
+            // Lógica básica para mostrar/ocultar campos de edición
+            editarPerfilBtn.addEventListener('click', function() {
+                detailSections.forEach(section => {
+                    section.classList.add('editing');
+                    const editableSpans = section.querySelectorAll('.editable span');
+                    const editableInputs = section.querySelectorAll('.editable input, .editable select');
+                    editableSpans.forEach(span => span.style.display = 'none');
+                    editableInputs.forEach(input => input.style.display = 'block');
+                    const editButtons = section.querySelectorAll('.section-actions .edit-button');
+                    const saveCancelButtons = section.querySelectorAll('.section-actions .save-button, .section-actions .cancel-button');
+                    editButtons.forEach(button => button.style.display = 'none');
+                    saveCancelButtons.forEach(button => button.style.display = 'inline-block');
+                });
+            });
+
+            // Aquí iría la lógica para los botones "Guardar" y "Cancelar" de cada sección
+            // y para el botón "Añadir Objetivo"
+        });
+    </script>
+</body>
+</html>

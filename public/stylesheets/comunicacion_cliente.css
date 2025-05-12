@@ -1,0 +1,184 @@
+/* Estilos para el panel de comunicación del cliente */
+.communication-panel-cliente {
+    display: flex;
+    gap: 20px;
+}
+
+.call-section-cliente {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.call-section-cliente h3 {
+    color: #333;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+.call-representation-cliente {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.call-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.call-box .avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #ddd;
+    border-radius: 50%;
+    margin-bottom: 5px;
+}
+
+.call-box .username {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.call-controls-cliente {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.call-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.call-button:hover {
+    background-color: #0056b3;
+}
+
+.call-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.chat-section-cliente {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-section-cliente h3 {
+    color: #333;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+#chat-messages-cliente {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
+}
+
+#chat-messages-cliente .message {
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    word-break: break-word;
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-messages-cliente .message.system {
+    align-self: center;
+    text-align: center;
+    background-color: #f8f9fa;
+    color: #383d41;
+}
+
+#chat-messages-cliente .message.asesor {
+    background-color: #d4edda;
+    color: #155724;
+    align-self: flex-start;
+}
+
+#chat-messages-cliente .message.cliente {
+    background-color: #cce5ff;
+    color: #004085;
+    align-self: flex-end;
+}
+
+#chat-messages-cliente .message .sender {
+    font-weight: bold;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+}
+
+.chat-input-area {
+    display: flex;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.chat-input-area textarea#message-input-cliente {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    resize: none;
+    box-sizing: border-box;
+    margin-right: 8px;
+}
+
+.chat-input-area button#send-message-cliente {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.chat-input-area button#send-message-cliente:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para el indicador de estado de la llamada */
+.call-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+
+.call-status.conectado {
+    background-color: #28a745; /* Verde para conectado */
+}
+
+.call-status.desconectado {
+    background-color: #dc3545; /* Rojo para desconectado */
+}
