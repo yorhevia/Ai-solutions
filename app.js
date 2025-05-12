@@ -1,4 +1,5 @@
 var createError = require('http-errors');
+const session = require('express-session');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
