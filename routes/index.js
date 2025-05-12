@@ -1,5 +1,4 @@
 var express = require('express');
-const admin = require('firebase-admin');
 const requireAuth = require('../config/middleware');
 const session = require('express-session');
 const admin = require('./firebase');
