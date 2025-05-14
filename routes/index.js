@@ -61,7 +61,7 @@ router.post('/registro', async (req, res) => {
       usuario: usuario,
     });
 
-    return res.redirect('/login'); // Redirige al login después del registro exitoso
+    return res.redirect('ingreso/login'); // Redirige al login después del registro exitoso
   } catch (error) {
     console.error('Error al registrar usuario:', error);
     let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
