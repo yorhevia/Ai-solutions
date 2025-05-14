@@ -13,45 +13,35 @@ body {
     min-height: 100vh;
 }
 
-/* Header Minimalista */
+/* Estilos para el header minimalista */
 .minimal-header {
-    background-color: rgba(0, 0, 0, 0.5); /* Header semitransparente */
-    color: #fff;
-    padding: 20px;
+    background-color: #f8f9fa; /* Un gris claro como ejemplo */
+    color: black; /* Por si acaso tienes texto en el header */
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
 }
 
 .minimal-header .logo img {
-    max-height: 40px;
+    max-height: 60px; /* Ajusta el tamaño de tu logo según necesites */
 }
 
 .minimal-header nav a {
-    color: #fff;
+    color: black; /* Color de los enlaces */
     text-decoration: none;
     margin-left: 20px;
-    transition: color 0.3s ease;
 }
 
-.minimal-header nav a:hover {
-    color: #007bff;
-}
-
-.minimal-header nav .register-button {
-    background-color: #007bff;
+.minimal-header nav a.register-button {
+    background-color: #007bff; /* Un azul llamativo para el botón de registro */
     color: white;
-    padding: 10px 15px;
+    padding: 8px 15px;
     border-radius: 5px;
 }
 
-.minimal-header nav .register-button:hover {
-    background-color: #0056b3;
+.minimal-header nav a:hover {
+    color: #007bff; /* Cambia el color al pasar el ratón */
 }
 
 /* Hero Section Alternativa */
