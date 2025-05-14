@@ -157,10 +157,11 @@ button.register-button:active {
     font-weight: 600;
     transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
     width: 100%;
+    box-sizing: border-box;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     margin-top: 20px; /* Espacio superior para separarlo del mensaje de éxito */
     text-decoration: none; /* Eliminar el subrayado por defecto de los enlaces */
-    display: inline-block; /* Para que width y padding funcionen correctamente */
+    display: block; /* Para que width y padding funcionen correctamente */
 }
 
 .continue-button:hover {

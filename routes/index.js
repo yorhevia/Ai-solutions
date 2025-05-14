@@ -28,26 +28,25 @@ router.get('/login', (req, res) => {
 
 // Ruta POST para el inicio de sesión
 router.post('/login', async (req, res) => {
-    const { email, contrasena } = req.body;
+    const { email } = req.body;
 
     try {
-        const usuario = await User.findOne({ email: email }); // Reemplaza con tu lógica real
-        if (!usuario) {
-            return res.render('ingreso/login', { error: 'Correo electrónico no encontrado.' });
-        }
+        const userRecord = await admin.auth().getUserByEmail(email);
+        console.log('Usuario encontrado en Firebase:', userRecord.uid);
 
-        const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena); // Reemplaza con tu lógica real
-        if (!contrasenaValida) {
-            return res.render('ingreso/login', { error: 'Contraseña incorrecta.' });
-        }
+        // Si el usuario existe, puedes establecer una sesión en tu backend
+        req.session.userId = userRecord.uid;
+        return res.redirect('/dashboard');
 
-        // Si la autenticación es exitosa, redirige al usuario
-        req.session.userId = usuario._id; // Ejemplo de guardar el ID del usuario en la sesión
-        return res.redirect('/dashboard'); // Redirige al dashboard
     } catch (error) {
-        console.error('Error durante el inicio de sesión:', error);
-        console.log('Objeto de error completo (login):', error); // Añade esta línea
-        return res.render('ingreso/login', { error: 'Ocurrió un error durante el inicio de sesión.' });
+        console.error('Error al verificar el usuario en Firebase:', error);
+        let errorMessage = 'Error al iniciar sesión.';
+        if (error.code === 'auth/user-not-found') {
+            errorMessage = 'Correo electrónico no encontrado.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'El correo electrónico no es válido.';
+        }
+        return res.render('ingreso/login', { error: errorMessage });
     }
 });
 
@@ -112,7 +111,7 @@ router.post('/registro', async (req, res) => {
             errorMessage = 'Este correo electrónico ya está en uso.';
         } else if (error?.errorInfo?.code === 'auth/invalid-email') {
             errorMessage = 'El correo electrónico no es válido.';
-        } else if (error?.errorInfo?.code === 'auth/weak-password') {
+        } else if (error?.errorInfo?.code === 'auth/invalid-password') {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
         }
         return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
