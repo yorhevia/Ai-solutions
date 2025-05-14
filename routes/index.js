@@ -46,6 +46,7 @@ router.post('/login', async (req, res) => {
         return res.redirect('/dashboard'); // Redirige al dashboard
     } catch (error) {
         console.error('Error durante el inicio de sesión:', error);
+        console.log('Objeto de error completo (login):', error); // Añade esta línea
         return res.render('ingreso/login', { error: 'Ocurrió un error durante el inicio de sesión.' });
     }
 });
@@ -83,6 +84,7 @@ router.get('/registro', (req, res) => {
     res.render('ingreso/registro');
 });
 
+
 // Ruta POST para el registro
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
@@ -105,13 +107,12 @@ router.post('/registro', async (req, res) => {
 
     } catch (error) {
         console.error('Error al registrar usuario:', error);
-        console.log('Objeto de error completo:', error);
         let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
-        if (error.code === 'auth/email-already-in-use') {
+        if (error?.errorInfo?.code === 'auth/email-already-exists') {
             errorMessage = 'Este correo electrónico ya está en uso.';
-        } else if (error.code === 'auth/invalid-email') {
+        } else if (error?.errorInfo?.code === 'auth/invalid-email') {
             errorMessage = 'El correo electrónico no es válido.';
-        } else if (error.code === 'auth/weak-password') {
+        } else if (error?.errorInfo?.code === 'auth/weak-password') {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
         }
         return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
