@@ -1,4 +1,3 @@
-/* Estilos base (los que ya tenemos) */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f9fcfd;
@@ -148,7 +147,7 @@ button:active {
   body {
       align-items: flex-start; /* Alinear el contenido al inicio en móviles */
       padding-top: 20px; /* Espacio superior para evitar el borde del navegador */
-      background-image: none; /* O un degradado más simple */
+      background-image: none;
   }
 
   .login-container {

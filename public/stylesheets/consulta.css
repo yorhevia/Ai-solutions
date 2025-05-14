@@ -302,7 +302,7 @@ header {
 }
 
 header .logo img {
-    height: 70px; /* Ajusta este valor según el tamaño deseado */
+    height: 70px;
 }
 
 header .header-navigation ul {

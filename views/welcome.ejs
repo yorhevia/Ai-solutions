@@ -93,18 +93,18 @@
             const numCircles = 20;
 
             for (let i = 0; i < numCircles; i++) {
-                const radius = Math.random() * 5 + 2; // Radio aleatorio entre 2 y 7
+                const radius = Math.random() * 5 + 2;
                 const x = Math.random() * 300;
                 const y = Math.random() * 150;
-                const delay = Math.random() * 3; // Retraso aleatorio para la animación
-                const duration = Math.random() * 3 + 3; // Duración aleatoria entre 3 y 6 segundos
+                const delay = Math.random() * 3;
+                const duration = Math.random() * 3 + 3; 
 
                 const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
                 circle.setAttribute('cx', x);
                 circle.setAttribute('cy', y);
                 circle.setAttribute('r', radius);
                 circle.style.fill = '#00ffcc';
-                circle.style.opacity = Math.random() * 0.3 + 0.3; // Opacidad aleatoria
+                circle.style.opacity = Math.random() * 0.3 + 0.3;
                 circle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite alternate`;
                 svg.appendChild(circle);
             }
