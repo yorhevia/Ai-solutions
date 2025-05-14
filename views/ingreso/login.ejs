@@ -14,22 +14,22 @@
         <h2 class="tagline">AI FINANCE SOLUTIONS</h2>
         <h2>Acceder a la Plataforma</h2>
         <form action="/login" method="POST">
-            <% if (error) { %>
-                <p class="error-message"><%= error %></p>
-            <% } %>
-            <div class="input-group">
-                <label for="correo">Correo Electrónico</label>
-                <input type="email" id="correo" name="correo" placeholder="Tu correo electrónico">
-            </div>
-            <div class="input-group">
-                <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña">
-            </div>
-            <button type="submit">Iniciar Sesión</button>
-        </form>
-        <div class="register-link">
-            ¿No tienes una cuenta? <a href="/registro">Regístrate aquí</a>
-        </div>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <p class="error-message"><%= error %></p>
+    <% } %>
+    <div class="input-group">
+        <label for="email">Correo Electrónico:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="input-group">
+        <label for="contrasena">Contraseña:</label>
+        <input type="password" id="contrasena" name="contrasena" required>
+    </div>
+    <button type="submit" class="login-button">Iniciar Sesión</button>
+</form>
+<div class="signup-link">
+    ¿No tienes una cuenta? <a href="/registro">Regístrate aquí</a>
+</div>
     </div>
 </body>
 </html>
