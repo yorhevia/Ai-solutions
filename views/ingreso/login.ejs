@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso a AI FINANCE SOLUTIONS</title>
     <link rel="stylesheet" href="/stylesheets/login.css">
-</head>
+   </head>
 <body>
     <div class="login-container">
         <div class="logo">
@@ -13,7 +13,10 @@
         </div>
         <h2 class="tagline">AI FINANCE SOLUTIONS</h2>
         <h2>Acceder a la Plataforma</h2>
-        <form>
+        <form action="/login" method="POST">
+            <% if (error) { %>
+                <p class="error-message"><%= error %></p>
+            <% } %>
             <div class="input-group">
                 <label for="correo">Correo Electrónico</label>
                 <input type="email" id="correo" name="correo" placeholder="Tu correo electrónico">

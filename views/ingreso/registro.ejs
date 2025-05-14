@@ -5,47 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro en AI FINANCE SOLUTIONS</title>
     <link rel="stylesheet" href="/stylesheets/registro.css">
+    
 </head>
 <body>
-    <div class="register-container">
-        <div class="logo">
-            <img src="/images/Logo.jpg" alt="Logo de AI FINANCE SOLUTIONS">
+    <div class="registration-container">
+        <h2>Regístrate en AI FINANCE SOLUTIONS</h2>
+        <% if (error) { %>
+            <p class="error-message"><%= error %></p>
+        <% } %>
+        <% if (success) { %>
+            <p class="success-message"><%= success %></p>
+            <a href="/dashboard" class="continue-button">Continuar para completar tu perfil</a>
+        <% } else { %>
+            <form action="/registro" method="POST">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" value="<%= formData ? formData.nombre : '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="apellido">Apellido:</label>
+                    <input type="text" id="apellido" name="apellido" value="<%= formData ? formData.apellido : '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo Electrónico:</label>
+                    <input type="email" id="email" name="email" value="<%= formData ? formData.email : '' %>" required>
+                </div>
+                <div class="form-group">
+                    <label for="contrasena">Contraseña:</label>
+                    <input type="password" id="contrasena" name="contrasena" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmar_contrasena">Confirmar Contraseña:</label>
+                    <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" required>
+                </div>
+                <button type="submit" class="register-button">Registrarse</button>
+            </form>
+        <% } %>
+        <div class="login-link">
+            ¿Ya tienes una cuenta? <a href="/login">Inicia sesión aquí</a>
         </div>
-        <h2>Crear una Cuenta</h2>
-        <form class="grid-form" action="/registro" method="POST">
-            <div class="input-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo">
-            </div>
-            <div class="input-group">
-                <label for="apellido">Apellido</label>
-                <input type="text" id="apellido" name="apellido" placeholder="Tu apellido completo">
-            </div>
-            <div class="input-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" name="email" placeholder="Tu dirección de email">
-            </div>
-            <div class="input-group">
-                <label for="telefono">Teléfono</label>
-                <input type="tel" id="telefono" name="telefono" placeholder="Tu número de teléfono">
-            </div>
-            <div class="input-group full-width">
-                <label for="usuario">Usuario</label>
-                <input type="text" id="usuario" name="usuario" placeholder="Elige un nombre de usuario">
-            </div>
-            <div class="input-group">
-                <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" name="contrasena" placeholder="Crea una contraseña segura">
-            </div>
-            <div class="input-group">
-                <label for="confirmar_contrasena">Confirmar Contraseña</label>
-                <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" placeholder="Repite tu contraseña">
-            </div>
-            <button type="submit">Registrarse</button>
-            <div class="login-link">
-                ¿Ya tienes una cuenta? <a href="/login">Inicia Sesión</a>
-            </div>
-        </form>
     </div>
 </body>
 </html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Registro de Asesor</title>
+    <link rel="stylesheet" href="/stylesheets/registro_asesor.css">
+</head>
+<body>
+    <div class="registration-container">
+        <header>
+            <div class="logo">
+                </div>
+            <h2>Bienvenido a AI Financial Solutions - Registro de Asesor</h2>
+            <p>Por favor, completa el siguiente formulario para crear tu perfil de asesor.</p>
+        </header>
+
+        <main class="registration-form">
+            <form id="asesorRegistrationForm" action="/registro-perfil" method="POST">
+                <input type="hidden" name="tipo_usuario" value="asesor">
+
+                <section>
+                    <h3>Información Personal</h3>
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido">Apellido:</label>
+                        <input type="text" id="apellido" name="apellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="tel" id="telefono" name="telefono">
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Información Profesional</h3>
+                    <div class="form-group">
+                        <label for="licencia">Número de Licencia Profesional:</label>
+                        <input type="text" id="licencia" name="licencia" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="especialidad">Especialidad Financiera:</label>
+                        <input type="text" id="especialidad" name="especialidad">
+                    </div>
+                    <div class="form-group">
+                        <label for="experiencia">Años de Experiencia:</label>
+                        <input type="number" id="experiencia" name="experiencia" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Breve Descripción Profesional:</label>
+                        <textarea id="descripcion" name="descripcion"></textarea>
+                    </div>
+                </section>
+
+                <button type="submit" class="submit-button">Registrar Perfil de Asesor</button>
+            </form>
+        </main>
+
+        <footer>
+            <p>© 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const asesorRegistrationForm = document.getElementById('asesorRegistrationForm');
+            asesorRegistrationForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                console.log('Formulario de Asesor enviado:', new FormData(asesorRegistrationForm));
+                alert('Registro de perfil de asesor completado. ¡Gracias!'); // Simulación
+                // Aquí se enviaría la información del formulario al backend
+            });
+        });
+    </script>
+</body>
+</html>

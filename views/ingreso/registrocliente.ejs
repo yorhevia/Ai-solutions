@@ -10,13 +10,15 @@
     <div class="registration-container">
         <header>
             <div class="logo">
-            </div>
-            <h2>Bienvenido a AI Financial Solutions</h2>
+                </div>
+            <h2>Bienvenido a AI Financial Solutions - Registro de Cliente</h2>
             <p>Por favor, completa el siguiente formulario para comenzar.</p>
         </header>
 
         <main class="registration-form">
-            <form id="registrationForm">
+            <form id="registrationForm" action="/registro-perfil" method="POST">
+                <input type="hidden" name="tipo_usuario" value="cliente">
+
                 <section>
                     <h3>Información Personal</h3>
                     <div class="form-group">
@@ -90,7 +92,7 @@
                     </div>
                 </section>
 
-                <button type="submit" class="submit-button">Registrarse</button>
+                <button type="submit" class="submit-button">Registrar Perfil de Cliente</button>
             </form>
         </main>
 
@@ -111,9 +113,9 @@
             const registrationForm = document.getElementById('registrationForm');
             registrationForm.addEventListener('submit', function(event) {
                 event.preventDefault();
+                console.log('Formulario de Cliente enviado:', new FormData(registrationForm));
+                alert('Registro de perfil de cliente completado. ¡Gracias!'); // Simulación
                 // Aquí se enviaría la información del formulario al backend
-                console.log('Formulario enviado:', new FormData(registrationForm));
-                alert('Registro completado. ¡Gracias!'); // Simulación
             });
         });
     </script>

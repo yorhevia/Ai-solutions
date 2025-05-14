@@ -12,6 +12,11 @@ body {
   line-height: 1.5;
   color: #333;
 }
+  .error-message {
+            color: red;
+            margin-top: 15px;
+            font-weight: bold;
+        }
 
 .login-container {
   background-color: white;
