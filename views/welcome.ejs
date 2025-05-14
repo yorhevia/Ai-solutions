@@ -87,25 +87,31 @@
         </footer>
     </div>
 
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
             const svg = document.getElementById('trading-animation');
             const numBars = 40;
-            const svgWidth = 300 - 40;
-            const svgHeight = 150 - 20;
-            const barWidth = svgWidth / numBars - 2; // Barras un poco más gruesas
+            const svgWidth = 300 - 40; // Ancho disponible
+            const svgHeight = 150 - 20; // Alto disponible
+            const barWidth = svgWidth / numBars - 2;
             const yBase = svgHeight + 10;
+            const startX = 20 + barWidth / 2; // Ajuste para centrar la primera barra
+
+            // Crear la flecha de guía (detrás de las barras)
+            const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            arrowPath.setAttribute('d', `M10,${yBase - 10} L${svgWidth + 30},${yBase - 10} L${svgWidth + 20},${yBase - 15} L${svgWidth + 20},${yBase - 5} Z`);
+            arrowPath.setAttribute('fill', 'rgba(255, 255, 255, 0.2)'); // Color blanco semitransparente
+            svg.appendChild(arrowPath);
 
             for (let i = 0; i < numBars; i++) {
-                const x = i * (barWidth + 2) + 20;
+                const x = startX + i * (barWidth + 2);
                 const height = Math.random() * (svgHeight * 0.6) + (svgHeight * 0.2);
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-                rect.setAttribute('x', x);
+                rect.setAttribute('x', x - barWidth / 2); // Centrar la barra en la posición X
                 rect.setAttribute('y', yBase - height);
                 rect.setAttribute('width', barWidth);
                 rect.setAttribute('height', height);
 
-                // Asignar color aleatorio
                 if (Math.random() > 0.5) {
                     rect.classList.add('red');
                 }
