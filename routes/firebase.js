@@ -9,4 +9,3 @@ admin.initializeApp({
 console.log('¡Firebase Admin SDK inicializado y conectado a Firebase!');
 
 module.exports = admin;
-// O module.exports = admin.firestore();

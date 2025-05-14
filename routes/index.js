@@ -1,6 +1,7 @@
 var express = require('express');
 const requireAuth = require('../config/middleware');
 const session = require('express-session');
+const admin = require('./firebase'); // Importa la instancia de admin directamente
 var router = express.Router();
 
 
@@ -13,8 +14,7 @@ router.get('/', (req, res) =>{
 // Ruta POST para el inicio de sesión
 router.post('/login', async (req, res) => {
   const { correo, contrasena } = req.body;
-  const admin = req.app.locals.admin; // Accede a la instancia de admin desde app.locals
-  const auth = admin.auth();
+  const auth = admin.auth(); // Usa la instancia de admin importada
 
   try {
     const userCredential = await auth.signInWithEmailAndPassword(correo, contrasena);
@@ -37,9 +37,8 @@ router.get('/registro', (req, res) =>{
 // Ruta POST para el registro
 router.post('/registro', async (req, res) => {
   const { nombre, apellido, email, telefono, usuario, contrasena, confirmar_contrasena } = req.body;
-  const admin = req.app.locals.admin; // Accede a la instancia de admin desde app.locals
-  const auth = admin.auth();
-  const db = admin.firestore(); // También puedes acceder a Firestore aquí
+  const auth = admin.auth(); 
+  const db = admin.firestore(); 
 
   if (contrasena !== confirmar_contrasena) {
     return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.' });
