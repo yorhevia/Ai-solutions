@@ -1,50 +1,184 @@
 body {
-    font-family: sans-serif;
-    margin: 20px;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f0f8f4; /* Un verde muy claro */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
     background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 h1 {
-    color: #28a745;
-    margin-bottom: 20px;
+    color: #28a745; /* Verde principal */
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
 h2 {
-    color: #28a745;
-    margin-bottom: 15px;
+    color: #28a745; /* Verde principal */
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 20px;
 }
 
 p {
-    line-height: 1.6;
+    line-height: 1.7;
     color: #555;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 1.1em;
 }
 
 ul {
     list-style: none;
     padding: 0;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 ul li {
-    margin-bottom: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0eee8; /* Un verde muy claro para el separador */
     color: #333;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+ul li::before {
+    content: '✓'; /* Un checkmark como viñeta */
+    color: #28a745;
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+ul li:last-child {
+    border-bottom: none;
 }
 
 .logout-link {
-    display: block;
-    margin-top: 20px;
-    color: #dc3545;
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #dc3545;
+    color: #fff;
     text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
 .logout-link:hover {
-    text-decoration: underline;
+    background-color: #c0392b;
+    transform: scale(1.05);
 }
+
+/* Estilos adicionales para un toque más moderno */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background-image: linear-gradient(to right, #28a745, #1e7e34); /* Degradado de verde */
+    z-index: -1;
+}
+
+.container {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media Query para pantallas más pequeñas */
+@media (max-width: 600px) {
+    .container {
+        padding: 30px;
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+
+    p {
+        font-size: 1em;
+        margin-bottom: 15px;
+    }
+
+    ul li {
+        font-size: 1em;
+        padding: 8px 0;
+    }
+
+    .logout-link {
+        padding: 10px 20px;
+        font-size: 0.9em;
+        border-radius: 6px;
+    }
+}
+
+    .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0eee8;
+            color: #333;
+            font-size: 1.1em;
+            text-decoration: none; /* Para que parezcan enlaces */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .feature-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .feature-item .icon {
+            margin-right: 15px;
+            font-size: 1.5em;
+            color: #aaa; /* Gris para los iconos */
+            width: 30px; /* Espacio reservado para el icono */
+            text-align: center;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }

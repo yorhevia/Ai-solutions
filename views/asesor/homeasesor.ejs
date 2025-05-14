@@ -5,30 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Finance Solutions - Inicio Asesor</title>
     <link rel="stylesheet" href="/stylesheets/home_asesor.css">
-    <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        h1 { color: #28a745; margin-bottom: 20px; }
-        h2 { color: #28a745; margin-bottom: 15px; }
-        p { line-height: 1.6; color: #555; }
-        ul { list-style: none; padding: 0; }
-        li { margin-bottom: 10px; }
-        .logout-link { display: block; margin-top: 20px; color: #dc3545; text-decoration: none; }
-        .logout-link:hover { text-decoration: underline; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
 </head>
 <body>
     <div class="container">
-        <h1>Bienvenido a AI Finance Solutions</h1>
-        <h2>Panel de Asesor</h2>
-        <p>¡Hola, Asesor! Has accedido a tu panel. Aquí podrás gestionar tus clientes y ofrecerles asesoramiento financiero personalizado.</p>
-        <ul>
-            <li>Ver la lista de clientes asignados.</li>
-            <li>Acceder a la información de perfil de tus clientes.</li>
-            <li>Programar y realizar consultas.</li>
-            <li>Utilizar herramientas de análisis financiero.</li>
-        </ul>
-        <p>Estamos comprometidos en brindarte las herramientas necesarias para que puedas ofrecer un servicio de excelencia a tus clientes.</p>
+        <header>
+            <div class="logo">
+                </div>
+            <h2>Panel de Asesor</h2>
+            <p>¡Hola, Asesor! Has accedido a tu panel. Aquí podrás gestionar tus clientes y ofrecerles asesoramiento financiero personalizado.</p>
+        </header>
+
+        <main>
+            <ul class="features-list">
+                <a href="/clientes-asignados" class="feature-item">
+                    <i class="fas fa-users icon"></i> Ver la lista de clientes asignados.
+                </a>
+                <a href="/perfiles-clientes" class="feature-item">
+                    <i class="fas fa-id-card icon"></i> Acceder a la información de perfil de tus clientes.
+                </a>
+                <a href="/programar-consulta" class="feature-item">
+                    <i class="fas fa-calendar-alt icon"></i> Programar y realizar consultas.
+                </a>
+                <a href="/herramientas-analisis" class="feature-item">
+                    <i class="fas fa-chart-line icon"></i> Utilizar herramientas de análisis financiero.
+                </a>
+            </ul>
+        </main>
+
         <a href="/logout" class="logout-link">Cerrar Sesión</a>
     </div>
 </body>
