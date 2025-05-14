@@ -105,6 +105,7 @@ router.post('/registro', async (req, res) => {
 
     } catch (error) {
         console.error('Error al registrar usuario:', error);
+        console.log('Objeto de error completo:', error);
         let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
         if (error.code === 'auth/email-already-in-use') {
             errorMessage = 'Este correo electrónico ya está en uso.';
