@@ -12,7 +12,7 @@
     <div class="welcome-container">
         <header class="minimal-header">
             <div class="logo">
-                <img src="/images/Logo.png" alt="Logo de AI FINANCE SOLUTIONS">
+                <img src="/images/Logo.jpg" alt="Logo de AI FINANCE SOLUTIONS">
             </div>
             <nav>
                 <a href="/login">Iniciar Sesión</a>
@@ -26,7 +26,7 @@
                 <p class="tagline-alt">Descubre un sistema diseñado para clientes y asesores, impulsando el crecimiento y la eficiencia financiera.</p>
             </div>
             <div class="hero-animation-container">
-                <svg id="trading-animation" viewBox="0 0 200 100" preserveAspectRatio="xMinYMin meet">
+                <svg id="trading-animation" viewBox="0 0 300 150" preserveAspectRatio="xMinYMin meet">
                     </svg>
             </div>
         </section>
@@ -90,20 +90,44 @@
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const svg = document.getElementById('trading-animation');
-            const numBars = 30; // Número de barras
-            const barWidth = 200 / numBars - 1; // Ancho de cada barra con espacio
-            const maxHeight = 80; // Altura máxima de las barras
-            const yOffset = 90; // Desplazamiento vertical para que las barras crezcan desde abajo
+            const numCandles = 40; // Número de velas
+            const candleWidth = 300 / numCandles - 2; // Ancho del cuerpo de la vela con espacio
+            const maxHighLow = 60; // Rango máximo para la mecha (alto/bajo desde el cuerpo)
+            const baseY = 140; // Posición base Y para el cuerpo de la vela
 
-            for (let i = 0; i < numBars; i++) {
-                const x = i * (barWidth + 1);
-                const height = Math.random() * maxHeight + 10; // Altura aleatoria
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-                rect.setAttribute('x', x);
-                rect.setAttribute('y', yOffset - height);
-                rect.setAttribute('width', barWidth);
-                rect.setAttribute('height', height);
-                svg.appendChild(rect);
+            for (let i = 0; i < numCandles; i++) {
+                const x = i * (candleWidth + 2) + candleWidth / 2 + 1; // Centrar la vela en el espacio
+                const open = Math.random() * 80 + 30; // Precio de apertura aleatorio
+                const close = open + (Math.random() * 40 - 20); // Precio de cierre aleatorio (arriba o abajo)
+                const high = Math.max(open, close) + Math.random() * maxHighLow;
+                const low = Math.min(open, close) - Math.random() * maxHighLow;
+
+                // Crear la mecha (línea vertical)
+                const wick = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                wick.setAttribute('x1', x);
+                wick.setAttribute('y1', baseY - high);
+                wick.setAttribute('x2', x);
+                wick.setAttribute('y2', baseY - low);
+                wick.setAttribute('stroke', '#e0e0e0');
+                wick.setAttribute('stroke-width', 1);
+                wick.classList.add('candle-wick');
+                svg.appendChild(wick);
+
+                // Crear el cuerpo de la vela (rectángulo)
+                const bodyHeight = Math.abs(open - close);
+                const bodyY = baseY - Math.max(open, close);
+                const body = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                body.setAttribute('x', x - candleWidth / 2);
+                body.setAttribute('y', bodyY);
+                body.setAttribute('width', candleWidth);
+                body.setAttribute('height', bodyHeight);
+                body.classList.add('candle-body');
+                if (close > open) {
+                    body.classList.add('green');
+                } else {
+                    body.classList.add('red');
+                }
+                svg.appendChild(body);
             }
         });
     </script>
