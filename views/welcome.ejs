@@ -90,39 +90,43 @@
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const svg = document.getElementById('trading-animation');
-            const numCandles = 40; // Número de velas
-            const candleWidth = 300 / numCandles - 2; // Ancho del cuerpo de la vela con espacio
-            const maxHighLow = 60; // Rango máximo para la mecha (alto/bajo desde el cuerpo)
-            const baseY = 140; // Posición base Y para el cuerpo de la vela
+            const numCandles = 40;
+            const svgWidth = 300 - 40; // Ancho disponible para las velas (restando el padding)
+            const svgHeight = 150 - 20; // Alto disponible para las velas (restando el padding)
+            const candleWidth = svgWidth / numCandles - 2;
+            const maxPrice = 100; // Precio máximo simulado
+            const minPrice = 10;  // Precio mínimo simulado
+            const priceRange = maxPrice - minPrice;
 
             for (let i = 0; i < numCandles; i++) {
-                const x = i * (candleWidth + 2) + candleWidth / 2 + 1; // Centrar la vela en el espacio
-                const open = Math.random() * 80 + 30; // Precio de apertura aleatorio
-                const close = open + (Math.random() * 40 - 20); // Precio de cierre aleatorio (arriba o abajo)
-                const high = Math.max(open, close) + Math.random() * maxHighLow;
-                const low = Math.min(open, close) - Math.random() * maxHighLow;
+                const x = i * (candleWidth + 2) + candleWidth / 2 + 20; // Posición X ajustada por el padding
+                const openPrice = Math.random() * priceRange + minPrice;
+                const closePrice = openPrice + (Math.random() * 20 - 10); // Cambio de precio más sutil
+                const highPrice = Math.max(openPrice, closePrice) + Math.random() * 15;
+                const lowPrice = Math.min(openPrice, closePrice) - Math.random() * 15;
+                const yBase = svgHeight + 10; // Base Y ajustada por el padding
 
-                // Crear la mecha (línea vertical)
+                // Crear la mecha
                 const wick = document.createElementNS("http://www.w3.org/2000/svg", 'line');
                 wick.setAttribute('x1', x);
-                wick.setAttribute('y1', baseY - high);
+                wick.setAttribute('y1', yBase - (highPrice - minPrice) / priceRange * svgHeight);
                 wick.setAttribute('x2', x);
-                wick.setAttribute('y2', baseY - low);
-                wick.setAttribute('stroke', '#e0e0e0');
+                wick.setAttribute('y2', yBase - (lowPrice - minPrice) / priceRange * svgHeight);
+                wick.setAttribute('stroke', '#aaa');
                 wick.setAttribute('stroke-width', 1);
                 wick.classList.add('candle-wick');
                 svg.appendChild(wick);
 
-                // Crear el cuerpo de la vela (rectángulo)
-                const bodyHeight = Math.abs(open - close);
-                const bodyY = baseY - Math.max(open, close);
+                // Crear el cuerpo de la vela
+                const bodyHeight = Math.abs(openPrice - closePrice) / priceRange * svgHeight;
+                const bodyY = yBase - Math.max(openPrice, closePrice) / priceRange * svgHeight;
                 const body = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
                 body.setAttribute('x', x - candleWidth / 2);
                 body.setAttribute('y', bodyY);
                 body.setAttribute('width', candleWidth);
-                body.setAttribute('height', bodyHeight);
+                body.setAttribute('height', Math.max(0, bodyHeight)); // Asegurar altura no negativa
                 body.classList.add('candle-body');
-                if (close > open) {
+                if (closePrice > openPrice) {
                     body.classList.add('green');
                 } else {
                     body.classList.add('red');
