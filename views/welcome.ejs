@@ -87,54 +87,30 @@
         </footer>
     </div>
 
-        <script>
+       <script>
         document.addEventListener('DOMContentLoaded', function() {
             const svg = document.getElementById('trading-animation');
-            const numCandles = 40;
-            const svgWidth = 300 - 40; // Ancho disponible para las velas (restando el padding)
-            const svgHeight = 150 - 20; // Alto disponible para las velas (restando el padding)
-            const candleWidth = svgWidth / numCandles - 2;
-            const maxPrice = 100; // Precio máximo simulado
-            const minPrice = 10;  // Precio mínimo simulado
-            const priceRange = maxPrice - minPrice;
+            const numBars = 40;
+            const svgWidth = 300 - 40; // Ancho disponible
+            const svgHeight = 150 - 20; // Alto disponible
+            const barWidth = svgWidth / numBars - 1;
+            const yBase = svgHeight + 10; // Base Y ajustada
 
-            for (let i = 0; i < numCandles; i++) {
-                const x = i * (candleWidth + 2) + candleWidth / 2 + 20; // Posición X ajustada por el padding
-                const openPrice = Math.random() * priceRange + minPrice;
-                const closePrice = openPrice + (Math.random() * 20 - 10); // Cambio de precio más sutil
-                const highPrice = Math.max(openPrice, closePrice) + Math.random() * 15;
-                const lowPrice = Math.min(openPrice, closePrice) - Math.random() * 15;
-                const yBase = svgHeight + 10; // Base Y ajustada por el padding
-
-                // Crear la mecha
-                const wick = document.createElementNS("http://www.w3.org/2000/svg", 'line');
-                wick.setAttribute('x1', x);
-                wick.setAttribute('y1', yBase - (highPrice - minPrice) / priceRange * svgHeight);
-                wick.setAttribute('x2', x);
-                wick.setAttribute('y2', yBase - (lowPrice - minPrice) / priceRange * svgHeight);
-                wick.setAttribute('stroke', '#aaa');
-                wick.setAttribute('stroke-width', 1);
-                wick.classList.add('candle-wick');
-                svg.appendChild(wick);
-
-                // Crear el cuerpo de la vela
-                const bodyHeight = Math.abs(openPrice - closePrice) / priceRange * svgHeight;
-                const bodyY = yBase - Math.max(openPrice, closePrice) / priceRange * svgHeight;
-                const body = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-                body.setAttribute('x', x - candleWidth / 2);
-                body.setAttribute('y', bodyY);
-                body.setAttribute('width', candleWidth);
-                body.setAttribute('height', Math.max(0, bodyHeight)); // Asegurar altura no negativa
-                body.classList.add('candle-body');
-                if (closePrice > openPrice) {
-                    body.classList.add('green');
-                } else {
-                    body.classList.add('red');
-                }
-                svg.appendChild(body);
+            for (let i = 0; i < numBars; i++) {
+                const x = i * (barWidth + 1) + 20; // Posición X ajustada
+                const height = Math.random() * (svgHeight * 0.7) + (svgHeight * 0.2); // Altura más controlada
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', yBase - height);
+                rect.setAttribute('width', barWidth);
+                rect.setAttribute('height', height);
+                rect.classList.add('candle-body'); // Reutilizamos la clase para el estilo de color/hover
+                svg.appendChild(rect);
             }
         });
     </script>
+</body>
+</html>
 
 </body>
 </html>
