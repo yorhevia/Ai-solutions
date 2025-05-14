@@ -20,14 +20,14 @@
             </nav>
         </header>
 
-         <section class="hero-alt">
+    <section class="hero-alt">
             <div class="hero-content-alt">
                 <h1>Potencia tus Finanzas con Inteligencia Artificial</h1>
                 <p class="tagline-alt">Descubre un sistema diseñado para clientes y asesores, impulsando el crecimiento y la eficiencia financiera.</p>
             </div>
             <div class="hero-animation-container">
-                <svg id="trading-animation" viewBox="0 0 300 150" preserveAspectRatio="xMinYMin meet">
-                    </svg>
+                <svg id="floating-circles" viewBox="0 0 300 150" preserveAspectRatio="xMinYMin meet">
+                </svg>
             </div>
         </section>
 
@@ -87,52 +87,29 @@
         </footer>
     </div>
 
-   <script>
+ <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const svg = document.getElementById('trading-animation');
-            const numBars = 40;
-            const svgWidth = 300 - 40; // Ancho disponible
-            const svgHeight = 150 - 20; // Alto disponible
-            const barWidth = svgWidth / numBars - 2;
-            const yBase = svgHeight + 10;
-            const startX = 20 + barWidth / 2; // Ajuste para centrar la primera barra
+            const svg = document.getElementById('floating-circles');
+            const numCircles = 20;
 
-            // Crear la flecha de guía (detrás de las barras)
-            const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-            arrowPath.setAttribute('d', `M10,${yBase - 10} L${svgWidth + 30},${yBase - 10} L${svgWidth + 20},${yBase - 15} L${svgWidth + 20},${yBase - 5} Z`);
-            arrowPath.setAttribute('fill', 'rgba(255, 255, 255, 0.2)'); // Color blanco semitransparente
-            svg.appendChild(arrowPath);
+            for (let i = 0; i < numCircles; i++) {
+                const radius = Math.random() * 5 + 2; // Radio aleatorio entre 2 y 7
+                const x = Math.random() * 300;
+                const y = Math.random() * 150;
+                const delay = Math.random() * 3; // Retraso aleatorio para la animación
+                const duration = Math.random() * 3 + 3; // Duración aleatoria entre 3 y 6 segundos
 
-            for (let i = 0; i < numBars; i++) {
-                const x = startX + i * (barWidth + 2);
-                const height = Math.random() * (svgHeight * 0.6) + (svgHeight * 0.2);
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
-                rect.setAttribute('x', x - barWidth / 2); // Centrar la barra en la posición X
-                rect.setAttribute('y', yBase - height);
-                rect.setAttribute('width', barWidth);
-                rect.setAttribute('height', height);
-
-                if (Math.random() > 0.5) {
-                    rect.classList.add('red');
-                }
-
-                rect.addEventListener('mouseenter', function() {
-                    this.classList.add('hovered');
-                    const originalTransform = this.getAttribute('transform') || '';
-                    setTimeout(() => {
-                        this.classList.remove('hovered');
-                        this.setAttribute('transform', originalTransform);
-                    }, 2000);
-                });
-
-                svg.appendChild(rect);
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', radius);
+                circle.style.fill = '#00ffcc';
+                circle.style.opacity = Math.random() * 0.3 + 0.3; // Opacidad aleatoria
+                circle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite alternate`;
+                svg.appendChild(circle);
             }
         });
     </script>
-</body>
-</html>
-</body>
-</html>
 
 </body>
 </html>

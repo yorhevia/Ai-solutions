@@ -282,33 +282,33 @@ body {
     }
 }
 
-/* Estilos para la animación de trading (barras interactivas) */
-.hero-animation-container {
-    max-width: 600px;
-    border-radius: 8px;
+/* Estilos para la animación de círculos flotantes */
+.hero-alt {
+    /* ... otros estilos del hero-alt ... */
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(to bottom, rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.9));
-    border: 1px solid rgba(0, 123, 255, 0.3);
 }
 
-#trading-animation {
+.hero-animation-container {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    padding: 10px 20px;
+    pointer-events: none;
 }
 
-#trading-animation rect {
-    transition: transform 0.2s ease-in-out, fill 0.2s ease-in-out;
-    transform-origin: bottom;
-    fill: #28a745; /* Color inicial verde */
+#floating-circles {
+    width: 100%;
+    height: 100%;
 }
 
-#trading-animation rect.red {
-    fill: #dc3545;
+#floating-circles circle {
+    fill: #00ffcc; /* Cian brillante */
+    opacity: 0.4;
 }
 
-#trading-animation rect.hovered {
-    transform: scaleY(1.5) !important; /* Prioridad para la animación hover */
-    cursor: pointer;
+@keyframes float {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(10px) translateX(15px); }
+    100% { transform: translateY(0) translateX(0); }
 }
