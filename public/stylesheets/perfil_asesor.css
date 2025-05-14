@@ -1,0 +1,211 @@
+/* Estilos generales */
+ body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden; /* Oculta cualquier contenido que exceda el ancho horizontal */
+ }
+
+ .main-header {
+  background-color: #333;
+  color: white;
+  padding: 1em 2em;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+ }
+
+ .header-left {
+  display: flex;
+  align-items: center;
+ }
+
+ .header-left h2 {
+  color: white; /* Texto blanco para "Perfil de Asesor" */
+  margin: 0;
+ }
+
+ .back-button {
+  color: white;
+  text-decoration: none;
+  margin-right: 1em;
+  font-size: 1.2em;
+ }
+
+ .back-button i {
+  margin-right: 0.5em;
+ }
+
+ .header-right {
+  display: flex;
+  align-items: center;
+ }
+
+ .logout-button-header {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 0.7em 1.2em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-right: 1em;
+ }
+
+ .logout-button-header:hover {
+  background-color: #777;
+ }
+
+ .profile-logo-container {
+  background-color: #444; /* Cambié el color de fondo a uno más oscuro para mejor contraste */
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+ }
+
+ .profile-logo-container i.profile-logo {
+  color: white; /* Color blanco para el icono de la casita */
+ }
+
+
+ .container {
+  background-color: white;
+  padding: 2em;
+  margin-top: 2em;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 800px;
+ }
+
+ h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5em;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5em;
+ }
+
+ section {
+  margin-bottom: 2em;
+ }
+
+ section h2 {
+  margin-top: 0;
+  color: #555;
+ }
+
+ .info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1em;
+ }
+
+ .icon {
+  color: #007bff;
+  margin-right: 1em;
+  font-size: 1.1em;
+  width: 20px; /* Para alinear los textos */
+  text-align: center;
+ }
+
+ span {
+  font-weight: bold;
+  color: #555;
+  margin-right: 0.5em;
+ }
+
+ .value {
+  color: #333;
+ }
+
+ .optional {
+  font-style: italic;
+  color: #777;
+ }
+
+ .edit-link {
+  color: #007bff;
+  text-decoration: none;
+  margin-left: 1em;
+  font-size: 0.9em;
+ }
+
+ .edit-link:hover {
+  text-decoration: underline;
+ }
+
+ .description-item {
+  display: flex;
+  align-items: flex-start; /* Asegura la alineación superior general */
+  margin-bottom: 1em;
+ }
+
+ .description-item i.icon {
+  margin-right: 1em;
+  font-size: 1.1em;
+  width: 20px;
+  text-align: center;
+  /* Eliminamos el margin-top aquí para un control más fino */
+ }
+
+ .description-item > div { /* Contenedor para la etiqueta y el texto */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Cambiamos a flex-start para alinear desde arriba */
+ }
+
+ .description-item span {
+  font-weight: bold;
+  color: #555;
+  margin-right: 0.5em;
+ }
+
+ .description-item p.value {
+  margin-top: 0.3em; /* Aumenta ligeramente el margen superior para moverlo hacia abajo */
+  line-height: 0.7; 
+  white-space: pre-line;
+ }
+
+ .description-item a.edit-link {
+  color: #007bff;
+  text-decoration: none;
+  margin-left: auto; /* Empuja el enlace a la derecha */
+  font-size: 0.9em;
+  align-self: center; /* Alinea verticalmente el enlace con la etiqueta/texto */
+ }
+
+ .main-footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1em 2em; /* Usamos el mismo padding vertical y horizontal que el header */
+  width: 100%;
+  margin-top: 2em;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* Incluye padding y border dentro del width */
+ }
+
+ .footer-content {
+  width: 100%; /* Asegura que el contenido interno también ocupe el ancho */
+  box-sizing: border-box;
+  padding: 0; /* Eliminamos el padding interno del footer-content, ya está en el footer */
+ }
+
+ .footer-content p {
+  margin: 0.5em 0;
+  font-size: 0.9em;
+ }

@@ -5,28 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Finance Solutions - Inicio Cliente</title>
     <link rel="stylesheet" href="/stylesheets/home_cliente.css">
-    <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        h1 { color: #007bff; margin-bottom: 20px; }
-        p { line-height: 1.6; color: #555; }
-        .logout-link { display: block; margin-top: 20px; color: #dc3545; text-decoration: none; }
-        .logout-link:hover { text-decoration: underline; }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <header class="main-header">
+        <div class="header-left">
+            <h2>Panel de Cliente</h2>
+        </div>
+        <div class="header-right">
+            <button onclick="window.location.href='/homecliente'">
+                <i class="fas fa-home"></i> Inicio
+            </button>
+            <button class="logout-button-header" onclick="window.location.href='/logout'">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+                    <a href="/perfilcliente" class="profile-logo-link">
+                <div class="profile-logo-container">
+                    <i class="fas fa-user-circle profile-logo"></i>
+                </div>
+            </a>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>Bienvenido a AI Finance Solutions</h1>
-        <h2>Panel de Cliente</h2>
-        <p>¡Hola! Has accedido a tu panel de cliente. Aquí podrás encontrar información relevante para tus finanzas y contactar con asesores.</p>
-        <ul>
-            <li>Ver tus objetivos financieros.</li>
-            <li>Revisar tu perfil de riesgo.</li>
-            <li>Explorar posibles inversiones.</li>
-            <li>Contactar con un asesor financiero.</li>
-        </ul>
-        <p>Estamos trabajando para ofrecerte la mejor experiencia en la gestión de tus finanzas con el impuso de la inteligencia artificial.</p>
-        <a href="/logout" class="logout-link">Cerrar Sesión</a>
+        <main class="client-dashboard">
+            <h1>Bienvenido a AI Finance Solutions</h1>
+            <p class="greeting">¡Hola! Has accedido a tu panel de cliente. Aquí podrás encontrar información relevante para tus finanzas y contactar con asesores.</p>
+            <section class="quick-access">
+                <h2>Acceso Rápido</h2>
+                <ul class="feature-list">
+                    <a href="/objetivos-financieros" class="feature-link" data-tooltip="Visualiza y gestiona tus metas financieras.">
+                        <li class="feature-item">
+                            <i class="fas fa-bullseye icon"></i>
+                            <span>Ver tus objetivos financieros.</span>
+                        </li>
+                    </a>
+                    <a href="/perfil-riesgo" class="feature-link" data-tooltip="Consulta y actualiza tu tolerancia al riesgo.">
+                        <li class="feature-item">
+                            <i class="fas fa-chart-pie icon"></i>
+                            <span>Revisar tu perfil de riesgo.</span>
+                        </li>
+                    </a>
+                    <a href="/inversiones" class="feature-link" data-tooltip="Explora diferentes opciones de inversión disponibles para ti.">
+                        <li class="feature-item">
+                            <i class="fas fa-lightbulb icon"></i>
+                            <span>Explorar posibles inversiones.</span>
+                        </li>
+                    </a>
+                    <a href="/contacto-asesor" class="feature-link" data-tooltip="Ponte en contacto con uno de nuestros asesores financieros.">
+                        <li class="feature-item">
+                            <i class="fas fa-comments icon"></i>
+                            <span>Contactar con un asesor financiero.</span>
+                        </li>
+                    </a>
+                </ul>
+            </section>
+            <p class="info-text">Estamos trabajando para ofrecerte la mejor experiencia en la gestión de tus finanzas con el impuso de la inteligencia artificial.</p>
+        </main>
     </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="tooltip"></div>
+    <script>
+        const featureLinks = document.querySelectorAll('.feature-link');
+        const tooltipDiv = document.getElementById('tooltip');
+
+        featureLinks.forEach(link => {
+            link.addEventListener('mouseenter', (event) => {
+                const tooltipText = link.getAttribute('data-tooltip');
+                tooltipDiv.textContent = tooltipText;
+                tooltipDiv.style.display = 'block';
+                tooltipDiv.style.left = event.clientX + 'px';
+                tooltipDiv.style.top = event.clientY - tooltipDiv.offsetHeight - 10 + 'px';
+            });
+
+            link.addEventListener('mousemove', (event) => {
+                tooltipDiv.style.left = event.clientX + 'px';
+                tooltipDiv.style.top = event.clientY - tooltipDiv.offsetHeight - 10 + 'px';
+            });
+
+            link.addEventListener('mouseleave', () => {
+                tooltipDiv.style.display = 'none';
+            });
+        });
+    </script>
 </body>
 </html>

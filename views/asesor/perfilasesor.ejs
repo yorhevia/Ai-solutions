@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+ <html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Finance Solutions - Perfil de Asesor</title>
+  <link rel="stylesheet" href="/stylesheets/perfil_asesor.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+  const fechaRegistroElement = document.querySelector('.value[data-date]');
+  if (fechaRegistroElement) {
+  const fechaOriginal = fechaRegistroElement.textContent;
+  const fechaFormateada = moment(fechaOriginal).format('MMMM D,<ctrl3348>');
+  fechaRegistroElement.textContent = fechaFormateada;
+  }
+  });
+  </script>
+ </head>
+ <body>
+  <header class="main-header">
+  <div class="header-left">
+  <a href="/homeasesor" class="back-button">
+  <i class="fas fa-arrow-left"></i>
+  </a>
+  <h2>Perfil de Asesor</h2>
+  </div>
+  <div class="header-right">
+  <button class="logout-button-header" onclick="window.location.href='/logout'">
+  <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+  </button>
+  <div class="profile-logo-container">
+  <a href="/homeasesor" class="home-link">
+  <i class="fas fa-home profile-logo"></i>
+  </a>
+  </div>
+  </div>
+  </header>
+
+  <div class="container profile-container">
+  <section class="profile-info">
+  <h2>Información Personal</h2>
+  <div class="info-item">
+  <i class="fas fa-user icon"></i>
+  <span>Nombre Completo:</span>
+  <span class="value"><%= asesor.nombre %> <%= asesor.apellido %></span>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-envelope icon"></i>
+  <span>Email:</span>
+  <span class="value"><%= asesor.email %></span>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-phone icon"></i>
+  <span>Teléfono:</span>
+  <span class="value"><%= asesor.telefono %></span>
+  </div>
+  </section>
+
+  <section class="professional-info">
+  <h2>Información Profesional</h2>
+  <div class="info-item">
+  <i class="fas fa-briefcase icon"></i>
+  <span>Profesión:</span>
+  <span class="value"><%= asesor.profesion %></span>
+  <a href="/editar-profesion" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-id-card icon"></i>
+  <span>Número de Licencia Profesional:</span>
+  <span class="value"><%= asesor.licencia %></span>
+  <a href="/editar-licencia" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-graduation-cap icon"></i>
+  <span>Especialidad Financiera:</span>
+  <span class="value"><%= asesor.especialidad %></span>
+  <a href="/editar-especialidad" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-chart-line icon"></i>
+  <span>Años de Experiencia:</span>
+  <span class="value"><%= asesor.experiencia %></span>
+  <a href="/editar-experiencia" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  <div class="info-item description-item">
+  <i class="fas fa-file-alt icon"></i>
+  <span>Descripción Profesional:</span>
+  <p class="value"><%= asesor.descripcion %></p>
+  <a href="/editar-descripcion" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  </section>
+
+  <section class="security-settings">
+  <h2>Seguridad</h2>
+  <div class="info-item">
+  <i class="fas fa-key icon"></i>
+  <span>Contraseña:</span>
+  <span class="value">*********</span>
+  <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
+  </div>
+  </section>
+
+  <section class="additional-info">
+  <h2>Información Adicional</h2>
+  <div class="info-item">
+  <i class="fas fa-calendar-alt icon"></i>
+  <span>Fecha de Registro:</span>
+  <span class="value" data-date="<%= asesor.fechaRegistro %>"><%= asesor.fechaRegistro %></span>
+  </div>
+  </section>
+  </div>
+
+  <footer class="main-footer">
+  <div class="footer-content">
+  <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+  <p>Crecimiento inteligente para tus finanzas.</p>
+  </div>
+  </footer>
+ </body>
+ </html>

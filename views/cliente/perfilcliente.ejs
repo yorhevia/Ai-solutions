@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+ <html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Finance Solutions - Perfil</title>
+  <link rel="stylesheet" href="/stylesheets/perfil_cliente.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+  // Formatear la fecha usando Moment.js
+  const fechaRegistroElement = document.querySelector('.value[data-date]');
+  if (fechaRegistroElement) {
+  const fechaOriginal = fechaRegistroElement.textContent;
+  const fechaFormateada = moment(fechaOriginal).format('MMMM D, YYYY');
+  fechaRegistroElement.textContent = fechaFormateada;
+  }
+  });
+  </script>
+ </head>
+ <body>
+  <header class="main-header">
+  <div class="header-left">
+  <a href="/homecliente" class="back-button">
+  <i class="fas fa-arrow-left"></i>
+  </a>
+  <h2>Perfil de Cliente</h2>
+  </div>
+  <div class="header-right">
+  <button class="logout-button-header" onclick="window.location.href='/logout'">
+  <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+  </button>
+  <div class="profile-logo-container">
+  <i class="fas fa-user-circle profile-logo"></i>
+  </div>
+  </div>
+  </header>
+
+  <div class="container profile-container">
+  <section class="profile-info">
+  <h2>Información Personal</h2>
+  <div class="info-item">
+  <i class="fas fa-user icon"></i>
+   <span>Nombre Completo:</span>
+  <span class="value"><%= cliente.nombre %> <%= cliente.apellido %></span>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-envelope icon"></i>
+  <span>Correo Electrónico:</span>
+  <span class="value"><%= cliente.email %></span>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-phone icon"></i>
+  <span>Teléfono:</span>
+  <span class="value"><%= cliente.telefono %></span>
+  </div>
+  <% if (cliente.direccion) { %>
+  <div class="info-item optional">
+  <i class="fas fa-map-marker-alt icon"></i>
+  <span>Dirección:</span>
+  <span class="value"><%= cliente.direccion %></span>
+  </div>
+  <% } %>
+  </section>
+
+  <section class="financial-info">
+  <h2>Información Financiera</h2>
+  <div class="info-item">
+  <i class="fas fa-chart-pie icon"></i>
+  <span>Perfil de Riesgo:</span>
+  <span class="value"><%= cliente.perfil_riesgo %></span>
+  <a href="/perfil-riesgo" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  <div class="info-item">
+  <i class="fas fa-bullseye icon"></i>
+  <span>Objetivos Principales:</span>
+  <span class="value"><%= cliente.objetivo_principal %></span>
+  <a href="/objetivos-financieros" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+  </div>
+  </section>
+
+  <section class="security-settings">
+  <h2>Seguridad</h2>
+  <div class="info-item">
+  <i class="fas fa-key icon"></i>
+  <span>Contraseña:</span>
+  <span class="value">*********</span>
+  <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
+  </div>
+  </section>
+
+  <section class="additional-info">
+  <h2>Información Adicional</h2>
+  <div class="info-item">
+  <i class="fas fa-calendar-alt icon"></i>
+  <span>Fecha de Registro:</span>
+  <span class="value" data-date="<%= cliente.fechaRegistro %>"><%= cliente.fechaRegistro %></span>
+  </div>
+  <% if (cliente.asesorAsignado) { %>
+  <div class="info-item optional">
+  <i class="fas fa-user-tie icon"></i>
+  <span>Asesor Asignado:</span>
+  <span class="value"><%= cliente.asesorAsignado %></span>
+  </div>
+  <% } %>
+  </section>
+  </div>
+
+  <footer class="main-footer">
+  <div class="footer-content">
+  <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+  <p>Crecimiento inteligente para tus finanzas.</p>
+  </div>
+  </footer>
+ </body>
+ </html>

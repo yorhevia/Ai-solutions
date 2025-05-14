@@ -2,9 +2,16 @@ var express = require('express');
 const requireAuth = require('../config/middleware');
 const session = require('express-session');
 const admin = require('./firebase');
+const clienteController = require('./controllers/clienteController');
+ const asesorController = require('./controllers/asesorController'); 
 const db = admin.firestore();
 var router = express.Router();
 
+// Ruta para mostrar el perfil del cliente
+router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfil); 
+
+// Ruta para mostrar el perfil del asesor
+router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
 
 // OBTENER RUTAS PRINCIPALES
 router.get('/homecliente', requireAuth, (req, res) => {
@@ -23,8 +30,21 @@ router.get('/', (req, res) =>{
 
 //OBTENER RUTA LOGIN
 router.get('/login', (req, res) => {
-    res.render('ingreso/login'); 
+    res.render('ingreso/login');
 });
+
+// Ruta para el logout
+ router.get('/logout', (req, res) => {
+  // Destruir la sesión del usuario
+  req.session.destroy((err) => {
+  if (err) {
+  console.error('Error al destruir la sesión:', err);
+  return res.status(500).send('Error al cerrar sesión.');
+  }
+  // Redirigir al usuario a la página de inicio de sesión después de cerrar la sesión
+  res.redirect('/login');
+  });
+ });
 
 
 // Ruta POST para el inicio de sesión
@@ -36,7 +56,8 @@ router.post('/login', async (req, res) => {
         console.log('Usuario encontrado en Firebase:', userRecord.uid);
 
         // Si el usuario existe, puedes establecer una sesión en tu backend
-        req.session.userId = userRecord.uid;
+        console.log('req.session después del login:', req.session);
+        req.session.userId = userRecord.uid; // Usas userId aquí, pero en el controlador esperabas uid
         return res.redirect('/dashboard');
 
     } catch (error) {
@@ -131,11 +152,6 @@ router.get('/consultacliente', (req, res)=> {
 })
 
 
-//OBTENER RUTA PERFIL CLIENTE
-router.get('/perfilcliente', (req, res) =>{
-  res.render('asesor/perfilcliente')
-})
-
 
 //OBTENER RUTA FORMULARIO CLIENTE
 router.get('/formulariocliente', (req, res) =>{
@@ -200,8 +216,5 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
         res.status(500).send('Error al registrar el perfil.');
     }
 });
-
-
-
 
 module.exports = router;
