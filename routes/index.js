@@ -5,8 +5,13 @@ const admin = require('./firebase'); // Importa la instancia de admin directamen
 var router = express.Router();
 
 
-//OBTENER RUTA PRINCIPAL (LOGIN)
+//OBTENER RUTA PRINCIPAL (HOME)
 router.get('/', (req, res) =>{
+  res.render('ingreso/login')
+})
+
+//OBTENER RUTA LOGIN
+router.get('/login', (req, res) =>{
   res.render('ingreso/login')
 })
 
