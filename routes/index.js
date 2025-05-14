@@ -17,7 +17,7 @@ router.get('/homeasesor', requireAuth, (req, res) => {
 
 //OBTENER RUTA PRINCIPAL (HOME)
 router.get('/', (req, res) =>{
-  res.render('/welcome')
+  res.render('welcome')
 })
 
 //OBTENER RUTA LOGIN
