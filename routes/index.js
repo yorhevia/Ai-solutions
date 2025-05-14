@@ -5,19 +5,15 @@ var router = express.Router();
 
 
 //OBTENER RUTA PRINCIPAL (LOGIN)
-//OBTENER RUTA PRINCIPAL (LOGIN)
-
-
 router.get('/', (req, res) =>{
   res.render('ingreso/login')
 })
 
 
 // Ruta POST para el inicio de sesión
-// Ruta POST para el inicio de sesión
 router.post('/login', async (req, res) => {
   const { correo, contrasena } = req.body;
-  const admin = req.app.locals.admin;
+  const admin = req.app.locals.admin; // Accede a la instancia de admin desde app.locals
   const auth = admin.auth();
 
   try {
@@ -28,26 +24,25 @@ router.post('/login', async (req, res) => {
     req.session.userId = user.uid;
     return res.redirect('/dashboard');
   } catch (error) {
-    return res.render('login', { error: errorMessage });
+    return res.render('ingreso/login', { error: 'Error al iniciar sesión' }); // Asegúrate de tener un mensaje de error
   }
 });
 
 
 //OBTENER RUTA REGISTRO
-//OBTENER RUTA REGISTRO
-
 router.get('/registro', (req, res) =>{
   res.render('ingreso/registro')
 })
 
 // Ruta POST para el registro
-// Ruta POST para el registro
 router.post('/registro', async (req, res) => {
   const { nombre, apellido, email, telefono, usuario, contrasena, confirmar_contrasena } = req.body;
+  const admin = req.app.locals.admin; // Accede a la instancia de admin desde app.locals
   const auth = admin.auth();
+  const db = admin.firestore(); // También puedes acceder a Firestore aquí
 
   if (contrasena !== confirmar_contrasena) {
-    return res.render('registro', { error: 'Las contraseñas no coinciden.' });
+    return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.' });
   }
 
   try {
@@ -59,7 +54,6 @@ router.post('/registro', async (req, res) => {
     console.log('Usuario registrado:', userRecord.uid);
 
     // Opcional: Guardar información adicional del usuario en Firestore
-    const db = admin.firestore();
     await db.collection('asesores').doc(userRecord.uid).set({
       nombre: nombre,
       apellido: apellido,
@@ -79,28 +73,23 @@ router.post('/registro', async (req, res) => {
     } else if (error.code === 'auth/weak-password') {
       errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
     }
-    return res.render('registro', { error: errorMessage, formData: req.body }); // Renderiza el formulario de registro con un mensaje de error y los datos ingresados
+    return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
   }
 });
 
 
 //OBTENER RUTA CONSULTA
-//OBTENER RUTA CONSULTA
-
 router.get('/consulta', (req, res) =>{
   res.render('asesor/consulta')
 })
 
 
 //OBTENER RUTA CONSULTA CLIENTE
-//OBTENER RUTA CONSULTA CLIENTE
-
 router.get('/consultacliente', (req, res)=> {
   res.render('cliente/consultacliente')
 })
 
 
-//OBTENER RUTA PERFIL CLIENTE
 //OBTENER RUTA PERFIL CLIENTE
 router.get('/perfilcliente', (req, res) =>{
   res.render('asesor/perfilcliente')
@@ -108,8 +97,6 @@ router.get('/perfilcliente', (req, res) =>{
 
 
 //OBTENER RUTA FORMULARIO CLIENTE
-//OBTENER RUTA FORMULARIO CLIENTE
-
 router.get('/formulariocliente', (req, res) =>{
   res.render('cliente/formulariocliente')
 })
