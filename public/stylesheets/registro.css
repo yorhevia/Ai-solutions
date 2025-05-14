@@ -1,17 +1,224 @@
-  .success-message {
-            color: green;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        .continue-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .continue-button:hover {
-            background-color: #0056b3;
-        }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fcfd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-image: linear-gradient(135deg, #3aacf220, #10559a20);
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.error-message {
+    color: red;
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center; /* Centrar el mensaje de error */
+}
+
+.success-message {
+    color: green;
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center; /* Centrar el mensaje de éxito */
+}
+
+.registration-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 400px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.registration-container:hover {
+    transform: translateY(-5px);
+}
+
+.logo-container {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 30px;
+    overflow: hidden;
+    background-image: linear-gradient(to right, #3aacf2, #10559a);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    color: #f9fcfd;
+    font-weight: bold;
+}
+
+.logo-container img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: transparent;
+}
+
+h2 {
+    color: #10559a;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 1.5em;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: color 0.2s ease-in-out;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: calc(100% - 24px);
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1.1em;
+    transition: border-color 0.2s ease-in-out;
+    color: #333;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #3aacf2;
+    box-shadow: 0 0 0 0.2rem rgba(58, 170, 242, 0.25);
+}
+
+button.register-button {
+    background-color: #10559a;
+    color: #f9fcfd;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 600;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+button.register-button:hover {
+    background-color: #125693;
+    transform: scale(1.02);
+}
+
+button.register-button:active {
+    transform: scale(1);
+}
+
+.login-link {
+    font-size: 1em;
+    color: #555;
+    text-align: center;
+}
+
+.login-link a {
+    color: #3aacf2;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s ease-in-out;
+}
+
+.login-link a:hover {
+    color: #2b8cc4;
+}
+
+.continue-button {
+    background-color: #3aacf2; /* Un color diferente para distinguirlo */
+    color: #f9fcfd;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 600;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+    width: 100%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px; /* Espacio superior para separarlo del mensaje de éxito */
+    text-decoration: none; /* Eliminar el subrayado por defecto de los enlaces */
+    display: inline-block; /* Para que width y padding funcionen correctamente */
+}
+
+.continue-button:hover {
+    background-color: #2b8cc4;
+    transform: scale(1.02);
+}
+
+.continue-button:active {
+    transform: scale(1);
+}
+
+/* Media Query para pantallas más pequeñas (móviles) */
+@media (max-width: 600px) {
+    body {
+        align-items: flex-start;
+        padding-top: 20px;
+        background-image: none;
+    }
+
+    .registration-container {
+        width: 90%;
+        margin: 20px auto;
+        padding: 30px;
+    }
+
+    .logo-container {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-size: 1em;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    button.register-button,
+    .continue-button {
+        padding: 14px 20px;
+        font-size: 1.1em;
+    }
+
+    .login-link {
+        font-size: 0.9em;
+    }
+}
