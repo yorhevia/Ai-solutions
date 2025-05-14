@@ -282,41 +282,33 @@ body {
     }
 }
 
-/* Estilos para la animación de trading (velas) - Refinado */
+/* Estilos para la animación de trading (barras interactivas) */
 .hero-animation-container {
     max-width: 600px;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(to bottom, rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.9)); /* Degradado sutil al fondo */
-    border: 1px solid rgba(0, 123, 255, 0.3); /* Borde sutil */
+    background: linear-gradient(to bottom, rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.9));
+    border: 1px solid rgba(0, 123, 255, 0.3);
 }
 
 #trading-animation {
     width: 100%;
     height: 100%;
-    padding: 10px 20px; /* Añadimos un poco de padding interno */
+    padding: 10px 20px;
 }
 
-#trading-animation .candle-body {
+#trading-animation rect {
     transition: transform 0.2s ease-in-out, fill 0.2s ease-in-out;
-    transform-origin: center bottom;
+    transform-origin: bottom;
+    fill: #28a745; /* Color inicial verde */
 }
 
-#trading-animation .candle-wick {
-    fill: #aaa; /* Gris más oscuro para las mechas */
-    stroke: none;
-}
-
-#trading-animation .green {
-    fill: #28a745;
-}
-
-#trading-animation .red {
+#trading-animation rect.red {
     fill: #dc3545;
 }
 
-#trading-animation .candle-body:hover {
-    transform: scaleY(1.1);
+#trading-animation rect.hovered {
+    transform: scaleY(1.5) !important; /* Prioridad para la animación hover */
     cursor: pointer;
 }

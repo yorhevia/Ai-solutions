@@ -87,28 +87,44 @@
         </footer>
     </div>
 
-       <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const svg = document.getElementById('trading-animation');
             const numBars = 40;
-            const svgWidth = 300 - 40; // Ancho disponible
-            const svgHeight = 150 - 20; // Alto disponible
-            const barWidth = svgWidth / numBars - 1;
-            const yBase = svgHeight + 10; // Base Y ajustada
+            const svgWidth = 300 - 40;
+            const svgHeight = 150 - 20;
+            const barWidth = svgWidth / numBars - 2; // Barras un poco más gruesas
+            const yBase = svgHeight + 10;
 
             for (let i = 0; i < numBars; i++) {
-                const x = i * (barWidth + 1) + 20; // Posición X ajustada
-                const height = Math.random() * (svgHeight * 0.7) + (svgHeight * 0.2); // Altura más controlada
+                const x = i * (barWidth + 2) + 20;
+                const height = Math.random() * (svgHeight * 0.6) + (svgHeight * 0.2);
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
                 rect.setAttribute('x', x);
                 rect.setAttribute('y', yBase - height);
                 rect.setAttribute('width', barWidth);
                 rect.setAttribute('height', height);
-                rect.classList.add('candle-body'); // Reutilizamos la clase para el estilo de color/hover
+
+                // Asignar color aleatorio
+                if (Math.random() > 0.5) {
+                    rect.classList.add('red');
+                }
+
+                rect.addEventListener('mouseenter', function() {
+                    this.classList.add('hovered');
+                    const originalTransform = this.getAttribute('transform') || '';
+                    setTimeout(() => {
+                        this.classList.remove('hovered');
+                        this.setAttribute('transform', originalTransform);
+                    }, 2000);
+                });
+
                 svg.appendChild(rect);
             }
         });
     </script>
+</body>
+</html>
 </body>
 </html>
 
