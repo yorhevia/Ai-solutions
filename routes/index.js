@@ -21,26 +21,33 @@ router.get('/', (req, res) =>{
 })
 
 //OBTENER RUTA LOGIN
-router.get('/login', (req, res) =>{
-  res.render('ingreso/login')
-})
+router.get('/login', (req, res) => {
+    res.render('ingreso/login'); 
+});
 
 
 // Ruta POST para el inicio de sesión
 router.post('/login', async (req, res) => {
-  const { correo, contrasena } = req.body;
-  const auth = admin.auth();
+    const { email, contrasena } = req.body;
 
-  try {
-    const userCredential = await auth.signInWithEmailAndPassword(correo, contrasena);
-    const user = userCredential.user;
-    console.log('Usuario autenticado:', user.uid);
-    // Establecer la sesión del usuario
-    req.session.userId = user.uid;
-    return res.redirect('/dashboard');
-  } catch (error) {
-    return res.render('ingreso/login', { error: 'Error al iniciar sesión' });
-  }
+    try {
+        const usuario = await User.findOne({ email: email }); // Reemplaza con tu lógica real
+        if (!usuario) {
+            return res.render('ingreso/login', { error: 'Correo electrónico no encontrado.' });
+        }
+
+        const contrasenaValida = await bcrypt.compare(contrasena, usuario.contrasena); // Reemplaza con tu lógica real
+        if (!contrasenaValida) {
+            return res.render('ingreso/login', { error: 'Contraseña incorrecta.' });
+        }
+
+        // Si la autenticación es exitosa, redirige al usuario
+        req.session.userId = usuario._id; // Ejemplo de guardar el ID del usuario en la sesión
+        return res.redirect('/dashboard'); // Redirige al dashboard
+    } catch (error) {
+        console.error('Error durante el inicio de sesión:', error);
+        return res.render('ingreso/login', { error: 'Ocurrió un error durante el inicio de sesión.' });
+    }
 });
 
 
@@ -72,12 +79,10 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
 
 
 //OBTENER RUTA REGISTRO
-router.get('/registro', (req, res) =>{
-  res.render('ingreso/registro')
-})
+router.get('/registro', (req, res) => {
+    res.render('ingreso/registro');
+});
 
-// Ruta POST para el registro
-// Ruta POST para el registro
 // Ruta POST para el registro
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
