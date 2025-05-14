@@ -4,181 +4,243 @@ body {
     background-color: #f0f8f4; /* Un verde muy claro */
     color: #333;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column; /* Para que el header, main y footer se apilen verticalmente */
+    align-items: center; /* Centrar el container */
     min-height: 100vh;
 }
 
-.container {
-    background-color: #fff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 800px;
-    transition: transform 0.2s ease-in-out;
+/* Estilos para el header principal (ahora fuera del container) */
+.main-header {
+    background-color: #fff; /* Fondo blanco para la barra */
+    color: #28a745; /* Color primario para el texto */
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0eee8; /* Línea separadora */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Ocupar todo el ancho de la ventana */
+    box-sizing: border-box; /* Incluir padding y border en el ancho */
 }
 
-.container:hover {
-    transform: translateY(-5px);
-}
-
-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-h1 {
-    color: #28a745; /* Verde principal */
-    font-size: 2.5em;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-h2 {
-    color: #28a745; /* Verde principal */
-    font-size: 1.8em;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-p {
-    line-height: 1.7;
-    color: #555;
-    margin-bottom: 20px;
-    font-size: 1.1em;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 25px;
-}
-
-ul li {
-    padding: 10px 0;
-    border-bottom: 1px solid #e0eee8; /* Un verde muy claro para el separador */
-    color: #333;
-    font-size: 1.1em;
+.header-left {
     display: flex;
     align-items: center;
 }
 
-ul li::before {
-    content: '✓'; /* Un checkmark como viñeta */
-    color: #28a745;
-    font-weight: bold;
-    margin-right: 10px;
-    font-size: 1.2em;
-}
-
-ul li:last-child {
-    border-bottom: none;
-}
-
-.logout-link {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #dc3545;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 8px;
+.main-header h2 {
+    font-size: 1.8em;
     font-weight: 600;
-    transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    margin: 0;
 }
 
-.logout-link:hover {
-    background-color: #c0392b;
-    transform: scale(1.05);
+.header-right {
+    display: flex;
+    align-items: center;
 }
 
-/* Estilos adicionales para un toque más moderno */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 8px;
-    background-image: linear-gradient(to right, #28a745, #1e7e34); /* Degradado de verde */
-    z-index: -1;
+.header-right button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff; /* Color del botón */
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    margin-left: 10px; /* Espacio entre el botón y el logo */
+}
+
+.header-right button i {
+    margin-right: 5px;
+}
+
+.header-right button:hover {
+    background-color: #0056b3;
+}
+
+.profile-logo-container {
+    cursor: pointer;
+    margin-left: 15px; /* Espacio entre el botón (si existe) y el logo */
+}
+
+.profile-logo {
+    font-size: 2em; /* Ajusta el tamaño del icono */
+    color: #555; /* Color del icono */
 }
 
 .container {
-    animation: fadeIn 0.5s ease-out forwards;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column; /* Para apilar el main y el footer dentro */
+    margin-top: 20px; /* Añade un margen superior para separarlo del header */
+    margin-bottom: 20px; /* Añade un margen inferior para separarlo del footer si es necesario */
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+main {
+    flex-grow: 1; /* Para que el main ocupe el espacio restante */
+    padding: 20px;
 }
 
-/* Media Query para pantallas más pequeñas */
+h1 {
+    color: #28a745; /* Verde principal */
+    font-size: 2.2em; /* Reduje un poco el tamaño del h1 */
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center; /* Centré el h1 */
+}
+
+h2 { /* Estilo para los h2 dentro del main */
+    color: #28a745; /* Verde principal */
+    font-size: 1.6em; /* Reduje un poco el tamaño del h2 */
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+p {
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 15px;
+    font-size: 1em;
+}
+
+ul.features-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0; /* Reduje un poco el padding vertical */
+    border-bottom: 1px solid #e0eee8; /* Un verde muy claro para el separador */
+    color: #333;
+    font-size: 1em;
+    text-decoration: none; /* Para que parezcan enlaces */
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.feature-item:hover {
+    background-color: #f9f9f9;
+}
+
+.feature-item .icon {
+    margin-right: 15px;
+    font-size: 1.3em; /* Reduje un poco el tamaño del icono */
+    color: #aaa; /* Gris para los iconos */
+    width: 30px; /* Espacio reservado para el icono */
+    text-align: center;
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+footer {
+    text-align: center;
+    padding: 15px 0; /* Reduje el padding del footer */
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    color: #777;
+    width: 100%; /* Ocupar todo el ancho del body */
+}
+
+.logout-button-footer {
+    padding: 8px 16px; /* Reduje el padding del botón de logout */
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    text-decoration: none; /* Si lo usas como enlace */
+    transition: background-color 0.3s ease;
+    display: inline-block; /* Si lo usas como botón */
+}
+
+.logout-button-footer:hover {
+    background-color: #c82333;
+}
+
+/* Media Query para pantallas más pequeñas (se mantienen) */
 @media (max-width: 600px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-left {
+        margin-bottom: 10px;
+    }
+
+    .profile-logo-container {
+        margin-left: 0; /* Reiniciar el margen izquierdo en pantallas pequeñas */
+        margin-top: 10px; /* Añadir un margen superior para separarlo del botón */
+    }
+
+    .profile-logo {
+        font-size: 1.8em;
+        margin-right: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.5em;
+    }
+
+    .header-right {
+        margin-top: 10px;
+        flex-direction: row; /* Asegurar que los elementos estén en fila */
+        justify-content: flex-end; /* Alinear los elementos a la derecha */
+        width: 100%; /* Ocupar todo el ancho disponible */
+    }
+
+    .header-right button {
+        margin-left: auto; /* Empujar el botón a la izquierda si el logo está antes */
+        margin-right: 10px; /* Espacio entre el botón y el logo */
+    }
+
     .container {
-        padding: 30px;
-        border-radius: 10px;
+        width: 95%; /* Ajusta el ancho del contenedor en pantallas pequeñas si es necesario */
+        margin-top: 15px;
+        margin-bottom: 15px;
     }
 
     h1 {
-        font-size: 2em;
-        margin-bottom: 15px;
+        font-size: 1.8em;
+        margin-bottom: 10px;
     }
 
-    h2 {
-        font-size: 1.5em;
-        margin-bottom: 15px;
+    h2 { /* Estilo para los h2 dentro del main en pantallas pequeñas */
+        font-size: 1.4em;
+        margin-bottom: 10px;
     }
 
     p {
-        font-size: 1em;
-        margin-bottom: 15px;
+        font-size: 0.9em;
+        margin-bottom: 10px;
     }
 
     ul li {
-        font-size: 1em;
-        padding: 8px 0;
+        font-size: 0.9em;
+        padding: 6px 0;
     }
 
-    .logout-link {
-        padding: 10px 20px;
-        font-size: 0.9em;
-        border-radius: 6px;
+    .feature-item .icon {
+        font-size: 1.2em;
+        margin-right: 10px;
+        width: 25px;
+    }
+
+    .logout-button-footer {
+        padding: 8px 12px;
+        font-size: 0.8em;
+        border-radius: 4px;
     }
 }
-
-    .feature-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #e0eee8;
-            color: #333;
-            font-size: 1.1em;
-            text-decoration: none; /* Para que parezcan enlaces */
-            transition: background-color 0.2s ease-in-out;
-            cursor: pointer;
-        }
-
-        .feature-item:hover {
-            background-color: #f9f9f9;
-        }
-
-        .feature-item .icon {
-            margin-right: 15px;
-            font-size: 1.5em;
-            color: #aaa; /* Gris para los iconos */
-            width: 30px; /* Espacio reservado para el icono */
-            text-align: center;
-        }
-
-        .feature-item:last-child {
-            border-bottom: none;
-        }
