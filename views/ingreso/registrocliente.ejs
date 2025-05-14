@@ -101,23 +101,5 @@
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const objetivoPrincipalSelect = document.getElementById('objetivo_principal');
-            const otroObjetivoDiv = document.getElementById('otro_objetivo_div');
-
-            objetivoPrincipalSelect.addEventListener('change', function() {
-                otroObjetivoDiv.style.display = this.value === 'otro' ? 'block' : 'none';
-            });
-
-            const registrationForm = document.getElementById('registrationForm');
-            registrationForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                console.log('Formulario de Cliente enviado:', new FormData(registrationForm));
-                alert('Registro de perfil de cliente completado. ¡Gracias!'); // Simulación
-                // Aquí se enviaría la información del formulario al backend
-            });
-        });
-    </script>
-</body>
+  </body>
 </html>
