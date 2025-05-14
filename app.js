@@ -5,6 +5,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const admin = require('./routes/firebase');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
