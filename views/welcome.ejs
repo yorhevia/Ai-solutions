@@ -12,7 +12,7 @@
     <div class="welcome-container">
         <header class="minimal-header">
             <div class="logo">
-                <img src="/images/Logo_light.png" alt="Logo de AI FINANCE SOLUTIONS">
+                <img src="/images/Logo.png" alt="Logo de AI FINANCE SOLUTIONS">
             </div>
             <nav>
                 <a href="/login">Iniciar Sesión</a>
@@ -20,13 +20,14 @@
             </nav>
         </header>
 
-        <section class="hero-alt">
+         <section class="hero-alt">
             <div class="hero-content-alt">
                 <h1>Potencia tus Finanzas con Inteligencia Artificial</h1>
                 <p class="tagline-alt">Descubre un sistema diseñado para clientes y asesores, impulsando el crecimiento y la eficiencia financiera.</p>
             </div>
-            <div class="hero-image-alt">
-                <img src="/images/abstract_finance_dark.jpg" alt="Visualización abstracta de finanzas">
+            <div class="hero-animation-container">
+                <svg id="trading-animation" viewBox="0 0 200 100" preserveAspectRatio="xMinYMin meet">
+                    </svg>
             </div>
         </section>
 
@@ -85,5 +86,27 @@
             <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
         </footer>
     </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const svg = document.getElementById('trading-animation');
+            const numBars = 30; // Número de barras
+            const barWidth = 200 / numBars - 1; // Ancho de cada barra con espacio
+            const maxHeight = 80; // Altura máxima de las barras
+            const yOffset = 90; // Desplazamiento vertical para que las barras crezcan desde abajo
+
+            for (let i = 0; i < numBars; i++) {
+                const x = i * (barWidth + 1);
+                const height = Math.random() * maxHeight + 10; // Altura aleatoria
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', yOffset - height);
+                rect.setAttribute('width', barWidth);
+                rect.setAttribute('height', height);
+                svg.appendChild(rect);
+            }
+        });
+    </script>
+
 </body>
 </html>

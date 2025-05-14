@@ -281,3 +281,29 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Estilos para la animación de trading */
+.hero-animation-container {
+    max-width: 500px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+#trading-animation {
+    width: 100%;
+    height: 100%;
+    background-color: #1e1e1e; /* Fondo oscuro para la animación */
+}
+
+#trading-animation rect {
+    fill: #007bff;
+    transition: transform 0.3s ease-in-out, fill 0.3s ease-in-out;
+    transform-origin: bottom;
+}
+
+#trading-animation rect:hover {
+    transform: scaleY(1.5); /* Las barras crecerán al pasar el mouse */
+    fill: #6610f2;
+    cursor: pointer;
+}
