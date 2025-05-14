@@ -2,6 +2,7 @@ var express = require('express');
 const requireAuth = require('../config/middleware');
 const session = require('express-session');
 const admin = require('./firebase');
+const db = admin.firestore();
 var router = express.Router();
 
 
@@ -55,7 +56,6 @@ router.post('/login', async (req, res) => {
 router.post('/registro-perfil', requireAuth, async (req, res) => {
     const { tipo_usuario, ...formData } = req.body;
     const userId = req.session.userId;
-    const db = admin.firestore();
 
     try {
         if (tipo_usuario === 'cliente') {
