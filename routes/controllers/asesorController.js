@@ -1,11 +1,10 @@
-// asesorController.js (o donde manejes la lógica de los asesores)
  const admin = require('firebase-admin');
  const db = admin.firestore();
 
  exports.mostrarPerfilAsesor = async (req, res) => {
   try {
   // 1. Obtener el UID del asesor autenticado desde la sesión
-  const asesorUid = req.session.userId; // Asumiendo que guardas el userId en la sesión
+  const asesorUid = req.session.userId;
 
   // 2. Verificar si el UID existe (asesor autenticado)
   if (!asesorUid) {

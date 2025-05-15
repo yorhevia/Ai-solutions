@@ -1,6 +1,5 @@
-// middleware/authMiddleware.js
 function requireAuth(req, res, next) {
-    console.log('req.session en requireAuth:', req.session); // <--- Añade esto
+    console.log('req.session en requireAuth:', req.session);
     if (req.session && req.session.userId) {
         // El usuario tiene una sesión activa, permitir el acceso
         next();

@@ -55,9 +55,8 @@ router.post('/login', async (req, res) => {
         const userRecord = await admin.auth().getUserByEmail(email);
         console.log('Usuario encontrado en Firebase:', userRecord.uid);
 
-        // Si el usuario existe, puedes establecer una sesión en tu backend
         console.log('req.session después del login:', req.session);
-        req.session.userId = userRecord.uid; // Usas userId aquí, pero en el controlador esperabas uid
+        req.session.userId = userRecord.uid; 
         return res.redirect('/dashboard');
 
     } catch (error) {
@@ -167,7 +166,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 
         if (!clienteDoc.exists && !asesorDoc.exists) {
             // Si no existe perfil de cliente ni de asesor, es la primera vez después del registro
-            return res.render('ingreso/seleccionar_tipo_usuario'); // Asegúrate de tener esta vista en 'ingreso'
+            return res.render('ingreso/seleccionar_tipo_usuario');
         } else if (clienteDoc.exists) {
             return res.redirect('/homecliente');
         } else if (asesorDoc.exists) {
@@ -186,11 +185,11 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 
 // Rutas para mostrar los formularios de perfil basados en la selección
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
-    res.render('ingreso/registrocliente'); // Ajusta la ruta a tu archivo de cliente
+    res.render('ingreso/registrocliente');
 });
 
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
-    res.render('ingreso/registroasesor'); // Ajusta la ruta a tu archivo de asesor
+    res.render('ingreso/registroasesor');
 });
 
 // Ruta POST para guardar la información del perfil (sin cambios)
