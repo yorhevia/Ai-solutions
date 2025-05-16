@@ -1,211 +1,309 @@
-/* Estilos generales */
- body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  overflow-x: hidden; /* Oculta cualquier contenido que exceda el ancho horizontal */
- }
+* {
+    box-sizing: border-box;
+}
 
- .main-header {
-  background-color: #333;
-  color: white;
-  padding: 1em 2em;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
- }
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los elementos hijos horizontalmente */
+    min-height: 100vh;
+    overflow-x: hidden; /* Oculta cualquier desbordamiento horizontal */
+    width: 100%; /* Asegura que el body no exceda el ancho */
+}
 
- .header-left {
-  display: flex;
-  align-items: center;
- }
+.main-header {
+    background-color: #333;
+    color: white;
+    padding: 1em 2em;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
- .header-left h2 {
-  color: white; /* Texto blanco para "Perfil de Asesor" */
-  margin: 0;
- }
+.header-left {
+    display: flex;
+    align-items: center;
+}
 
- .back-button {
-  color: white;
-  text-decoration: none;
-  margin-right: 1em;
-  font-size: 1.2em;
- }
+.header-left h2 {
+    color: white;
+    margin: 0;
+}
 
- .back-button i {
-  margin-right: 0.5em;
- }
+.back-button {
+    color: white;
+    text-decoration: none;
+    margin-right: 1em;
+    font-size: 1.2em;
+}
 
- .header-right {
-  display: flex;
-  align-items: center;
- }
+.back-button i {
+    margin-right: 0.5em;
+}
 
- .logout-button-header {
-  background-color: #555;
-  color: white;
-  border: none;
-  padding: 0.7em 1.2em;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9em;
-  margin-right: 1em;
- }
+.header-right {
+    display: flex;
+    align-items: center;
+}
 
- .logout-button-header:hover {
-  background-color: #777;
- }
+.logout-button-header {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 0.7em 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-right: 1em;
+}
 
- .profile-logo-container {
-  background-color: #444; /* Cambié el color de fondo a uno más oscuro para mejor contraste */
-  color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.2em;
- }
+.logout-button-header:hover {
+    background-color: #777;
+}
 
- .profile-logo-container i.profile-logo {
-  color: white; /* Color blanco para el icono de la casita */
- }
+.profile-logo-container {
+    background-color: #444;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+}
 
+.profile-logo-container i.profile-logo {
+    color: white;
+}
 
- .container {
-  background-color: white;
-  padding: 2em;
-  margin-top: 2em;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 800px;
- }
+.container {
+    background-color: white;
+    padding: 2em;
+    margin-top: 2em;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 800px;
+    flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
+    margin-left: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
+    margin-right: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
+}
 
- h2 {
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 1.5em;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 0.5em;
- }
+h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5em;
+}
 
- section {
-  margin-bottom: 2em;
- }
+section {
+    margin-bottom: 2em;
+}
 
- section h2 {
-  margin-top: 0;
-  color: #555;
- }
+section h2 {
+    margin-top: 0;
+    color: #555;
+}
 
- .info-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1em;
- }
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+}
 
- .icon {
-  color: #007bff;
-  margin-right: 1em;
-  font-size: 1.1em;
-  width: 20px; /* Para alinear los textos */
-  text-align: center;
- }
+.icon {
+    color: #007bff;
+    margin-right: 1em;
+    font-size: 1.1em;
+    width: 20px;
+    text-align: center;
+}
 
- span {
-  font-weight: bold;
-  color: #555;
-  margin-right: 0.5em;
- }
+span {
+    font-weight: bold;
+    color: #555;
+    margin-right: 0.5em;
+}
 
- .value {
-  color: #333;
- }
+.value {
+    color: #333;
+}
 
- .optional {
-  font-style: italic;
-  color: #777;
- }
+.optional {
+    font-style: italic;
+    color: #777;
+}
 
- .edit-link {
-  color: #007bff;
-  text-decoration: none;
-  margin-left: 1em;
-  font-size: 0.9em;
- }
+.edit-link {
+    color: #007bff;
+    text-decoration: none;
+    margin-left: 1em;
+    font-size: 0.9em;
+}
 
- .edit-link:hover {
-  text-decoration: underline;
- }
+.edit-link:hover {
+    text-decoration: underline;
+}
 
- .description-item {
-  display: flex;
-  align-items: flex-start; /* Asegura la alineación superior general */
-  margin-bottom: 1em;
- }
+.description-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1em;
+}
 
- .description-item i.icon {
-  margin-right: 1em;
-  font-size: 1.1em;
-  width: 20px;
-  text-align: center;
-  /* Eliminamos el margin-top aquí para un control más fino */
- }
+.description-item i.icon {
+    margin-right: 1em;
+    font-size: 1.1em;
+    width: 20px;
+    text-align: center;
+}
 
- .description-item > div { /* Contenedor para la etiqueta y el texto */
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Cambiamos a flex-start para alinear desde arriba */
- }
+.description-item > div {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
 
- .description-item span {
-  font-weight: bold;
-  color: #555;
-  margin-right: 0.5em;
- }
+.description-item span {
+    font-weight: bold;
+    color: #555;
+    margin-right: 0.5em;
+}
 
- .description-item p.value {
-  margin-top: 0.3em; /* Aumenta ligeramente el margen superior para moverlo hacia abajo */
-  line-height: 0.7; 
-  white-space: pre-line;
- }
+.description-item p.value {
+    margin-top: 0.3em;
+    line-height: 0.7;
+    white-space: pre-line;
+}
 
- .description-item a.edit-link {
-  color: #007bff;
-  text-decoration: none;
-  margin-left: auto; /* Empuja el enlace a la derecha */
-  font-size: 0.9em;
-  align-self: center; /* Alinea verticalmente el enlace con la etiqueta/texto */
- }
+.description-item a.edit-link {
+    color: #007bff;
+    text-decoration: none;
+    margin-left: auto;
+    font-size: 0.9em;
+    align-self: center;
+}
 
- .main-footer {
-  background-color: #333;
-  color: white;
-  text-align: center;
-  padding: 1em 2em; /* Usamos el mismo padding vertical y horizontal que el header */
-  width: 100%;
-  margin-top: 2em;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box; /* Incluye padding y border dentro del width */
- }
+.main-footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1em 2em;
+    width: 100%;
+    margin-top: 2em;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
 
- .footer-content {
-  width: 100%; /* Asegura que el contenido interno también ocupe el ancho */
-  box-sizing: border-box;
-  padding: 0; /* Eliminamos el padding interno del footer-content, ya está en el footer */
- }
+.footer-content {
+    width: 100%;
+    padding: 0;
+}
 
- .footer-content p {
-  margin: 0.5em 0;
-  font-size: 0.9em;
- }
+.footer-content p {
+    margin: 0.5em 0;
+    font-size: 0.9em;
+}
+
+@media (max-width: 600px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-left {
+        margin-bottom: 10px;
+    }
+
+    .profile-logo-container {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .profile-logo {
+        font-size: 1.8em;
+        margin-right: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.5em;
+    }
+
+    .header-right {
+        margin-top: 10px;
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    .header-right button {
+        margin-left: auto;
+        margin-right: 10px;
+    }
+
+    .container {
+        width: 95%;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        padding: 1em; /* Ajusta el padding para pantallas pequeñas */
+    }
+
+    h2 {
+        font-size: 1.4em;
+        margin-bottom: 1em;
+    }
+
+    section {
+        margin-bottom: 1.5em;
+    }
+
+    .info-item {
+        flex-direction: column; /* Apila los elementos en pantallas pequeñas */
+        align-items: flex-start;
+        margin-bottom: 0.8em;
+    }
+
+    .info-item span {
+        margin-right: 0;
+        margin-bottom: 0.2em; /* Espacio entre la etiqueta y el valor */
+    }
+
+    .edit-link {
+        margin-left: 0;
+        align-self: flex-end; /* Alinea el enlace a la derecha en su propia línea */
+    }
+
+    .description-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .description-item i.icon {
+        margin-bottom: 0.5em;
+    }
+
+    .description-item > div {
+        width: 100%;
+    }
+
+    .description-item p.value {
+        margin-top: 0.1em;
+        line-height: 1.4;
+    }
+
+    .main-footer {
+        padding: 0.8em 1em;
+    }
+
+    .footer-content p {
+        font-size: 0.8em;
+    }
+}
