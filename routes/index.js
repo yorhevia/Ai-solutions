@@ -1,17 +1,17 @@
 var express = require('express');
 const multer = require('multer');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); 
 const cors = require('cors');
-require('dotenv').config();
 
-const requireAuth = require('../config/middleware');
-const admin = require('./firebase');
-const clienteController = require('./controllers/clienteController');
-const asesorController = require('./controllers/asesorController');
-const editProfileController = require('./controllers/editProfilecontroller');
+
+const requireAuth = require('../config/middleware'); 
+const admin = require('../firebase');
+const clienteController = require('./controllers/clienteController'); 
+const asesorController = require('./controllers/asesorController');     
+const editProfileController = require('./controllers/editProfileController');
 
 const db = admin.firestore();
-const auth = admin.auth();
+const auth = admin.auth(); 
 
 var router = express.Router();
 
@@ -22,13 +22,14 @@ const imgurClientId = process.env.IMGUR_CLIENT_ID;
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 5 * 1024 * 1024
+        fileSize: 5 * 1024 * 1024 // 5 MB
     },
     fileFilter: (req, file, cb) => {
         const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
         if (allowedMimeTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
+           
             cb(new Error('Tipo de archivo no permitido. Solo se permiten JPG, PNG, GIF.'), false);
         }
     }
@@ -91,7 +92,7 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         });
         console.log(`URL de foto de perfil actualizada en Firestore para el asesor ${userId}: ${imageUrl}`);
 
-        res.json({
+        return res.json({ 
             success: true,
             message: 'Foto de perfil subida y actualizada correctamente.',
             imageUrl: imageUrl
@@ -113,38 +114,39 @@ router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
 
 // --- RUTAS DE HOME ---
 router.get('/homecliente', requireAuth, (req, res) => {
-    res.render('cliente/homecliente');
+    return res.render('cliente/homecliente'); 
 });
 router.get('/homeasesor', requireAuth, (req, res) => {
-    res.render('asesor/homeasesor');
+    return res.render('asesor/homeasesor'); 
 });
 
 // --- RUTAS DE ACCESO ---
 router.get('/', (req, res) => {
-    res.render('welcome')
-})
+    return res.render('welcome'); 
+});
 router.get('/login', (req, res) => {
-    res.render('ingreso/login');
+    return res.render('ingreso/login'); 
 });
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Error al destruir la sesión:', err);
+            // Asegurarse de retornar aquí
             return res.status(500).send('Error al cerrar sesión.');
         }
-        res.redirect('/login');
+        return res.redirect('/login'); 
     });
 });
 router.post('/login', async (req, res) => {
     const { email, contrasena } = req.body;
     if (!email || !contrasena) {
-        return res.render('ingreso/login', { error: 'Por favor, introduce correo electrónico y contraseña.' });
+        return res.render('ingreso/login', { error: 'Por favor, introduce correo electrónico y contraseña.' }); // Ya tiene return, ¡bien!
     }
     try {
         const apiKey = process.env.FIREBASE_API_KEY;
         if (!apiKey) {
             console.error('ERROR: FIREBASE_API_KEY no está configurado en las variables de entorno.');
-            return res.status(500).render('ingreso/login', { error: 'Error de configuración del servidor. Contacta al administrador.' });
+            return res.status(500).render('ingreso/login', { error: 'Error de configuración del servidor. Contacta al administrador.' }); // Ya tiene return, ¡bien!
         }
         const signInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
         const response = await fetch(signInUrl, {
@@ -183,22 +185,22 @@ router.post('/login', async (req, res) => {
         console.log('Usuario autenticado con éxito en Firebase (REST API). UID:', uid);
         req.session.userId = uid;
         // Se asume que '/dashboard' es la ruta que determina a dónde redirigir.
-        return res.redirect('/dashboard');
+        return res.redirect('/dashboard'); // Ya tiene return, ¡bien!
     } catch (error) {
         console.error('Error general en la ruta /login:', error);
         // Asegurarse de retornar aquí
-        return res.status(500).render('ingreso/login', { error: 'Error interno del servidor. Inténtalo más tarde.' });
+        return res.status(500).render('ingreso/login', { error: 'Error interno del servidor. Inténtalo más tarde.' }); // Ya tiene return, ¡bien!
     }
 });
 
 router.get('/registro', (req, res) => {
-    res.render('ingreso/registro');
+    return res.render('ingreso/registro'); 
 });
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
-    const auth = admin.auth();
+    // const auth = admin.auth(); // Ya importado arriba
     if (contrasena !== confirmar_contrasena) {
-        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body });
+        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body }); // Ya tiene return, ¡bien!
     }
     try {
         const userRecord = await auth.createUser({
@@ -209,7 +211,7 @@ router.post('/registro', async (req, res) => {
         console.log('Usuario registrado en Firebase Auth:', userRecord.uid);
         req.session.userId = userRecord.uid;
         req.session.userCreationTime = userRecord.metadata.creationTime;
-        return res.redirect('/dashboard');
+        return res.redirect('/dashboard'); 
     } catch (error) {
         console.error('Error al registrar usuario:', error);
         let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
@@ -221,16 +223,16 @@ router.post('/registro', async (req, res) => {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
         }
         // Asegurarse de retornar aquí
-        return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
+        return res.render('ingreso/registro', { error: errorMessage, formData: req.body }); // Ya tiene return, ¡bien!
     }
 });
 
 // --- RUTAS DE REGISTRO DE PERFIL ---
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
-    res.render('ingreso/registrocliente');
+    return res.render('ingreso/registrocliente'); // Se añadió 'return'
 });
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
-    res.render('ingreso/registroasesor');
+    return res.render('ingreso/registroasesor'); 
 });
 router.post('/registro-perfil', requireAuth, async (req, res) => {
     const { tipo_usuario, ...formData } = req.body;
@@ -238,7 +240,7 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
     const userCreationTime = req.session.userCreationTime;
     if (!userId || !userCreationTime) {
         console.error('ID de usuario o fecha de creación no encontrada en la sesión durante registro-perfil.');
-        return res.status(401).send('Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.');
+        return res.status(401).send('Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.'); // Ya tiene return, ¡bien!
     }
     try {
         const datosAGuardar = {
@@ -249,21 +251,21 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
             await db.collection('clientes').doc(userId).set(datosAGuardar);
             console.log(`Perfil de cliente registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
-            return res.redirect('/homecliente');
+            return res.redirect('/homecliente'); 
         } else if (tipo_usuario === 'asesor') {
             await db.collection('asesores').doc(userId).set(datosAGuardar);
             console.log(`Perfil de asesor registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
-            return res.redirect('/homeasesor');
+            return res.redirect('/homeasesor'); 
         } else {
             console.error('Tipo de usuario no válido:', tipo_usuario);
             // Asegurarse de retornar aquí
-            return res.status(400).send('Tipo de usuario no válido.');
+            return res.status(400).send('Tipo de usuario no válido.'); 
         }
     } catch (error) {
         console.error('Error al registrar el perfil:', error);
         // Asegurarse de retornar aquí
-        return res.status(500).send('Error al registrar el perfil.');
+        return res.status(500).send('Error al registrar el perfil.'); 
     }
 });
 
@@ -274,11 +276,11 @@ router.get('/dashboard', requireAuth, async (req, res) => {
         const clienteDoc = await db.collection('clientes').doc(userId).get();
         const asesorDoc = await db.collection('asesores').doc(userId).get();
         if (!clienteDoc.exists && !asesorDoc.exists) {
-            return res.render('ingreso/seleccionar_tipo_usuario');
+            return res.render('ingreso/seleccionar_tipo_usuario'); 
         } else if (clienteDoc.exists) {
-            return res.redirect('/homecliente');
+            return res.redirect('/homecliente'); 
         } else if (asesorDoc.exists) {
-            return res.redirect('/homeasesor');
+            return res.redirect('/homeasesor'); 
         } else {
             console.error('Estado de perfil inconsistente para el usuario:', userId);
             // Asegurarse de retornar aquí
@@ -286,28 +288,25 @@ router.get('/dashboard', requireAuth, async (req, res) => {
         }
     } catch (error) {
         console.error('Error al verificar el perfil del usuario:', error);
-        // ¡LA CORRECCIÓN VA AQUÍ!
-        return res.status(500).send('Error al verificar el perfil del usuario.');
+        return res.status(500).send('Error al verificar el perfil del usuario.'); 
     }
 });
 
 // --- RUTAS DE CAMBIO DE CONTRASEÑA ---
-// GET para mostrar el formulario de cambio de contraseña
 router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage);
 
 // POST para manejar el cambio de contraseña
 router.post('/cambiar-password', requireAuth, asesorController.changePassword);
 
-// --- OTRAS RUTAS ---
 router.get('/consulta', (req, res) => {
-    res.render('asesor/consulta')
-})
+    return res.render('asesor/consulta'); 
+});
 router.get('/consultacliente', (req, res) => {
-    res.render('cliente/consultacliente')
-})
+    return res.render('cliente/consultacliente'); 
+});
 router.get('/formulariocliente', (req, res) => {
-    res.render('cliente/formulariocliente')
-})
+    return res.render('cliente/formulariocliente'); 
+});
 router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
 
 
