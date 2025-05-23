@@ -11,7 +11,7 @@ exports.postEditPersonalAndContactInfo = async (req, res) => {
     }
 
     if (!nombre || !apellido || !email || !telefono) {
-        return res.status(400).json({ error: 'Nombre, apellido, email y teléfono son campos obligatorios.' });
+        return res.status(400).json({ error: 'Nombre, apellido, email y teléfono son campos obligatorios.' });//
     }
     
     // Validación básica de email en el backend
