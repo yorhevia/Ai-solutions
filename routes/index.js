@@ -3,7 +3,8 @@ const requireAuth = require('../config/middleware');
 const session = require('express-session');
 const admin = require('./firebase');
 const clienteController = require('./controllers/clienteController');
- const asesorController = require('./controllers/asesorController'); 
+const asesorController = require('./controllers/asesorController'); 
+const editProfileController = require('./controllers/editProfileController');
 const db = admin.firestore();
 var router = express.Router();
 
