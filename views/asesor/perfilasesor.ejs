@@ -1,467 +1,122 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Finance Solutions - Perfil de Asesor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/stylesheets/perfil_asesor.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
-</head>
-<body>
-    <header class="main-header">
-        <div class="header-left">
-            <a href="/homeasesor" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h2>Perfil de Asesor</h2>
-        </div>
-        <div class="header-right">
-            <button class="logout-button-header" onclick="window.location.href='/logout'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
-            <div class="profile-logo-container">
-                <a href="/homeasesor" class="home-link">
-                    <i class="fas fa-home profile-logo"></i>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <div id="globalMessage" class="success-message"></div>
-
-    <div class="container profile-container">
-        <section class="profile-photo-section">
-            <div class="profile-picture-wrapper">
-                <img id="profilePictureDisplay" src="<%= asesor.fotoPerfilUrl || 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=%EF%A3%BF' %>" alt="Foto de Perfil">
-            </div>
-            <input type="file" id="profilePictureUpload" accept="image/*" style="display: none;">
-            <label for="profilePictureUpload" class="upload-button">
-                <i class="fas fa-upload"></i> Subir Foto de Perfil
-            </label>
-            <span id="uploadMessage" class="upload-message">Por favor, sube una foto formal y clara de perfil. **Recomendado: 250px de ancho y 333px de alto.**</span>
-            <p id="profilePictureErrorMessage" class="error-message" style="display: none;"></p>
-        </section>
-
-        <section class="profile-info">
-            <h2>Información Personal</h2>
-            <div class="info-item">
-                <i class="fas fa-user icon"></i>
-                <span>Nombre Completo:</span>
-                <span class="value" id="displayNombre"><%= asesor.nombre %></span>
-                <span class="value" id="displayApellido"><%= asesor.apellido %></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-envelope icon"></i>
-                <span>Email:</span>
-                <span class="value" id="displayEmail"><%= asesor.email %></span>
-            </div>
-            <div class="info-item">
-                <i class="fas fa-phone icon"></i>
-                <span>Teléfono:</span>
-                <span class="value" id="displayTelefono"><%= asesor.telefono %></span>
-            </div>
-            <% if (asesor.direccion) { %>
-            <div class="info-item">
-                <i class="fas fa-map-marker-alt icon"></i>
-                <span>Dirección:</span>
-                <span class="value" id="displayDireccion"><%= asesor.direccion %></span>
-            </div>
-            <% } %>
-
-            <a href="#" id="editPersonalLink" class="edit-link" style="margin-top: 15px;">
-                <i class="fas fa-edit"></i> Editar Información Personal
-            </a>
-        </section>
-
-        <div id="editPersonalCard" class="edit-card">
-            <h3>Editar Información Personal</h3>
-            <p id="editPersonalErrorMessage" class="error-message" style="display: none;"></p>
-            <form id="editPersonalForm">
-                <div class="form-group">
-                    <label for="editNombre">Nombre:</label>
-                    <input type="text" id="editNombre" name="nombre" value="<%= asesor.nombre || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editApellido">Apellido:</label>
-                    <input type="text" id="editApellido" name="apellido" value="<%= asesor.apellido || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editEmail">Email:</label>
-                    <input type="email" id="editEmail" name="email" value="<%= asesor.email || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editTelefono">Teléfono:</label>
-                    <input type="tel" id="editTelefono" name="telefono" value="<%= asesor.telefono || '' %>">
-                </div>
-                <div class="form-group">
-                    <label for="editDireccion">Dirección:</label>
-                    <input type="text" id="editDireccion" name="direccion" value="<%= asesor.direccion || '' %>">
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-button">Guardar</button>
-                    <button type="button" id="cancelEditPersonalButton" class="cancel-button">Cancelar</button>
-                </div>
-            </form>
-        </div>
-
-        <section class="professional-info">
-            <h2>Información Profesional</h2>
-            <div class="info-item">
-                <i class="fas fa-briefcase icon"></i>
-                <span>Profesión:</span>
-                <span class="value" id="displayProfesion"><%= asesor.profesion %></span>
-                </div>
-            <div class="info-item">
-                <i class="fas fa-id-card icon"></i>
-                <span>Número de Licencia Profesional:</span>
-                <span class="value" id="displayLicencia"><%= asesor.licencia %></span>
-                </div>
-            <div class="info-item">
-                <i class="fas fa-graduation-cap icon"></i>
-                <span>Especialidad Financiera:</span>
-                <span class="value" id="displayEspecialidad"><%= asesor.especialidad %></span>
-                </div>
-            <div class="info-item">
-                <i class="fas fa-chart-line icon"></i>
-                <span>Años de Experiencia:</span>
-                <span class="value" id="displayExperiencia"><%= asesor.experiencia %></span>
-                </div>
-            <div class="info-item">
-                <i class="fas fa-file-alt icon"></i>
-                <span>Descripción Profesional:</span>
-                <p class="value" id="displayDescripcion"><%= asesor.descripcion %></p>
-                </div>
-            <a href="#" id="editProfessionalLink" class="edit-link" style="margin-top: 15px;">
-                <i class="fas fa-edit"></i> Editar Información Profesional
-            </a>
-        </section>
-
-        <div id="editProfessionalCard" class="edit-card">
-            <h3>Editar Información Profesional</h3>
-            <p id="editProfessionalErrorMessage" class="error-message" style="display: none;"></p>
-            <form id="editProfessionalForm">
-                <div class="form-group">
-                    <label for="editProfesion">Profesión:</label>
-                    <input type="text" id="editProfesion" name="profesion" value="<%= asesor.profesion || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editLicencia">Número de Licencia Profesional:</label>
-                    <input type="text" id="editLicencia" name="licencia" value="<%= asesor.licencia || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editEspecialidad">Especialidad Financiera:</label>
-                    <input type="text" id="editEspecialidad" name="especialidad" value="<%= asesor.especialidad || '' %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="editExperiencia">Años de Experiencia:</label>
-                    <input type="number" id="editExperiencia" name="experiencia" value="<%= asesor.experiencia || '' %>" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="editDescripcion">Descripción Profesional:</label>
-                    <textarea id="editDescripcion" name="descripcion"><%= asesor.descripcion || '' %></textarea>
-                </div>
-                <div class="button-group">
-                    <button type="submit" class="save-button">Guardar</button>
-                    <button type="button" id="cancelEditProfessionalButton" class="cancel-button">Cancelar</button>
-                </div>
-            </form>
-        </div>
-
-        <section class="security-settings">
-            <h2>Seguridad</h2>
-            <div class="info-item">
-                <i class="fas fa-key icon"></i>
-                <span>Contraseña:</span>
-                <span class="value">*********</span>
-                <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
-            </div>
-        </section>
-
-        <section class="additional-info">
-            <h2>Información Adicional</h2>
-            <div class="info-item">
-                <i class="fas fa-calendar-alt icon"></i>
-                <span>Fecha de Registro:</span>
-                <span class="value" data-date="<%= asesor.fechaRegistro %>"><%= asesor.fechaRegistro %></span>
-            </div>
-        </section>
-    </div>
-
-    <footer class="main-footer">
-        <div class="footer-content">
-            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
-            <p>Crecimiento inteligente para tus finanzas.</p>
-        </div>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Script para formatear la fecha de registro
+  <!DOCTYPE html>
+      <html lang="es">
+         <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>AI Finance Solutions - Perfil de Asesor</title>
+      <link rel="stylesheet" href="/stylesheets/perfil_asesor.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+      <script>
+         document.addEventListener('DOMContentLoaded', function() {
             const fechaRegistroElement = document.querySelector('.value[data-date]');
             if (fechaRegistroElement) {
-                const fechaOriginal = fechaRegistroElement.textContent;
-                const parsedDate = moment(fechaOriginal);
+            const fechaOriginal = fechaRegistroElement.textContent;
+            const fechaFormateada = moment(fechaOriginal).format('MMMM D,<ctrl3348>');
+            fechaRegistroElement.textContent = fechaFormateada;
+         }
+     });
+            </script>
+ </head>
+  <body>
+     <header class="main-header">
+         <div class="header-left">
+            <a href="/homeasesor" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            </a>
+     <h2>Perfil de Asesor</h2>
+        </div>
+            <div class="header-right">
+            <button class="logout-button-header" onclick="window.location.href='/logout'">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+         <div class="profile-logo-container">
+            <a href="/homeasesor" class="home-link">
+            <i class="fas fa-home profile-logo"></i>
+            </a>
+            </div>
+            </div>
+    </header>
 
-                if (parsedDate.isValid()) {
-                    const fechaFormateada = parsedDate.locale('es').format('D [de] MMMM, YYYY');
-                    fechaRegistroElement.textContent = fechaFormateada;
-                    console.log('Frontend: Fecha formateada en español (CORRECTA):', fechaFormateada);
-                } else {
-                    console.error('Frontend: Moment.js no pudo parsear la fecha:', fechaOriginal);
-                    fechaRegistroElement.textContent = 'Fecha de registro no disponible';
-                }
-            }
+        <div class="container profile-container">
+         <section class="profile-info">
+            <h2>Información Personal</h2>
+         <div class="info-item">
+            <i class="fas fa-user icon"></i>
+            <span>Nombre Completo:</span>
+            <span class="value"><%= asesor.nombre %> <%= asesor.apellido %></span>
+         </div>
+            <div class="info-item">
+            <i class="fas fa-envelope icon"></i>
+            <span>Email:</span>
+            <span class="value"><%= asesor.email %></span>
+            </div>
+            <div class="info-item">
+            <i class="fas fa-phone icon"></i>
+            <span>Teléfono:</span>
+            <span class="value"><%= asesor.telefono %></span>
+            </div>
+            </section>
 
-            // --- VARIABLES Y FUNCIÓN DE MENSAJES ---
-            const globalMessage = document.getElementById('globalMessage');
-            let messageTimeout;
+    <section class="professional-info">
+         <h2>Información Profesional</h2>
+            <div class="info-item">
+            <i class="fas fa-briefcase icon"></i>
+            <span>Profesión:</span>
+            <span class="value"><%= asesor.profesion %></span>
+            <a href="/editar-profesion" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            </div>
+            <div class="info-item">
+            <i class="fas fa-id-card icon"></i>
+            <span>Número de Licencia Profesional:</span>
+            <span class="value"><%= asesor.licencia %></span>
+            <a href="/editar-licencia" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            </div>
+            <div class="info-item">
+            <i class="fas fa-graduation-cap icon"></i>
+            <span>Especialidad Financiera:</span>
+            <span class="value"><%= asesor.especialidad %></span>
+            <a href="/editar-especialidad" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            </div>
+            <div class="info-item">
+            <i class="fas fa-chart-line icon"></i>
+            <span>Años de Experiencia:</span>
+            <span class="value"><%= asesor.experiencia %></span>
+            <a href="/editar-experiencia" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            </div>
+            <div class="info-item description-item">
+            <i class="fas fa-file-alt icon"></i>
+            <span>Descripción Profesional:</span>
+            <p class="value"><%= asesor.descripcion %></p>
+            <a href="/editar-descripcion" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            </div>
+            </section>
 
-            function showMessage(element, message, isSuccess = true, duration = 5000) {
-                clearTimeout(messageTimeout);
-                element.textContent = message;
-                element.className = isSuccess ? 'success-message show' : 'error-message show';
-                element.style.display = 'block';
+            <section class="security-settings">
+            <h2>Seguridad</h2>
+            <div class="info-item">
+            <i class="fas fa-key icon"></i>
+            <span>Contraseña:</span>
+            <span class="value">*********</span>
+            <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
+            </div>
+            </section>
 
-                messageTimeout = setTimeout(() => {
-                    element.classList.remove('show');
-                    setTimeout(() => {
-                        element.style.display = 'none';
-                    }, 500);
-                }, duration);
-            }
+            <section class="additional-info">
+            <h2>Información Adicional</h2>
+            <div class="info-item">
+            <i class="fas fa-calendar-alt icon"></i>
+            <span>Fecha de Registro:</span>
+            <span class="value" data-date="<%= asesor.fechaRegistro %>"><%= asesor.fechaRegistro %></span>
+            </div>
+            </section>
+            </div>
 
-            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PERSONAL ---
-            const editPersonalLink = document.getElementById('editPersonalLink');
-            const editPersonalCard = document.getElementById('editPersonalCard');
-            const cancelEditPersonalButton = document.getElementById('cancelEditPersonalButton');
-            const editPersonalForm = document.getElementById('editPersonalForm');
-            const editPersonalErrorMessage = document.getElementById('editPersonalErrorMessage');
-
-            editPersonalLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                editPersonalCard.style.display = 'block';
-                editPersonalErrorMessage.style.display = 'none';
-                globalMessage.classList.remove('show');
-                globalMessage.style.display = 'none';
-                editProfessionalCard.style.display = 'none';
-            });
-
-            cancelEditPersonalButton.addEventListener('click', function() {
-                editPersonalCard.style.display = 'none';
-                editPersonalErrorMessage.style.display = 'none';
-                globalMessage.classList.remove('show');
-                globalMessage.style.display = 'none';
-            });
-
-            editPersonalForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-
-                const formData = new FormData(editPersonalForm);
-                const data = Object.fromEntries(formData.entries());
-
-                console.log('Frontend (Personal): Datos que se enviarán al backend:', data);
-
-                if (!data.nombre || !data.apellido || !data.email || !data.telefono) {
-                    showMessage(editPersonalErrorMessage, 'Nombre, apellido, email y teléfono son obligatorios.', false);
-                    return;
-                }
-
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(data.email)) {
-                    showMessage(editPersonalErrorMessage, 'El formato del correo electrónico no es válido.', false);
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/perfil/editar-info-personal', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    console.log('Frontend (Personal): Respuesta raw del servidor (status, ok):', response.status, response.ok);
-
-                    const result = await response.json();
-                    console.log('Frontend (Personal): Contenido de la respuesta JSON del servidor:', result);
-
-                    if (response.ok) {
-                        document.getElementById('displayNombre').textContent = result.asesor.nombre;
-                        document.getElementById('displayApellido').textContent = result.asesor.apellido;
-                        document.getElementById('displayEmail').textContent = result.asesor.email;
-                        document.getElementById('displayTelefono').textContent = result.asesor.telefono;
-
-                        const displayDireccion = document.getElementById('displayDireccion');
-                        if (displayDireccion) {
-                            displayDireccion.textContent = result.asesor.direccion || '';
-                        }
-
-                        editPersonalCard.style.display = 'none';
-                        showMessage(globalMessage, '¡Información personal actualizada con éxito!', true);
-                    } else {
-                        showMessage(editPersonalErrorMessage, result.error || 'Error al actualizar la información personal.', false);
-                    }
-                } catch (error) {
-                    console.error('Frontend (Personal): Error en la solicitud fetch o al procesar la respuesta:', error);
-                    showMessage(globalMessage, 'Error de conexión o de red al actualizar información personal. Inténtalo de nuevo.', false);
-                }
-            });
-
-            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PROFESIONAL (NUEVA) ---
-            const editProfessionalLink = document.getElementById('editProfessionalLink');
-            const editProfessionalCard = document.getElementById('editProfessionalCard');
-            const cancelEditProfessionalButton = document.getElementById('cancelEditProfessionalButton');
-            const editProfessionalForm = document.getElementById('editProfessionalForm');
-            const editProfessionalErrorMessage = document.getElementById('editProfessionalErrorMessage');
-
-            editProfessionalLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                editProfessionalCard.style.display = 'block';
-                editProfessionalErrorMessage.style.display = 'none';
-                globalMessage.classList.remove('show');
-                globalMessage.style.display = 'none';
-                editPersonalCard.style.display = 'none';
-            });
-
-            cancelEditProfessionalButton.addEventListener('click', function() {
-                editProfessionalCard.style.display = 'none';
-                editProfessionalErrorMessage.style.display = 'none';
-                globalMessage.classList.remove('show');
-                globalMessage.style.display = 'none';
-            });
-
-            editProfessionalForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-
-                const formData = new FormData(editProfessionalForm);
-                const data = Object.fromEntries(formData.entries());
-
-                console.log('Frontend (Profesional): Datos que se enviarán al backend:', data);
-
-                if (!data.profesion || !data.licencia || !data.especialidad) {
-                    showMessage(editProfessionalErrorMessage, 'Profesión, licencia y especialidad son obligatorios.', false);
-                    return;
-                }
-                if (data.experiencia && (isNaN(data.experiencia) || data.experiencia < 0)) {
-                    showMessage(editProfessionalErrorMessage, 'Años de experiencia debe ser un número positivo.', false);
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/perfil/editar-info-profesional', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data),
-                    });
-
-                    console.log('Frontend (Profesional): Respuesta raw del servidor (status, ok):', response.status, response.ok);
-
-                    const result = await response.json();
-                    console.log('Frontend (Profesional): Contenido de la respuesta JSON del servidor:', result);
-
-                    if (response.ok) {
-                        document.getElementById('displayProfesion').textContent = result.asesor.profesion;
-                        document.getElementById('displayLicencia').textContent = result.asesor.licencia;
-                        document.getElementById('displayEspecialidad').textContent = result.asesor.especialidad;
-                        document.getElementById('displayExperiencia').textContent = result.asesor.experiencia;
-                        document.getElementById('displayDescripcion').textContent = result.asesor.descripcion || '';
-
-                        editProfessionalCard.style.display = 'none';
-                        showMessage(globalMessage, '¡Información profesional actualizada con éxito!', true);
-                    } else {
-                        showMessage(editProfessionalErrorMessage, result.error || 'Error al actualizar la información profesional.', false);
-                    }
-                } catch (error) {
-                    console.error('Frontend (Profesional): Error en la solicitud fetch o al procesar la respuesta:', error);
-                    showMessage(globalMessage, 'Error de conexión o de red al actualizar información profesional. Inténtalo de nuevo.', false);
-                }
-            });
-
-            //Lógica para la subida de foto de perfil
-            const profilePictureUpload = document.getElementById('profilePictureUpload');
-            const profilePictureDisplay = document.getElementById('profilePictureDisplay');
-            const uploadMessage = document.getElementById('uploadMessage');
-            const profilePictureErrorMessage = document.getElementById('profilePictureErrorMessage');
-            const uploadButtonLabel = document.querySelector('.upload-button');
-
-            profilePictureUpload.addEventListener('change', async function() {
-                const file = this.files[0];
-                if (file) {
-                    // Validar tamaño de archivo
-                    const maxSizeMB = 5;
-                    if (file.size > maxSizeMB * 1024 * 1024) {
-                        showMessage(profilePictureErrorMessage, `El archivo es demasiado grande. Máximo ${maxSizeMB}MB.`, false);
-                        // Ocultar mensaje de subida si estaba visible
-                        uploadMessage.classList.remove('show');
-                        uploadMessage.style.display = 'none';
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        profilePictureDisplay.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-
-                    try {
-                        const formData = new FormData();
-                        formData.append('profilePhoto', file);
-
-                        // Mostrar el mensaje "Subiendo foto..."
-                        showMessage(uploadMessage, 'Subiendo foto...', true, 99999); // Duración larga para que se mantenga hasta la respuesta
-                        profilePictureErrorMessage.style.display = 'none'; // Asegura que el error previo se oculte
-
-                        const response = await fetch('/upload-profile-photo', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        const result = await response.json();
-
-                        // Ocultar el mensaje "Subiendo foto..." después de la respuesta
-                        uploadMessage.classList.remove('show');
-                        uploadMessage.style.display = 'none';
-
-                        if (response.ok && result.success) {
-                            // Actualizar la imagen en la página con la URL de Imgur
-                            profilePictureDisplay.src = result.imageUrl;
-                            showMessage(globalMessage, '¡Foto de perfil subida y actualizada con éxito!', true);
-                        } else {
-                            showMessage(profilePictureErrorMessage, result.message || 'Error al subir la foto.', false);
-                        }
-                    } catch (error) {
-                        console.error('Error al subir la foto:', error);
-                        // Ocultar el mensaje "Subiendo foto..." si hay un error de red/fetch
-                        uploadMessage.classList.remove('show');
-                        uploadMessage.style.display = 'none';
-                        showMessage(globalMessage, 'Error de conexión al subir la foto. Inténtalo de nuevo.', false);
-                    }
-
-                } else {
-                    showMessage(profilePictureErrorMessage, 'No se seleccionó ninguna foto.', false);
-                    // Ocultar mensaje de subida si no se selecciona archivo
-                    uploadMessage.classList.remove('show');
-                    uploadMessage.style.display = 'none';
-                }
-            });
-
-            // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
-            if (uploadButtonLabel) {
-                uploadButtonLabel.addEventListener('click', function() {
-                    // Solo mostrar el mensaje inicial de recomendación, no "Subiendo foto..."
-                    uploadMessage.textContent = 'Por favor, sube una foto formal y clara de perfil. **Recomendado: 250px de ancho y 333px de alto.**';
-                    uploadMessage.classList.add('show');
-                    uploadMessage.style.display = 'block';
-                    profilePictureErrorMessage.style.display = 'none';
-                });
-            }
-
-        });
-    </script>
-</body>
-</html>
+            <footer class="main-footer">
+            <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+            </div>
+            </footer>
+            </body>
+            </html>
