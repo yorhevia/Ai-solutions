@@ -5,7 +5,7 @@ const cors = require('cors');
 
 
 const requireAuth = require('../config/middleware'); 
-const admin = require('../firebase');
+const admin = require('./firebase');
 const clienteController = require('./controllers/clienteController'); 
 const asesorController = require('./controllers/asesorController');     
 const editProfileController = require('./controllers/editProfileController');
