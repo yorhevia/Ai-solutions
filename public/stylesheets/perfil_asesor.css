@@ -1,99 +1,132 @@
+/* ... (tu CSS existente hasta antes de .main-header, si lo hay) ... */
+
 * {
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+    /* Aquí debería estar el contenido de las propiedades CSS del body.
+       El fragmento que me diste parece que estaba destinado a un contenedor
+       principal dentro del body, no al body en sí, o faltan propiedades CSS.
+       Si esto es para un .main-content o similar, se movería ahí.
+       Por ahora, lo dejo aquí con un comentario. */
+    
+    flex-grow: 1;
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
-    flex-direction: column;
-    align-items: center; /* Centra los elementos hijos horizontalmente */
-    min-height: 100vh;
-    overflow-x: hidden; /* Oculta cualquier desbordamiento horizontal */
-    width: 100%; /* Asegura que el body no exceda el ancho */
+    flex-wrap: wrap;
+    gap: 2em;
+
 }
 
-.main-header {
-    background-color: #333;
-    color: white;
-    padding: 1em 2em;
-    width: 100%; /* Ocupa todo el ancho disponible */
+/* Nuevos estilos para la sección de la foto dentro del contenedor */
+.profile-photo-section {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    flex-direction: column; /* Coloca los elementos en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+    margin-bottom: 30px; /* Espacio con la siguiente sección */
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    text-align: center;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.header-left h2 {
-    color: white;
-    margin: 0;
-}
-
-.back-button {
-    color: white;
-    text-decoration: none;
-    margin-right: 1em;
-    font-size: 1.2em;
-}
-
-.back-button i {
-    margin-right: 0.5em;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-}
-
-.logout-button-header {
-    background-color: #555;
-    color: white;
-    border: none;
-    padding: 0.7em 1.2em;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    margin-right: 1em;
-}
-
-.logout-button-header:hover {
-    background-color: #777;
-}
-
-.profile-logo-container {
-    background-color: #444;
-    color: white;
+.profile-picture-wrapper {
+    width: 120px; /* Tamaño de la foto */
+    height: 120px;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    overflow: hidden;
+    margin-bottom: 15px; /* Espacio entre la imagen y el botón */
+    border: 3px solid #007bff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    background-color: #CCCCCC;
+    color: #FFFFFF;
+    font-size: 4em;
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 1.2em;
+    justify-content: center;
 }
 
-.profile-logo-container i.profile-logo {
-    color: white;
+.profile-picture-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-.container {
-    background-color: white;
-    padding: 2em;
-    margin-top: 2em;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.upload-button {
+    /* El botón ya no necesita posicionamiento absoluto, ya que está fuera del wrapper de la imagen */
+    background-color: #007bff; /* Color de fondo del botón */
+    color: white; /* Color del texto del botón */
+    padding: 10px 20px; /* Aumentado el padding para un mejor tamaño */
+    border-radius: 25px; /* Bordes más redondeados */
+    cursor: pointer;
+    font-size: 16px; /* Aumentado el tamaño de la fuente */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre el icono y el texto */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none; /* Asegúrate de que no tenga subrayado si es un label */
+    margin-top: 10px; /* Espacio superior para separarlo del círculo */
+}
+
+.upload-button:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el ratón */
+}
+
+/* El .camera-icon-button ya no es necesario si el botón de subida está fuera del círculo */
+/* Puedes eliminar todo el bloque de .camera-icon-button si no lo usas */
+
+.upload-message, .error-message {
+    font-size: 0.85em;
+    margin-top: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: none; /* Controlado por JS */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-align: center; /* Centrar el mensaje */
+}
+
+.upload-message.show {
+    opacity: 1;
+    background-color: #e0f7fa; /* Un azul claro suave */
+    color: #007bff;
+    border: 1px solid #007bff;
+    display: block;
+}
+
+.error-message.show {
+    opacity: 1;
+    background-color: #ffe0e0;
+    color: #d32f2f;
+    border: 1px solid #d32f2f;
+    display: block;
+}
+
+.success-message { /* Este es para el mensaje global, ya existía */
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: none; /* Oculto por defecto */
+    opacity: 0;
+    transition: opacity 0.5s ease;
     width: 90%;
     max-width: 800px;
-    flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
-    margin-left: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
-    margin-right: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
+}
+
+.success-message.show {
+    opacity: 1;
+    display: block;
 }
 
 h2 {
@@ -102,87 +135,63 @@ h2 {
     margin-bottom: 1.5em;
     border-bottom: 2px solid #eee;
     padding-bottom: 0.5em;
+    width: 100%; /* Asegura que los títulos ocupen todo el ancho dentro del flexbox */
 }
 
 section {
     margin-bottom: 2em;
+    width: 100%; /* Cada sección ocupará todo el ancho para un mejor apilamiento */
 }
 
 section h2 {
-    margin-top: 0;
-    color: #555;
+    /* Si tenías estilos específicos para h2 dentro de una sección, irían aquí */
 }
 
-.info-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1em;
-}
-
-.icon {
-    color: #007bff;
-    margin-right: 1em;
+/* Selector global para span - si no es lo que quieres, elimínalo o hazlo más específico */
+span {
+    /* Aquí se define 'width: 20px' y 'text-align: center' y 'align-self: flex-start'
+       Lo más probable es que esto sea parte de .description-item i o similar,
+       no un estilo global para todos los span. Si esto es para iconos, muévelo a un selector de iconos. */
+    /*
     font-size: 1.1em;
     width: 20px;
     text-align: center;
-}
-
-span {
-    font-weight: bold;
-    color: #555;
-    margin-right: 0.5em;
-}
-
-.value {
-    color: #333;
-}
-
-.optional {
-    font-style: italic;
-    color: #777;
-}
-
-.edit-link {
-    color: #007bff;
-    text-decoration: none;
-    margin-left: 1em;
-    font-size: 0.9em;
-}
-
-.edit-link:hover {
-    text-decoration: underline;
+    align-self: flex-start;
+    */
 }
 
 .description-item {
     display: flex;
-    align-items: flex-start;
+    flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+    align-items: flex-start; /* Alinea los elementos al inicio del eje cruzado */
     margin-bottom: 1em;
 }
 
-.description-item i.icon {
-    margin-right: 1em;
+/* Si este span tiene un icono, como en el ejemplo anterior */
+.description-item i { /* Asumo que era un 'i' o un 'span' con clase de icono */
+    color: #007bff; /* Color del icono */
+    margin-right: 0.5em;
     font-size: 1.1em;
     width: 20px;
     text-align: center;
+    align-self: flex-start;
 }
 
-.description-item > div {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
 
-.description-item span {
+.description-item > span { /* Se refiere al "Descripción Profesional:" o etiquetas similares */
     font-weight: bold;
     color: #555;
     margin-right: 0.5em;
+    margin-bottom: 0.3em;
+    flex-basis: 100%; /* Ocupa todo el ancho si es necesario */
 }
 
 .description-item p.value {
-    margin-top: 0.3em;
-    line-height: 0.7;
+    margin-top: 0;
+    line-height: 1.5;
     white-space: pre-line;
+    text-align: left;
+    flex-grow: 1; /* Permite que el párrafo ocupe el espacio restante */
 }
 
 .description-item a.edit-link {
@@ -190,120 +199,153 @@ span {
     text-decoration: none;
     margin-left: auto;
     font-size: 0.9em;
-    align-self: center;
+    align-self: flex-start;
+    margin-top: 0;
 }
+
 
 .main-footer {
     background-color: #333;
     color: white;
-    text-align: center;
-    padding: 1em 2em;
-    width: 100%;
-    margin-top: 2em;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    /* Aquí puede que falten más propiedades CSS para el main-footer */
 }
 
-.footer-content {
-    width: 100%;
-    padding: 0;
-}
-
-.footer-content p {
-    margin: 0.5em 0;
+/* Si tenías un selector span dentro de .main-footer, iría aquí */
+.main-footer span {
     font-size: 0.9em;
 }
 
+
+/* MEDIA QUERIES */
 @media (max-width: 600px) {
     .main-header {
         flex-direction: column;
         align-items: flex-start;
+        /* El padding-bottom aquí ya no es relevante para la foto, se mantiene por el diseño general del header */
     }
 
     .header-left {
-        margin-bottom: 10px;
-    }
-
-    .profile-logo-container {
-        margin-left: 0;
-        margin-top: 10px;
-    }
-
-    .profile-logo {
-        font-size: 1.8em;
-        margin-right: 10px;
-    }
-
-    .main-header h2 {
-        font-size: 1.5em;
+        /* Estilos para .header-left en móviles */
     }
 
     .header-right {
-        margin-top: 10px;
-        flex-direction: row;
-        justify-content: flex-end;
-        width: 100%;
+        /* Estilos para .header-right en móviles */
     }
 
-    .header-right button {
-        margin-left: auto;
-        margin-right: 10px;
-    }
-
-    .container {
-        width: 95%;
+    /* Asumo que estos eran los estilos para .main-content en móvil */
+    .main-content {
         margin-top: 15px;
         margin-bottom: 15px;
         padding: 1em; /* Ajusta el padding para pantallas pequeñas */
+        flex-direction: column; /* Apila las secciones en móvil */
+        gap: 1.5em; /* Ajusta el espacio entre secciones */
+    }
+
+    .profile-photo-section {
+        padding-bottom: 1em; /* Más compacto en móvil */
+        margin-bottom: 1.5em; /* Más compacto en móvil */
     }
 
     h2 {
-        font-size: 1.4em;
-        margin-bottom: 1em;
+        /* Estilos para h2 en móviles */
     }
 
-    section {
-        margin-bottom: 1.5em;
-    }
-
-    .info-item {
-        flex-direction: column; /* Apila los elementos en pantallas pequeñas */
-        align-items: flex-start;
-        margin-bottom: 0.8em;
-    }
-
-    .info-item span {
-        margin-right: 0;
-        margin-bottom: 0.2em; /* Espacio entre la etiqueta y el valor */
-    }
-
-    .edit-link {
-        margin-left: 0;
-        align-self: flex-end; /* Alinea el enlace a la derecha en su propia línea */
-    }
-
-    .description-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .description-item i.icon {
-        margin-bottom: 0.5em;
-    }
-
-    .description-item > div {
-        width: 100%;
-    }
-
-    .description-item p.value {
-        margin-top: 0.1em;
-        line-height: 1.4;
-    }
-
-    .main-footer {
-        padding: 0.8em 1em;
-    }
+    /* Si tenías estilos para span en móvil, irían aquí */
+    /* span {
+        font-size: 0.85em;
+    } */
 
     .footer-content p {
         font-size: 0.8em;
     }
+}
+
+/* ESTILOS ESPECÍFICOS PARA LA EDICIÓN (TARJETA Y MENSAJES) */
+.edit-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    display: none; /* Oculto por defecto */
+    margin-bottom: 1rem;
+    width: 100%; /* Asegura que la tarjeta de edición ocupe todo el ancho */
+}
+.edit-card h3 {
+    margin-top: 0;
+    margin-bottom: 1em;
+    color: #333;
+}
+.edit-card .form-group {
+    margin-bottom: 15px;
+}
+.edit-card label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+.edit-card input[type="text"],
+.edit-card input[type="email"],
+.edit-card input[type="tel"],
+.edit-card input[type="number"],
+.edit-card textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+}
+
+.edit-card textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.edit-card .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.edit-card .save-button,
+.edit-card .cancel-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.edit-card .save-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.edit-card .save-button:hover {
+    background-color: #218838;
+}
+
+.edit-card .cancel-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.edit-card .cancel-button:hover {
+    background-color: #c82333;
+}
+
+/* Mensajes de error específicos para las tarjetas de edición */
+.edit-card .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: none;
+    font-size: 0.9em;
 }

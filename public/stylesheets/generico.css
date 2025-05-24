@@ -1,0 +1,137 @@
+/* Estilos generales para mensajes y formularios genéricos */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #333;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+h1 {
+    color: #007bff;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+h3 {
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #666;
+}
+
+.form-group input[type="password"],
+.form-group input[type="text"],
+.form-group input[type="email"] { /* Añadido por si se usan en otros formularios */
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Asegura que el padding no aumente el ancho total */
+    font-size: 1em;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    gap: 15px; /* Espacio entre los botones */
+}
+
+.save-button,
+.cancel-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none; /* Para los enlaces que se usan como botones */
+    display: inline-block; /* Para que el 'a' se comporte como un botón */
+    text-align: center;
+}
+
+.save-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Mensajes de feedback */
+.error-message,
+.success-message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: left;
+    display: none; /* Por defecto ocultos */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.error-message.show,
+.success-message.show {
+    display: block;
+    opacity: 1;
+}
+
+.error-message {
+    background-color: #f8d7da; /* Rojo claro */
+    color: #721c24; /* Rojo oscuro */
+    border: 1px solid #f5c6cb;
+}
+
+.error-message ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.error-message ul li {
+    margin-bottom: 5px;
+}
+
+.success-message {
+    background-color: #d4edda; /* Verde claro */
+    color: #155724; /* Verde oscuro */
+    border: 1px solid #c3e6cb;
+}
