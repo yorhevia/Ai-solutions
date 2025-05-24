@@ -1,7 +1,7 @@
 var express = require('express');
 const requireAuth = require('../config/middleware'); 
 const session = require('express-session'); 
-const admin = require('./firebase'); 
+const { admin, db } = require('./firebase');
 const clienteController = require('./controllers/clienteController');
 const asesorController = require('./controllers/asesorController'); 
 const editProfileController = require('./controllers/editProfileController');
@@ -24,9 +24,7 @@ if (!FIREBASE_API_KEY) {
 }
 
 
-
-const db = admin.firestore();
-const auth = admin.auth(); // Se necesita para admin.auth().createUser, etc.
+const auth = admin.auth(); 
 
 var router = express.Router();
 
@@ -175,7 +173,7 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
 
 //OBTENER RUTA REGISTRO
 router.get('/registro', (req, res) => {
-    return res.render('ingreso/registro'); // Añadir 'return'
+    return res.render('ingreso/registro'); 
 });
 
 
@@ -221,19 +219,18 @@ router.post('/registro', async (req, res) => {
 
 //OBTENER RUTA CONSULTA
 router.get('/consulta', (req, res) =>{
-    return res.render('asesor/consulta'); // Añadir 'return'
+    return res.render('asesor/consulta');
 });
 
 
 //OBTENER RUTA CONSULTA CLIENTE
 router.get('/consultacliente', (req, res)=> {
-    return res.render('cliente/consultacliente'); // Añadir 'return'
+    return res.render('cliente/consultacliente');
 });
-
 
 //OBTENER RUTA FORMULARIO CLIENTE
 router.get('/formulariocliente', (req, res) =>{
-    return res.render('cliente/formulariocliente'); // Añadir 'return'
+    return res.render('cliente/formulariocliente');
 });
 
 router.get('/dashboard', requireAuth, async (req, res) => {
@@ -244,8 +241,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
         const asesorDoc = await db.collection('asesores').doc(userId).get();
 
         if (!clienteDoc.exists && !asesorDoc.exists) {
-            // Si no existe perfil de cliente ni de asesor, es la primera vez después del registro
-            // Aquí se redirige para que el usuario elija el tipo de perfil
+            
             return res.render('ingreso/seleccionar_tipo_usuario');
         } else if (clienteDoc.exists) {
             return res.redirect('/homecliente');
@@ -264,11 +260,11 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 
 // Rutas para mostrar los formularios de perfil basados en la selección
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
-    return res.render('ingreso/registrocliente'); // Añadir 'return'
+    return res.render('ingreso/registrocliente'); 
 });
 
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
-    return res.render('ingreso/registroasesor'); // Añadir 'return'
+    return res.render('ingreso/registroasesor'); 
 });
 
 // RUTA PARA LA SELECCIÓN INICIAL DEL TIPO DE USUARIO DESPUÉS DEL REGISTRO
