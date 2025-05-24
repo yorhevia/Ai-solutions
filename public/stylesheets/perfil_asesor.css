@@ -1,5 +1,4 @@
-/* ... (tu CSS existente hasta antes de .main-header) ... */
-
+/* Estilos generales */
 * {
     box-sizing: border-box;
 }
@@ -17,6 +16,7 @@ body {
     width: 100%; /* Asegura que el body no exceda el ancho */
 }
 
+/* Encabezado principal */
 .main-header {
     background-color: #333;
     color: white;
@@ -85,6 +85,7 @@ body {
     color: white;
 }
 
+/* Contenedor principal de la página */
 .container {
     background-color: white;
     padding: 2em;
@@ -101,7 +102,7 @@ body {
     gap: 2em; /* Espacio entre las secciones del contenedor */
 }
 
-/* Nuevos estilos para la sección de la foto dentro del contenedor */
+/* Sección de Foto de Perfil */
 .profile-photo-section {
     display: flex;
     flex-direction: column; /* Coloca los elementos en columna */
@@ -137,7 +138,6 @@ body {
 }
 
 .upload-button {
-    /* El botón ya no necesita posicionamiento absoluto, ya que está fuera del wrapper de la imagen */
     background-color: #007bff; /* Color de fondo del botón */
     color: white; /* Color del texto del botón */
     padding: 10px 20px; /* Aumentado el padding para un mejor tamaño */
@@ -159,9 +159,7 @@ body {
     transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el ratón */
 }
 
-/* El .camera-icon-button ya no es necesario si el botón de subida está fuera del círculo */
-/* Puedes eliminar todo el bloque de .camera-icon-button */
-
+/* Mensajes de subida/error de foto */
 .upload-message, .error-message {
     font-size: 0.85em;
     margin-top: 5px;
@@ -189,7 +187,8 @@ body {
     display: block;
 }
 
-.success-message { /* Este es para el mensaje global, ya existía */
+/* Mensaje global de éxito */
+.success-message {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
@@ -210,7 +209,7 @@ body {
     display: block;
 }
 
-
+/* Estilos de los títulos de sección */
 h2 {
     color: #333;
     margin-top: 0;
@@ -228,8 +227,180 @@ section {
 section h2 {
     margin-top: 0;
     color: #555;
+    display: flex; /* Para alinear el icono con el texto */
+    align-items: center;
+    gap: 10px; /* Espacio entre icono y texto */
 }
 
+/* Sección de Estado de Verificación */
+.verification-status-section {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: left;
+    width: 100%; /* Ocupa todo el ancho */
+}
+
+.verification-status-section h2 {
+    text-align: center;
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+}
+
+/* Contenedor general para cada bloque de verificación (Identidad, Credenciales) */
+.verification-block {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.verification-block:last-child {
+    margin-bottom: 0;
+}
+
+/* Encabezado de cada bloque de verificación (ícono, título, estado) */
+.verification-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
+
+.verification-header .icon {
+    font-size: 1.4em;
+    color: #007bff; /* Color principal de los íconos */
+    margin-right: 15px;
+    min-width: 25px; /* Asegura un ancho mínimo para el ícono */
+    text-align: center;
+}
+
+.verification-header span:first-of-type {
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+    flex-shrink: 0; /* Evita que el texto del título se encoja */
+}
+
+/* Estilos para indicadores de estado */
+.status-indicator {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Espacio entre texto e icono */
+}
+
+.status-verificado {
+    color: #28a745; /* Verde para verificado */
+    background-color: #e6ffe6;
+}
+
+.status-pendiente {
+    color: #ffc107; /* Amarillo/Naranja para pendiente */
+    background-color: #fff8e6;
+}
+
+.status-rechazado {
+    color: #dc3545; /* Rojo para rechazado */
+    background-color: #ffe6e6;
+}
+
+.status-no-enviado {
+    color: #6c757d; /* Gris para no enviado */
+    background-color: #f2f2f2;
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA verification-actions (KYC y Credenciales) --- */
+.verification-actions {
+    display: flex;
+    flex-direction: column; /* Apila los botones y mensajes verticalmente */
+    gap: 12px; /* Aumenta el espacio entre los elementos apilados */
+    margin-top: 10px;
+    padding-left: 40px; /* Alinea los elementos con el contenido del encabezado */
+    align-items: flex-start; /* Alinea los elementos a la izquierda */
+}
+
+/* Estilos base para todos los botones de acción */
+.action-button {
+    display: inline-flex; /* Permite alinear el ícono y el texto */
+    align-items: center;
+    justify-content: center; /* Centra el contenido horizontalmente */
+    gap: 8px; /* Espacio entre el ícono y el texto */
+    padding: 10px 20px; /* Relleno del botón */
+    border-radius: 8px; /* Bordes más redondeados */
+    text-decoration: none;
+    font-weight: 600; /* Un poco más de peso en la fuente */
+    font-size: 0.9em; /* Tamaño de fuente ligeramente más pequeño */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
+    min-width: 180px; /* Ancho mínimo para consistencia */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave */
+}
+
+/* Estilo para el botón de acción principal (e.g., Iniciar/Re-enviar Verificación) */
+.primary-action {
+    background-color: #007bff; /* Azul brillante */
+    color: white;
+    border: 1px solid #007bff;
+}
+
+.primary-action:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Efecto de "levantar" */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* Sombra más pronunciada */
+}
+
+/* Estilo para el botón de acción secundaria (e.g., Ver Documento Enviado) */
+.secondary-action {
+    background-color: #f0f2f5; /* Gris muy claro */
+    color: #495057; /* Texto gris oscuro */
+    border: 1px solid #ced4da; /* Borde gris */
+}
+
+.secondary-action:hover {
+    background-color: #e2e6ea; /* Gris ligeramente más oscuro al pasar el ratón */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Estilos para los mensajes de observación (motivos de rechazo) */
+.observation-message {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 10px 15px;
+    background-color: #fff3cd; /* Amarillo claro para advertencia/observación */
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+    width: auto; /* Permite que se ajuste al contenido, pero con un max-width si es necesario */
+}
+
+.observation-message.full-width {
+    width: 100%; /* Asegura que ocupe todo el ancho disponible si se necesita */
+}
+
+.observation-message i {
+    color: #856404; /* Color oscuro para el ícono de información (amarillo más intenso) */
+    font-size: 1.1em;
+    margin-top: 2px;
+}
+
+/* Estilos para los items de información personal y profesional */
 .info-item {
     display: flex;
     align-items: center;
@@ -310,7 +481,7 @@ span {
     margin-top: 0;
 }
 
-
+/* Pie de página */
 .main-footer {
     background-color: #333;
     color: white;
@@ -331,12 +502,30 @@ span {
     font-size: 0.9em;
 }
 
-/* MEDIA QUERIES */
+/* MEDIA QUERIES para responsividad */
+@media (max-width: 768px) {
+    .verification-actions {
+        padding-left: 0; /* Elimina el padding para que los botones y mensajes se centren mejor */
+        align-items: center; /* Centra los elementos horizontalmente */
+    }
+
+    .action-button {
+        width: 90%; /* Hace que los botones ocupen más ancho en móviles */
+        max-width: 300px; /* Limita el ancho máximo para que no se vean demasiado grandes */
+        margin: 0 auto; /* Centra los botones */
+    }
+
+    .observation-message {
+        width: 90%; /* También ajusta el ancho de los mensajes de observación */
+        margin: 0 auto;
+        margin-top: 10px; /* Espacio superior para separarlo del botón */
+    }
+}
+
 @media (max-width: 600px) {
     .main-header {
         flex-direction: column;
         align-items: flex-start;
-        /* El padding-bottom aquí ya no es relevante para la foto, se mantiene por el diseño general del header */
     }
 
     .header-left {
@@ -432,6 +621,29 @@ span {
 
     .footer-content p {
         font-size: 0.8em;
+    }
+
+    /* Media queries para la sección de verificación en móvil */
+    .verification-status-section h2 {
+        font-size: 1.3em;
+    }
+    .status-item .status-text {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .status-item .status-message {
+        margin-left: 0;
+    }
+    .observation-message {
+        padding-left: 0;
+    }
+    .observation-message.full-width {
+        padding-left: 15px;
+    }
+    .view-verification-button {
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 

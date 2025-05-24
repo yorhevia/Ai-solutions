@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Verificaciones Pendientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/admin_dashboard.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <a href="/admin/dashboard" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2>Gestión de Verificaciones</h2>
+        </div>
+    </header>
+
+    <div class="container admin-container">
+        <h1>Documentos Pendientes de Revisión</h1>
+
+        <% if (asesoresPendientes && asesoresPendientes.length > 0) { %>
+            <table class="verification-table">
+                <thead>
+                    <tr>
+                        <th>Asesor</th>
+                        <th>Tipo de Verificación</th>
+                        <th>Documento</th>
+                        <th>Estado Actual</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% asesoresPendientes.forEach(asesor => { %>
+                        <%
+                        // Identificación (KYC)
+                        if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                            <tr>
+                                <td><%= asesor.nombre %> <%= asesor.apellido %></td>
+                                <td>Identificación (KYC)</td>
+                                <td>
+                                    <% if (asesor.verification.photos && asesor.verification.photos.front) { %>
+                                        <a href="<%= asesor.verification.photos.front %>" target="_blank">Ver Documento</a>
+                                    <% } else { %>
+                                        No disponible
+                                    <% } %>
+                                </td>
+                                <td class="status-pendiente">Pendiente</td>
+                                <td>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="kyc" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="kyc" data-action="rechazar">Rechazar</button>
+                                </td>
+                            </tr>
+                        <% } %>
+
+                        <%
+                        // Credenciales Profesionales - Título
+                        if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') { %>
+                            <tr>
+                                <td><%= asesor.nombre %> <%= asesor.apellido %></td>
+                                <td>Título Profesional</td>
+                                <td>
+                                    <% if (asesor.verificacion.titulo.urlDocumento) { %>
+                                        <a href="<%= asesor.verificacion.titulo.urlDocumento %>" target="_blank">Ver Título</a>
+                                    <% } else { %>
+                                        No disponible
+                                    <% } %>
+                                </td>
+                                <td class="status-pendiente">Pendiente</td>
+                                <td>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="titulo" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="titulo" data-action="rechazar">Rechazar</button>
+                                </td>
+                            </tr>
+                        <% } %>
+
+                        <%
+                        // Credenciales Profesionales - Certificación
+                        if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente') { %>
+                            <tr>
+                                <td><%= asesor.nombre %> <%= asesor.apellido %></td>
+                                <td>Certificación Profesional</td>
+                                <td>
+                                    <% if (asesor.verificacion.certificacion.urlDocumento) { %>
+                                        <a href="<%= asesor.verificacion.certificacion.urlDocumento %>" target="_blank">Ver Certificación</a>
+                                    <% } else { %>
+                                        No disponible
+                                    <% } %>
+                                </td>
+                                <td class="status-pendiente">Pendiente</td>
+                                <td>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="certificacion" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="certificacion" data-action="rechazar">Rechazar</button>
+                                </td>
+                            </tr>
+                        <% } %>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p class="no-results">No hay documentos pendientes de revisión.</p>
+        <% } %>
+    </div>
+
+    <div id="rejectionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Motivo de Rechazo</h2>
+            <p>Por favor, especifique el motivo del rechazo para que el asesor pueda corregirlo.</p>
+
+            <label for="predefinedReason">Selecciona un motivo:</label>
+            <select id="predefinedReason">
+                <option value="">-- Selecciona una opción --</option>
+                <option value="Documento ilegible o de baja calidad">Documento ilegible o de baja calidad</option>
+                <option value="Información incompleta">Información incompleta en el documento</option>
+                <option value="Documento expirado">Documento expirado</option>
+                <option value="Documento no válido para el tipo de verificación">Documento no válido para el tipo de verificación</option>
+                <option value="Datos no coinciden con los registrados">Datos en el documento no coinciden con los registrados</option>
+                <option value="Formato de archivo incorrecto">Formato de archivo incorrecto</option>
+                <option value="Fotografía de identificación no clara o sin autofoto (selfie)">Fotografía de identificación no clara o sin autofoto (selfie)</option>
+                <option value="Otros">Otro (especifica en observaciones)</option>
+            </select>
+
+            <label for="rejectionNotes">Observaciones adicionales (opcional):</label>
+            <textarea id="rejectionNotes" placeholder="Escriba aquí observaciones adicionales, especialmente si seleccionó 'Otro'."></textarea>
+            <button id="confirmRejectButton" class="action-button reject-button">Confirmar Rechazo</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const approveButtons = document.querySelectorAll('.approve-button');
+            const rejectButtons = document.querySelectorAll('.reject-button');
+            const rejectionModal = document.getElementById('rejectionModal');
+            const closeButton = document.querySelector('.modal .close-button');
+            const confirmRejectButton = document.getElementById('confirmRejectButton');
+            const rejectionNotes = document.getElementById('rejectionNotes');
+            const predefinedReasonSelect = document.getElementById('predefinedReason');
+
+            let currentAsesorId = null;
+            let currentVerificationType = null; // 'kyc', 'titulo', 'certificacion'
+            let currentAction = null; // 'verificar' o 'rechazar'
+
+            // Abrir modal de rechazo
+            rejectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentAsesorId = this.dataset.asesorId;
+                    currentVerificationType = this.dataset.type;
+                    currentAction = this.dataset.action;
+                    rejectionNotes.value = ''; // Limpiar textarea
+                    predefinedReasonSelect.value = ''; // Limpiar selección predefinida
+                    rejectionModal.style.display = 'block';
+                });
+            });
+
+            // Cerrar modal
+            closeButton.addEventListener('click', function() {
+                rejectionModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target == rejectionModal) {
+                    rejectionModal.style.display = 'none';
+                }
+            });
+
+            // Confirmar rechazo
+            confirmRejectButton.addEventListener('click', function() {
+                const selectedReason = predefinedReasonSelect.value;
+                const customNotes = rejectionNotes.value.trim();
+
+                let finalNotes = '';
+                if (selectedReason && selectedReason !== 'Otros') {
+                    finalNotes = selectedReason;
+                } else if (selectedReason === 'Otros' && customNotes) {
+                    finalNotes = `Otro: ${customNotes}`;
+                } else if (customNotes) {
+                    finalNotes = customNotes; // Si solo se escriben notas sin seleccionar razón
+                } else if (!selectedReason && !customNotes) {
+                    alert('Por favor, selecciona un motivo de rechazo o ingresa observaciones.');
+                    return;
+                }
+
+                // Si hay una razón predefinida Y notas adicionales (que no sean 'Otros'), las combinamos
+                if (selectedReason && selectedReason !== 'Otros' && customNotes) {
+                    finalNotes = `${selectedReason}. ${customNotes}`;
+                }
+
+                rejectionModal.style.display = 'none';
+                processVerification(currentAsesorId, currentVerificationType, currentAction, finalNotes);
+            });
+
+            // Aprobar
+            approveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentAsesorId = this.dataset.asesorId;
+                    currentVerificationType = this.dataset.type;
+                    currentAction = this.dataset.action;
+                    // No se necesitan notas para aprobar, se envía null
+                    processVerification(currentAsesorId, currentVerificationType, currentAction, null);
+                });
+            });
+
+            async function processVerification(asesorId, type, action, notes) {
+                try {
+                    const response = await fetch('/admin/verificar-documento', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            asesorId: asesorId,
+                            type: type, // 'kyc', 'titulo', 'certificacion'
+                            action: action, // 'verificar', 'rechazar'
+                            notes: notes // Solo para rechazo
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        alert(`¡Documento de ${type} ${action === 'verificar' ? 'aprobado' : 'rechazado'} con éxito!`);
+                        // Recargar la página para ver los cambios actualizados
+                        window.location.reload();
+                    } else {
+                        alert(`Error al procesar la verificación: ${result.message || 'Error desconocido'}`);
+                    }
+                } catch (error) {
+                    console.error('Error en la solicitud de verificación:', error);
+                    alert('Error de conexión o de red al procesar la solicitud.');
+                }
+            }
+        });
+    </script>
+
+ 
+</body>
+</html>

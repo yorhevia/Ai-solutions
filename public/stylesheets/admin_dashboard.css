@@ -1,0 +1,281 @@
+/* admin_dashboard.css */
+
+/* Estilos generales para el encabezado principal */
+.main-header {
+    background-color: #f8f9fa; /* Color de fondo claro */
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Para alinear elementos */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra suave */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.back-button {
+    color: #007bff; /* Color azul para el botón de regresar */
+    font-size: 1.5em;
+    margin-right: 15px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #0056b3; /* Tono más oscuro al pasar el ratón */
+}
+
+.main-header h2 {
+    margin: 0;
+    color: #343a40; /* Color de texto oscuro */
+    font-size: 1.8em;
+}
+
+/* Contenedor principal del administrador */
+.admin-container {
+    max-width: 1200px;
+    margin: 20px auto; /* Centrar con margen automático */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.admin-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 2em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Estilos de la tabla de verificaciones */
+.verification-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95em;
+}
+
+.verification-table th, .verification-table td {
+    border: 1px solid #ddd;
+    padding: 12px 10px; /* Aumentado el padding para mejor legibilidad */
+    text-align: left;
+    vertical-align: middle; /* Alineación vertical */
+}
+
+.verification-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.verification-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.verification-table tbody tr:hover {
+    background-color: #e9e9e9;
+}
+
+/* Estilos para el estado "Pendiente" */
+.status-pendiente {
+    font-weight: bold;
+    color: #ffc107; /* Color amarillo de Bootstrap para advertencia */
+}
+
+/* Estilos de los botones de acción */
+.action-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover {
+    transform: translateY(-1px);
+}
+
+.approve-button {
+    background-color: #28a745; /* Verde de Bootstrap */
+    color: white;
+}
+
+.approve-button:hover {
+    background-color: #218838;
+}
+
+.reject-button {
+    background-color: #dc3545; /* Rojo de Bootstrap */
+    color: white;
+}
+
+.reject-button:hover {
+    background-color: #c82333;
+}
+
+/* Mensaje de no resultados */
+.no-results {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+    font-style: italic;
+    font-size: 1.1em;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+/* Estilos del Modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ more opacity */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 30px; /* Aumentado padding */
+    border: 1px solid #888;
+    width: 90%; /* Más ancho para móviles */
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra más pronunciada */
+    position: relative;
+    box-sizing: border-box; /* Incluir padding y borde en el ancho */
+}
+
+.close-button {
+    color: #aaa;
+    font-size: 32px; /* Más grande */
+    font-weight: bold;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+.modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.modal-content select,
+.modal-content textarea {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    padding: 12px; /* Más padding */
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px; /* Bordes más suaves */
+    font-size: 1em;
+    resize: vertical; /* Permite redimensionar verticalmente */
+    box-sizing: border-box; /* Incluir padding y borde en el ancho */
+}
+
+.modal-content textarea {
+    min-height: 120px; /* Altura mínima del textarea */
+}
+
+.modal-content .reject-button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px; /* Más padding para el botón */
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.5em;
+        margin-top: 10px;
+    }
+
+    .back-button {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+
+    .admin-container {
+        padding: 15px;
+        margin: 15px auto;
+    }
+
+    .admin-container h1 {
+        font-size: 1.6em;
+        padding-bottom: 10px;
+    }
+
+    .verification-table th, .verification-table td {
+        padding: 8px;
+        font-size: 0.85em;
+    }
+
+    .action-button {
+        padding: 6px 10px;
+        font-size: 0.8em;
+        margin-right: 3px;
+        margin-bottom: 5px; /* Espacio entre botones en móviles */
+    }
+
+    .modal-content {
+        padding: 20px;
+        width: 95%;
+    }
+
+    .modal-content select,
+    .modal-content textarea {
+        padding: 10px;
+    }
+
+    .modal-content .reject-button {
+        padding: 10px;
+        font-size: 1em;
+    }
+}

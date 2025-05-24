@@ -1,0 +1,100 @@
+ <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+<header class="navbar">
+    <a href="/homeasesor" class="navbar-brand">AI Finance Solutions</a>
+    <nav class="navbar-nav">
+        <a href="/perfilasesor" class="nav-link">Mi Perfil</a>
+        <a href="/consulta" class="nav-link">Consulta</a>
+        <div class="nav-item notifications-dropdown">
+            <a href="#" class="nav-link notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="badge" id="notification-count">0</span>
+            </a>
+            <div class="dropdown-menu" id="notificationDropdown">
+                <h6 class="dropdown-header">Notificaciones</h6>
+                <div id="latest-notifications">
+                    <span class="dropdown-item">Cargando...</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item view-all-notifications" href="/asesor/notificaciones">Ver todas</a>
+            </div>
+        </div>
+        <a href="/logout" class="nav-link">Cerrar Sesión</a>
+    </nav>
+</header>
+
+
+    
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationCount = document.getElementById('notification-count');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const latestNotificationsDiv = document.getElementById('latest-notifications');
+
+        // Función para cargar y actualizar las notificaciones
+        window.updateNotificationBell = async function() { // Hacerla global para usarla desde notificaciones.ejs
+            try {
+                const response = await fetch('/api/asesor/notificaciones-resumen');
+                const data = await response.json();
+
+                if (data.success) {
+                    const count = data.unreadCount;
+                    const latest = data.latestNotifications;
+
+                    notificationCount.textContent = count;
+                    notificationCount.style.display = count > 0 ? 'block' : 'none';
+
+                    latestNotificationsDiv.innerHTML = ''; // Limpiar notificaciones anteriores
+
+                    if (latest.length > 0) {
+                        latest.forEach(notif => {
+                            // Limitar la longitud del mensaje para el dropdown
+                            const message = notif.message.length > 60 ? notif.message.substring(0, 57) + '...' : notif.message;
+                            // Manejar el timestamp que viene de Firestore (objeto Timestamp)
+                            const notificationDate = notif.timestamp && notif.timestamp._seconds
+                                ? new Date(notif.timestamp._seconds * 1000).toLocaleDateString()
+                                : 'Fecha no disponible';
+
+
+                            const item = document.createElement('a');
+                            item.href = '/asesor/notificaciones'; // Ir a la página de notificaciones al hacer clic
+                            item.classList.add('dropdown-item');
+                            if (!notif.read) {
+                                item.classList.add('font-weight-bold');
+                            }
+                            item.innerHTML = `<span style="font-size:0.9em; color:#666;">${notificationDate}</span><br>${message}`;
+                            latestNotificationsDiv.appendChild(item);
+                        });
+                    } else {
+                        latestNotificationsDiv.innerHTML = '<span class="dropdown-item">No hay notificaciones recientes.</span>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cargar notificaciones en la barra de navegación:', error);
+                notificationCount.textContent = '!'; // Indicador de error
+                notificationCount.style.display = 'block';
+            }
+        };
+
+        // Evento para mostrar/ocultar el dropdown
+        notificationBell.addEventListener('click', function(event) {
+            event.preventDefault(); // Evita que el enlace recargue la página
+            notificationDropdown.classList.toggle('show');
+            // Cuando se abre el dropdown, si se quiere que se marquen como leídas al verlas,
+            // se necesitaría una petición POST adicional aquí. Por ahora, solo se actualiza al cargar.
+        });
+
+        // Cierra el dropdown si se hace clic fuera de él
+        window.addEventListener('click', function(event) {
+            if (!event.target.closest('.notifications-dropdown') && notificationDropdown.classList.contains('show')) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        // Cargar notificaciones al cargar la página
+        window.updateNotificationBell();
+        // Opcional: Actualizar notificaciones cada cierto tiempo (ej. cada minuto)
+        // setInterval(window.updateNotificationBell, 60000);
+    });
+</script>

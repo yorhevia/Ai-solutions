@@ -1,15 +1,20 @@
+require('dotenv').config();
 var express = require('express');
 const multer = require('multer');
-const fetch = require('node-fetch'); 
+const fetch = require('node-fetch');
 const cors = require('cors');
+const moment = require('moment'); // Agregado para manejar fechas
+const { v4: uuidv4 } = require('uuid'); // Agregado para generar IDs únicos
 
+// Importa requireAuth desde el archivo original
+const requireAuth = require('../config/middleware');
+// isAdmin SÍ necesita importarse aquí, ya que se usará directamente en este archivo
+const isAdmin = require('../config/middlewareisadmin');
 
-const requireAuth = require('../config/middleware'); 
 const { admin, db, auth } = require('./firebase');
-const clienteController = require('./controllers/clienteController'); 
-const asesorController = require('./controllers/asesorController');     
+const clienteController = require('./controllers/clienteController');
+const asesorController = require('./controllers/asesorController');
 const editProfileController = require('./controllers/editProfileController');
-
 
 
 var router = express.Router();
@@ -17,7 +22,7 @@ var router = express.Router();
 // Obtén el Client ID de Imgur
 const imgurClientId = process.env.IMGUR_CLIENT_ID;
 
-// Configuración de Multer
+// Configuración de Multer para la subida de FOTO DE PERFIL (SOLO IMAGENES PARA IMGUR)
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
@@ -28,7 +33,6 @@ const upload = multer({
         if (allowedMimeTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-           
             cb(new Error('Tipo de archivo no permitido. Solo se permiten JPG, PNG, GIF.'), false);
         }
     }
@@ -36,7 +40,28 @@ const upload = multer({
 
 router.use(cors());
 
-// --- RUTAS DE UPLOAD DE FOTOS ---
+// --- Función auxiliar para añadir notificación ---
+// (Movida aquí para ser accesible en varias rutas)
+async function addNotificationToUser(userId, message, link = '#') {
+    try {
+        const asesorRef = db.collection('asesores').doc(userId);
+        const notification = {
+            id: uuidv4(), // ID único para la notificación
+            message: message,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(), // Fecha del servidor
+            read: false,
+            link: link // Enlace opcional a un recurso relacionado
+        };
+        await asesorRef.update({
+            notifications: admin.firestore.FieldValue.arrayUnion(notification)
+        });
+        console.log(`Notificación añadida a ${userId}: ${message}`);
+    } catch (error) {
+        console.error('Error al añadir notificación:', error);
+    }
+}
+
+// --- RUTAS DE UPLOAD DE FOTO DE PERFIL ---
 router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'), async (req, res) => {
     try {
         if (!req.file) {
@@ -91,7 +116,7 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         });
         console.log(`URL de foto de perfil actualizada en Firestore para el asesor ${userId}: ${imageUrl}`);
 
-        return res.json({ 
+        return res.json({
             success: true,
             message: 'Foto de perfil subida y actualizada correctamente.',
             imageUrl: imageUrl
@@ -102,7 +127,6 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         if (error instanceof multer.MulterError) {
             return res.status(400).json({ success: false, message: `Error en la subida: ${error.message}` });
         }
-        // Asegurarse de retornar aquí también
         return res.status(500).json({ success: false, message: 'Error interno del servidor al procesar la imagen.' });
     }
 });
@@ -113,39 +137,42 @@ router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
 
 // --- RUTAS DE HOME ---
 router.get('/homecliente', requireAuth, (req, res) => {
-    return res.render('cliente/homecliente'); 
+    return res.render('cliente/homecliente');
 });
-router.get('/homeasesor', requireAuth, (req, res) => {
-    return res.render('asesor/homeasesor'); 
+router.get('/homeasesor', requireAuth, async (req, res) => {
+    // Asumiendo que req.userEmail está disponible desde requireAuth
+    const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
+    const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor';
+
+    return res.render('asesor/homeasesor', { userRole: userRole, currentPage: 'home' });
 });
 
 // --- RUTAS DE ACCESO ---
 router.get('/', (req, res) => {
-    return res.render('welcome'); 
+    return res.render('welcome');
 });
 router.get('/login', (req, res) => {
-    return res.render('ingreso/login'); 
+    return res.render('ingreso/login');
 });
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Error al destruir la sesión:', err);
-            // Asegurarse de retornar aquí
             return res.status(500).send('Error al cerrar sesión.');
         }
-        return res.redirect('/login'); 
+        return res.redirect('/login');
     });
 });
 router.post('/login', async (req, res) => {
     const { email, contrasena } = req.body;
     if (!email || !contrasena) {
-        return res.render('ingreso/login', { error: 'Por favor, introduce correo electrónico y contraseña.' }); // Ya tiene return, ¡bien!
+        return res.render('ingreso/login', { error: 'Por favor, introduce correo electrónico y contraseña.' });
     }
     try {
         const apiKey = process.env.FIREBASE_API_KEY;
         if (!apiKey) {
             console.error('ERROR: FIREBASE_API_KEY no está configurado en las variables de entorno.');
-            return res.status(500).render('ingreso/login', { error: 'Error de configuración del servidor. Contacta al administrador.' }); // Ya tiene return, ¡bien!
+            return res.status(500).render('ingreso/login', { error: 'Error de configuración del servidor. Contacta al administrador.' });
         }
         const signInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
         const response = await fetch(signInUrl, {
@@ -183,23 +210,23 @@ router.post('/login', async (req, res) => {
         const uid = firebaseResponse.localId;
         console.log('Usuario autenticado con éxito en Firebase (REST API). UID:', uid);
         req.session.userId = uid;
-        // Se asume que '/dashboard' es la ruta que determina a dónde redirigir.
-        return res.redirect('/dashboard'); // Ya tiene return, ¡bien!
+        // Establecer userEmail en la sesión o en req.userEmail si no lo está ya en el middleware requireAuth
+        // (Esto es importante para el dashboard si el email no se obtiene en requireAuth)
+        req.userEmail = email; 
+        return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error general en la ruta /login:', error);
-        // Asegurarse de retornar aquí
-        return res.status(500).render('ingreso/login', { error: 'Error interno del servidor. Inténtalo más tarde.' }); // Ya tiene return, ¡bien!
+        return res.status(500).render('ingreso/login', { error: 'Error interno del servidor. Inténtalo más tarde.' });
     }
 });
 
 router.get('/registro', (req, res) => {
-    return res.render('ingreso/registro'); 
+    return res.render('ingreso/registro');
 });
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
-    // const auth = admin.auth(); // Ya importado arriba
     if (contrasena !== confirmar_contrasena) {
-        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body }); // Ya tiene return, ¡bien!
+        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body });
     }
     try {
         const userRecord = await auth.createUser({
@@ -210,7 +237,9 @@ router.post('/registro', async (req, res) => {
         console.log('Usuario registrado en Firebase Auth:', userRecord.uid);
         req.session.userId = userRecord.uid;
         req.session.userCreationTime = userRecord.metadata.creationTime;
-        return res.redirect('/dashboard'); 
+        // También aquí, es útil establecer el email en req.userEmail o sesión para el dashboard
+        req.userEmail = email; 
+        return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error al registrar usuario:', error);
         let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
@@ -221,17 +250,16 @@ router.post('/registro', async (req, res) => {
         } else if (error?.errorInfo?.code === 'auth/invalid-password') {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
         }
-        // Asegurarse de retornar aquí
-        return res.render('ingreso/registro', { error: errorMessage, formData: req.body }); // Ya tiene return, ¡bien!
+        return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
     }
 });
 
 // --- RUTAS DE REGISTRO DE PERFIL ---
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
-    return res.render('ingreso/registrocliente'); // Se añadió 'return'
+    return res.render('ingreso/registrocliente');
 });
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
-    return res.render('ingreso/registroasesor'); 
+    return res.render('ingreso/registroasesor');
 });
 router.post('/registro-perfil', requireAuth, async (req, res) => {
     const { tipo_usuario, ...formData } = req.body;
@@ -239,7 +267,7 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
     const userCreationTime = req.session.userCreationTime;
     if (!userId || !userCreationTime) {
         console.error('ID de usuario o fecha de creación no encontrada en la sesión durante registro-perfil.');
-        return res.status(401).send('Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.'); // Ya tiene return, ¡bien!
+        return res.status(401).send('Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.');
     }
     try {
         const datosAGuardar = {
@@ -250,63 +278,80 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
             await db.collection('clientes').doc(userId).set(datosAGuardar);
             console.log(`Perfil de cliente registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
-            return res.redirect('/homecliente'); 
+            return res.redirect('/homecliente');
         } else if (tipo_usuario === 'asesor') {
             await db.collection('asesores').doc(userId).set(datosAGuardar);
             console.log(`Perfil de asesor registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
-            return res.redirect('/homeasesor'); 
+            return res.redirect('/homeasesor');
         } else {
             console.error('Tipo de usuario no válido:', tipo_usuario);
-            // Asegurarse de retornar aquí
-            return res.status(400).send('Tipo de usuario no válido.'); 
+            return res.status(400).send('Tipo de usuario no válido.');
         }
     } catch (error) {
         console.error('Error al registrar el perfil:', error);
-        // Asegurarse de retornar aquí
-        return res.status(500).send('Error al registrar el perfil.'); 
+        return res.status(500).send('Error al registrar el perfil.');
     }
 });
 
 // --- RUTA DASHBOARD ---
 router.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
+
+    // Obtener el email del usuario (ya lo tenemos de requireAuth)
+    const userEmail = req.userEmail; 
+
+    // Obtener la lista de administradores desde .env
+    const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
+
     try {
+        // 1. **VERIFICAR SI ES ADMINISTRADOR PRIMERO**
+        if (adminEmails.includes(userEmail)) {
+            console.log(`Usuario ${userEmail} es administrador. Redirigiendo a /admin/verificaciones_pendientes.`);
+            return res.redirect('/admin/verificaciones_pendientes'); // Redirigir a la URL completa del admin
+        }
+
+        // 2. Si no es administrador, procede con la lógica existente para asesor/cliente
         const clienteDoc = await db.collection('clientes').doc(userId).get();
         const asesorDoc = await db.collection('asesores').doc(userId).get();
+
         if (!clienteDoc.exists && !asesorDoc.exists) {
-            return res.render('ingreso/seleccionar_tipo_usuario'); 
+            // Si el usuario no tiene perfil de cliente ni asesor, redirigir a selección de tipo
+            return res.render('ingreso/seleccionar_tipo_usuario');
         } else if (clienteDoc.exists) {
-            return res.redirect('/homecliente'); 
+            // Si tiene perfil de cliente
+            return res.redirect('/homecliente');
         } else if (asesorDoc.exists) {
-            return res.redirect('/homeasesor'); 
+            // Si tiene perfil de asesor
+            return res.redirect('/homeasesor');
         } else {
             console.error('Estado de perfil inconsistente para el usuario:', userId);
-            // Asegurarse de retornar aquí
             return res.status(500).send('Error en el estado del perfil del usuario.');
         }
     } catch (error) {
-        console.error('Error al verificar el perfil del usuario:', error);
-        return res.status(500).send('Error al verificar el perfil del usuario.'); 
+        console.error('Error al verificar el perfil del usuario en /dashboard:', error);
+        return res.status(500).send('Error al verificar el perfil del usuario.');
     }
 });
 
-// --- RUTAS DE CAMBIO DE CONTRASEÑA ---
-router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage);
-
-// POST para manejar el cambio de contraseña
-router.post('/cambiar-password', requireAuth, asesorController.changePassword);
+// --- RUTAS DE CAMBIO DE CONTRASEÑA (Existentes) ---
+router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage); 
+router.post('/cambiar-password', requireAuth, asesorController.changePassword); 
 
 router.get('/consulta', (req, res) => {
-    return res.render('asesor/consulta'); 
+    return res.render('asesor/consulta');
 });
+
+// --- Rutas de Verificación de Identidad para Asesor (MODIFICADA para URLs) ---
+router.get('/asesor/verificar_identidad', requireAuth, asesorController.getVerificationPageAsesor);
+router.post('/asesor/verificar_identidad', requireAuth, asesorController.postVerifyIdentityAsesor);
 
 //Rutas de cliente
 router.get('/consultacliente', (req, res) => {
-    return res.render('cliente/consultacliente'); 
+    return res.render('cliente/consultacliente');
 });
 router.get('/formulariocliente', (req, res) => {
-    return res.render('cliente/formulariocliente'); 
+    return res.render('cliente/formulariocliente');
 });
 router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
 
@@ -322,4 +367,194 @@ router.post('/cliente/upload-profile-photo', requireAuth, upload.single('profile
 // Rutas para cambiar contraseña del cliente
 router.get('/cliente/cambiar_password', requireAuth, clienteController.getChangePasswordPageCliente);
 router.post('/cliente/cambiar_password', requireAuth, clienteController.changePasswordCliente);
+
+
+
+// Ruta para mostrar la página de verificaciones pendientes (solo para admin)
+// La URL será /admin/verificaciones-pendientes
+router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req, res) => {
+    try {
+        const asesoresRef = db.collection('asesores');
+        const asesoresPendientes = [];
+
+        const snapshot = await asesoresRef.get();
+
+        snapshot.forEach(doc => {
+            const asesor = doc.data();
+            asesor._id = doc.id; 
+
+            // Verificar si algún tipo de verificación está pendiente
+            const kycPending = asesor.verification && asesor.verification.status === 'pendiente';
+            // Asegúrate de que estás accediendo correctamente a 'verificacion.titulo.estado' y 'verificacion.certificacion.estado'
+            const tituloPending = asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente';
+            const certificacionPending = asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente';
+
+            if (kycPending || tituloPending || certificacionPending) {
+                asesoresPendientes.push(asesor);
+            }
+        });
+        
+        // Renderiza la vista que está en views/admin/verificaciones_pendientes.ejs
+        res.render('admin/verificaciones_pendientes', { asesoresPendientes: asesoresPendientes });
+    } catch (error) {
+        console.error('Error al cargar verificaciones pendientes (Firestore):', error);
+        res.status(500).send('Error interno del servidor al cargar verificaciones.');
+    }
+});
+
+// Ruta para procesar la aprobación o rechazo de documentos
+// La URL será /admin/verificar-documento
+router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res) => {
+    const { asesorId, type, action, notes } = req.body; // 'notes' puede ser un texto predefinido o personalizado
+
+    if (!asesorId || !type || !action) {
+        return res.status(400).json({ success: false, message: 'Datos incompletos para la verificación.' });
+    }
+
+    try {
+        const asesorRef = db.collection('asesores').doc(asesorId);
+        const asesorDoc = await asesorRef.get();
+
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
+        }
+
+        const updateData = {};
+        let statusPath;
+        let notesPath; // Ruta para las observaciones del rechazo
+        let notificationMessage = ''; // Mensaje que se guardará como notificación
+        let notificationLink = '/perfilasesor'; // Enlace por defecto para el asesor
+
+        switch (type) {
+            case 'kyc':
+                statusPath = 'verification.status';
+                notesPath = 'verification.notes';
+                notificationMessage = `Tu verificación de **Identificación (KYC)** ha sido **${action === 'verificar' ? 'aprobada' : 'rechazada'}**.`;
+                break;
+            case 'titulo':
+                statusPath = 'verificacion.titulo.estado';
+                notesPath = 'verificacion.titulo.observaciones';
+                notificationMessage = `Tu **Título Profesional** ha sido **${action === 'verificar' ? 'aprobado' : 'rechazado'}**.`;
+                break;
+            case 'certificacion':
+                statusPath = 'verificacion.certificacion.estado';
+                notesPath = 'verificacion.certificacion.observaciones';
+                notificationMessage = `Tu **Certificación Profesional** ha sido **${action === 'verificar' ? 'aprobada' : 'rechazada'}**.`;
+                break;
+            default:
+                return res.status(400).json({ success: false, message: 'Tipo de verificación inválido.' });
+        }
+
+        if (action === 'verificar') {
+            updateData[statusPath] = 'verificado';
+            updateData[notesPath] = null; // Limpiar notas si se aprueba
+            notificationMessage += " ¡Felicidades! Ya puedes acceder a todas las funcionalidades."; // Mensaje para aprobación
+        } else if (action === 'rechazar') {
+            if (!notes) {
+                return res.status(400).json({ success: false, message: 'Las observaciones son obligatorias para el rechazo.' });
+            }
+            updateData[statusPath] = 'rechazado';
+            updateData[notesPath] = notes; // Guardar las notas de rechazo
+            notificationMessage += ` Motivo: ${notes}. Por favor, corrige y vuelve a subir el documento.`; // Añadir motivo al mensaje de notificación
+        } else {
+            return res.status(400).json({ success: false, message: 'Acción inválida.' });
+        }
+
+        await asesorRef.update(updateData);
+
+        // --- Sistema de Notificaciones: Guardar la notificación ---
+        await addNotificationToUser(asesorId, notificationMessage, notificationLink);
+        // --- FIN Sistema de Notificaciones ---
+
+        res.json({ success: true, message: `Verificación de ${type} actualizada a ${updateData[statusPath]}.` });
+
+    } catch (error) {
+        console.error('Error al actualizar la verificación del documento (Firestore):', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al procesar la verificación.' });
+    }
+});
+
+
+// Ruta para la página de notificaciones del asesor
+router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+    try {
+        const asesorDoc = await db.collection('asesores').doc(userId).get();
+        if (!asesorDoc.exists) {
+            return res.status(404).send('Perfil de asesor no encontrado.');
+        }
+        const asesorData = asesorDoc.data();
+        // Obtener solo las notificaciones y ordenarlas por más reciente primero
+        const notifications = (asesorData.notifications || []).sort((a, b) => {
+            // Manejar el caso donde timestamp podría no existir o no ser un objeto Timestamp de Firestore
+            const timeA = b.timestamp && b.timestamp._seconds !== undefined ? b.timestamp._seconds : 0;
+            const timeB = a.timestamp && a.timestamp._seconds !== undefined ? a.timestamp._seconds : 0;
+            return timeA - timeB; // Esto ordena del más nuevo al más viejo
+        });
+
+        res.render('asesor/notificaciones', { notifications: notifications });
+    } catch (error) {
+        console.error('Error al cargar notificaciones del asesor:', error);
+        res.status(500).send('Error interno del servidor al cargar notificaciones.');
+    }
+});
+
+// Ruta para marcar notificaciones como leídas
+router.post('/asesor/notificaciones/marcar-leida', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+    const { notificationId } = req.body;
+
+    try {
+        const asesorRef = db.collection('asesores').doc(userId);
+        const asesorDoc = await asesorRef.get();
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Perfil de asesor no encontrado.' });
+        }
+
+        const notifications = asesorDoc.data().notifications || [];
+        const updatedNotifications = notifications.map(notif => {
+            if (notif.id === notificationId) {
+                return { ...notif, read: true }; // Marcar como leído
+            }
+            return notif;
+        });
+
+        await asesorRef.update({ notifications: updatedNotifications });
+        res.json({ success: true, message: 'Notificación marcada como leída.' });
+
+    } catch (error) {
+        console.error('Error al marcar notificación como leída:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+});
+
+// Ruta API para obtener un resumen de notificaciones para la campana
+router.get('/api/asesor/notificaciones-resumen', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+    try {
+        const asesorDoc = await db.collection('asesores').doc(userId).get();
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Perfil de asesor no encontrado.' });
+        }
+        const asesorData = asesorDoc.data();
+        const notifications = asesorData.notifications || [];
+
+        const unreadCount = notifications.filter(notif => !notif.read).length;
+        // Obtener las últimas 3 notificaciones (leídas o no) ordenadas por fecha
+        const latestNotifications = notifications
+                                    .sort((a, b) => {
+                                        const timeA = b.timestamp && b.timestamp._seconds !== undefined ? b.timestamp._seconds : 0;
+                                        const timeB = a.timestamp && a.timestamp._seconds !== undefined ? a.timestamp._seconds : 0;
+                                        return timeA - timeB; // Más reciente primero
+                                    })
+                                    .slice(0, 3); // Obtener solo las 3 más recientes
+
+        res.json({ success: true, unreadCount: unreadCount, latestNotifications: latestNotifications });
+
+    } catch (error) {
+        console.error('Error al obtener resumen de notificaciones:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+});
+
 module.exports = router;

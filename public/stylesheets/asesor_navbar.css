@@ -1,0 +1,200 @@
+/* Estilos para la nueva clase principal de la navbar */
+.navbar {
+    background-color: #333333; /* Color de fondo claro */
+    padding: 15px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;  
+    margin: 0; 
+}
+
+/* Estilos para el logo de la navbar */
+.navbar-brand {
+    color: #007bff;
+    font-size: 1.8em;
+    font-weight: bold;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    margin-right: 25px;
+}
+
+.navbar-brand i { /* Si tienes un ícono en el brand */
+    margin-right: 8px;
+    color: #28a745;
+}
+
+/* Navegación principal */
+.navbar-nav {
+    display: flex;
+    gap: 20px; /* Espacio entre elementos del menú */
+    list-style: none; /* Asegúrate de que no haya viñetas si no es ul */
+    margin: 0;
+    padding: 0;
+    align-items: center; /* Para alinear verticalmente los elementos de navegación */
+}
+
+/* Estilos para los enlaces de navegación */
+.nav-link {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: #e2e6ea;
+    color: #007bff;
+}
+
+/* Estilos para el contenedor de notificaciones */
+.notifications-dropdown {
+    position: relative;
+    margin-left: 20px;
+}
+
+/* Estilos para la campana de notificación */
+.notification-bell {
+    position: relative;
+    color: #555;
+    font-size: 1.8em;
+    text-decoration: none;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+.notification-bell:hover {
+    color: #007bff;
+}
+
+/* Estilos para el contador de notificaciones */
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #dc3545; /* Rojo */
+    color: white;
+    border-radius: 50%;
+    padding: 2px 7px;
+    font-size: 0.7em;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    line-height: 1;
+    border: 1px solid white;
+    display: none; /* Oculto por defecto */
+}
+
+/* Estilos para el menú desplegable de notificaciones */
+.dropdown-menu {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 280px;
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-header {
+    font-weight: bold;
+    padding: 8px 15px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    margin: 0;
+}
+
+#latest-notifications {
+    list-style: none; /* Si no es ul */
+    padding: 0;
+    margin: 0;
+    max-height: 200px; /* Altura máxima para scroll */
+    overflow-y: auto;
+}
+
+.dropdown-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9em;
+    color: #444;
+    display: block; /* Para que ocupen todo el ancho y se puedan clickear bien */
+    text-decoration: none;
+    white-space: normal; /* Asegura que el texto se envuelva */
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item.font-weight-bold { /* Clase para notificaciones no leídas */
+    background-color: #e9f7ff;
+    font-weight: bold;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: #007bff;
+}
+
+.view-all-notifications {
+    display: block;
+    text-align: center;
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.view-all-notifications:hover {
+    background-color: #f5f5f5;
+}
+
+/* Media Queries para responsividad (ajusta según tus necesidades) */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .nav-link {
+        width: 100%;
+        text-align: center;
+    }
+    .notifications-dropdown {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+    }
+    .notification-bell {
+        display: inline-block; /* Para centrarlo si el padre es text-align: center */
+    }
+    .dropdown-menu {
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        min-width: unset;
+        width: 90%;
+    }
+}

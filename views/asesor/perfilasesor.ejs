@@ -6,28 +6,12 @@
     <title>AI Finance Solutions - Perfil de Asesor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/stylesheets/perfil_asesor.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css"> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-left">
-            <a href="/homeasesor" class="back-button">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h2>Perfil de Asesor</h2>
-        </div>
-        <div class="header-right">
-            <button class="logout-button-header" onclick="window.location.href='/logout'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
-            <div class="profile-logo-container">
-                <a href="/homeasesor" class="home-link">
-                    <i class="fas fa-home profile-logo"></i>
-                </a>
-            </div>
-        </div>
-    </header>
+    <%- include('../partials/asesor_navbar') %>
 
     <div id="globalMessage" class="success-message"></div>
 
@@ -57,10 +41,6 @@
                 <span>Email:</span>
                 <span class="value" id="displayEmail"><%= asesor.email %></span>
             </div>
-
-
-
-
             <div class="info-item">
                 <i class="fas fa-phone icon"></i>
                 <span>Teléfono:</span>
@@ -116,27 +96,27 @@
                 <i class="fas fa-briefcase icon"></i>
                 <span>Profesión:</span>
                 <span class="value" id="displayProfesion"><%= asesor.profesion %></span>
-                </div>
+            </div>
             <div class="info-item">
                 <i class="fas fa-id-card icon"></i>
                 <span>Número de Licencia Profesional:</span>
                 <span class="value" id="displayLicencia"><%= asesor.licencia %></span>
-                </div>
+            </div>
             <div class="info-item">
                 <i class="fas fa-graduation-cap icon"></i>
                 <span>Especialidad Financiera:</span>
                 <span class="value" id="displayEspecialidad"><%= asesor.especialidad %></span>
-                </div>
+            </div>
             <div class="info-item">
                 <i class="fas fa-chart-line icon"></i>
                 <span>Años de Experiencia:</span>
                 <span class="value" id="displayExperiencia"><%= asesor.experiencia %></span>
-                </div>
-            <div class="info-item">
+            </div>
+            <div class="info-item description-item">
                 <i class="fas fa-file-alt icon"></i>
                 <span>Descripción Profesional:</span>
                 <p class="value" id="displayDescripcion"><%= asesor.descripcion %></p>
-                </div>
+            </div>
             <a href="#" id="editProfessionalLink" class="edit-link" style="margin-top: 15px;">
                 <i class="fas fa-edit"></i> Editar Información Profesional
             </a>
@@ -174,15 +154,121 @@
         </div>
 
         <section class="security-settings">
-            <h2>Seguridad</h2>
+            <h2>Seguridad y Verificación de Perfil</h2>
             <div class="info-item">
                 <i class="fas fa-key icon"></i>
                 <span>Contraseña:</span>
                 <span class="value">*********</span>
                 <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
             </div>
-        </section>
 
+            <div class="verification-block">
+                <div class="verification-header">
+                    <i class="fas fa-user-check icon"></i>
+                    <span>Verificación de Identidad (KYC):</span>
+                    <span class="status-indicator <%= asesor.verification && asesor.verification.status ? 'status-' + asesor.verification.status : 'status-no-enviado' %>">
+                        <% if (asesor.verification && asesor.verification.status === 'verificado') { %>
+                            Verificado <i class="fas fa-check-circle"></i>
+                        <% } else if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                            Pendiente <i class="fas fa-hourglass-half"></i>
+                        <% } else if (asesor.verification && asesor.verification.status === 'rechazado') { %>
+                            Rechazado <i class="fas fa-times-circle"></i>
+                        <% } else { %>
+                            No Enviado <i class="fas fa-exclamation-triangle"></i>
+                        <% } %>
+                    </span>
+                </div>
+                <div class="verification-actions">
+                    <% if (!(asesor.verification && asesor.verification.status === 'verificado')) { %>
+                        <a href="/asesor/verificar_identidad" class="action-button primary-action">
+                            <i class="fas fa-shield-alt"></i>
+                            <% if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                                Ver estado / Re-enviar
+                            <% } else if (asesor.verification && asesor.verification.status === 'rechazado') { %>
+                                Re-enviar para Verificación
+                            <% } else { %>
+                                Iniciar Verificación
+                            <% } %>
+                        </a>
+                    <% } %>
+                    <% if (asesor.verification && asesor.verification.notes && asesor.verification.status === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Motivo de rechazo:** <%= asesor.verification.notes %></p>
+                    <% } %>
+                    <% if (asesor.verification && asesor.verification.photos && asesor.verification.photos.front) { %>
+                        <a href="<%= asesor.verification.photos.front %>" target="_blank" class="action-button secondary-action">
+                            <i class="fas fa-eye"></i> Ver Documento de Identidad Enviado
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="verification-block">
+                <div class="verification-header">
+                    <i class="fas fa-award icon"></i>
+                    <span>Credenciales Profesionales:</span>
+                    <span class="status-indicator 
+                        <% 
+                        const hasTitulo = asesor.verificacion && asesor.verificacion.titulo && (asesor.verificacion.titulo.estado === 'verificado' || asesor.verificacion.titulo.estado === 'pendiente' || asesor.verificacion.titulo.estado === 'rechazado');
+                        const hasCertificacion = asesor.verificacion && asesor.verificacion.certificacion && (asesor.verificacion.certificacion.estado === 'verificado' || asesor.verificacion.certificacion.estado === 'pendiente' || asesor.verificacion.certificacion.estado === 'rechazado');
+
+                        const isAllVerified = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado') && (asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado');
+                        const isAnyPending = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente');
+                        const isAnyRejected = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'rechazado') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'rechazado');
+                        
+                        if (isAllVerified) { %>
+                            status-verificado
+                        <% } else if (isAnyPending) { %>
+                            status-pendiente
+                        <% } else if (isAnyRejected) { %>
+                            status-rechazado
+                        <% } else { %>
+                            status-no-enviado
+                        <% } %>
+                    ">
+                        <% 
+                        if (isAllVerified) { %>
+                            Verificado <i class="fas fa-check-circle"></i>
+                        <% } else if (isAnyPending) { %>
+                            Pendiente <i class="fas fa-hourglass-half"></i>
+                        <% } else if (isAnyRejected) { %>
+                            Rechazado <i class="fas fa-times-circle"></i>
+                        <% } else { %>
+                            No Enviado <i class="fas fa-exclamation-triangle"></i>
+                        <% } %>
+                    </span>
+                </div>
+                <div class="verification-actions">
+                    <% if (!isAllVerified) { %>
+                        <a href="/asesor/verificar_identidad" class="action-button primary-action">
+                            <i class="fas fa-file-upload"></i>
+                            <% if (isAnyPending) { %>
+                                Ver estado / Adjuntar más
+                            <% } else if (isAnyRejected) { %>
+                                Re-enviar Credenciales
+                            <% } else { %>
+                                Subir Credenciales
+                            <% } %>
+                        </a>
+                    <% } %>
+                    <% if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.observaciones && asesor.verificacion.titulo.estado === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Título:** <%= asesor.verificacion.titulo.observaciones %></p>
+                    <% } %>
+                    <% if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.observaciones && asesor.verificacion.certificacion.estado === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Certificación:** <%= asesor.verificacion.certificacion.observaciones %></p>
+                    <% } %>
+                    <% if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento) { %>
+                        <a href="<%= asesor.verificacion.titulo.urlDocumento %>" target="_blank" class="action-button secondary-action">
+                            <i class="fas fa-eye"></i> Ver Título Enviado
+                        </a>
+                    <% } %>
+                    <% if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento) { %>
+                        <a href="<%= asesor.verificacion.certificacion.urlDocumento %>" target="_blank" class="action-button secondary-action">
+                            <i class="fas fa-eye"></i> Ver Certificación Enviada
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </section>
         <section class="additional-info">
             <h2>Información Adicional</h2>
             <div class="info-item">
@@ -199,6 +285,8 @@
             <p>Crecimiento inteligente para tus finanzas.</p>
         </div>
     </footer>
+
+    <script src="/javascripts/asesor_notifications.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -235,7 +323,6 @@
                     }, 500);
                 }, duration);
             }
-
             // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PERSONAL ---
             const editPersonalLink = document.getElementById('editPersonalLink');
             const editPersonalCard = document.getElementById('editPersonalCard');
@@ -249,7 +336,7 @@
                 editPersonalErrorMessage.style.display = 'none';
                 globalMessage.classList.remove('show');
                 globalMessage.style.display = 'none';
-                editProfessionalCard.style.display = 'none';
+                editProfessionalCard.style.display = 'none'; // Asegúrate de cerrar la otra tarjeta
             });
 
             cancelEditPersonalButton.addEventListener('click', function() {
@@ -314,7 +401,7 @@
                 }
             });
 
-            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PROFESIONAL (NUEVA) ---
+            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PROFESIONAL ---
             const editProfessionalLink = document.getElementById('editProfessionalLink');
             const editProfessionalCard = document.getElementById('editProfessionalCard');
             const cancelEditProfessionalButton = document.getElementById('cancelEditProfessionalButton');
@@ -327,7 +414,7 @@
                 editProfessionalErrorMessage.style.display = 'none';
                 globalMessage.classList.remove('show');
                 globalMessage.style.display = 'none';
-                editPersonalCard.style.display = 'none';
+                editPersonalCard.style.display = 'none'; // Asegúrate de cerrar la otra tarjeta
             });
 
             cancelEditProfessionalButton.addEventListener('click', function() {
@@ -454,7 +541,7 @@
                 }
             });
 
-            // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
+               // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
             if (uploadButtonLabel) {
                 uploadButtonLabel.addEventListener('click', function() {
                     // Solo mostrar el mensaje inicial de recomendación, no "Subiendo foto..."
@@ -464,8 +551,8 @@
                     profilePictureErrorMessage.style.display = 'none';
                 });
             }
-
         });
     </script>
 </body>
 </html>
+

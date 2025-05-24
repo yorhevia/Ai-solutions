@@ -135,3 +135,65 @@ h3 {
     color: #155724; /* Verde oscuro */
     border: 1px solid #c3e6cb;
 }
+ /* Estilos adicionales para esta vista */
+        .verification-status-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en líneas más pequeñas */
+        }
+        .status-item i {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+        .status-item .status-text {
+            font-weight: bold;
+        }
+        .status-item .status-message {
+            margin-left: 10px;
+            color: #6c757d;
+        }
+
+        /* Colores de estado */
+        .status-verificado { color: #28a745; }
+        .status-pendiente { color: #ffc107; }
+        .status-rechazado { color: #dc3545; }
+        .status-no-enviado { color: #6c757d; }
+
+        .view-document-link {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 0.95em;
+        }
+        .view-document-link:hover {
+            text-decoration: underline;
+        }
+
+        .observation-message {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 5px;
+            width: 100%; /* Para que ocupe todo el ancho y se vea debajo del status */
+            padding-left: 40px; /* Alineación con el ícono del status */
+        }
+        .observation-message .fas {
+            margin-right: 5px;
+        }
+        .file-uploaded {
+            display: block; /* Para que el mensaje aparezca en una nueva línea */
+            margin-top: 5px;
+            color: #28a745;
+            font-size: 0.9em;
+        }
+        .file-uploaded i {
+            margin-right: 5px;
+        }

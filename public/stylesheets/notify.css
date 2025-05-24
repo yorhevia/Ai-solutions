@@ -1,0 +1,54 @@
+/* Reset básico para eliminar márgenes y rellenos por defecto */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    min-height: 100vh; 
+    overflow-x: hidden; 
+
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    flex-direction: column;
+}
+
+/* El nuevo contenedor que empujará el footer */
+.content-wrapper {
+    flex: 1; 
+   
+}
+
+/* Tus estilos existentes para .container */
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho/alto */
+ 
+}
+
+/* Tus estilos existentes para el footer */
+.main-footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1em 2em;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Evita que el footer se encoja */
+    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ... Resto de tus estilos ... */

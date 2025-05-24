@@ -6,25 +6,10 @@
     <title>AI Finance Solutions - Inicio Asesor</title>
     <link rel="stylesheet" href="/stylesheets/home_asesor.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-</head>
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css"> </head>
 <body>
-<header class="main-header">
-    <div class="header-left">
-    
-        <h2>Panel de Asesor</h2> </div>
-    <div class="header-right">
-        <button class="logout-button-header" onclick="window.location.href='/logout'">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-        </button>
-        <div class="profile-logo-container">
-            <a href="/perfilasesor" class="profile-link"> <i class="fas fa-user-circle profile-logo"></i>
-            </a>
-        </div>
-    </div>
-</header>
 
-    <div class="container">
+    <%- include('../partials/asesor_navbar') %> <div class="container">
         <main>
             <p>¡Hola, Asesor! Has accedido a tu panel. Aquí podrás gestionar tus clientes y ofrecerles asesoramiento financiero personalizado.</p>
             <ul class="features-list">
@@ -45,9 +30,8 @@
                 </a>
             </ul>
         </main>
-
     </div>
-   
+    
 </body>
     <footer class="main-footer">
     <div class="footer-content">
@@ -55,4 +39,5 @@
         <p>Crecimiento inteligente para tus finanzas.</p>
     </div>
 </footer>
+<script src="/javascripts/asesor_notifications.js"></script>
 </html>

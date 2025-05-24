@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Notificaciones</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/notify.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    </head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <h2>Mis Notificaciones</h2>
+
+            <% if (notifications && notifications.length > 0) { %>
+                <% notifications.forEach(notification => { %>
+                    <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-id="<%= notification.id %>">
+                        <span class="timestamp"><%= new Date(notification.timestamp._seconds * 1000).toLocaleString() %></span>
+                        <p class="message"><%- notification.message %></p> <% if (!notification.read) { %>
+                            <button class="mark-read-btn">Marcar como leída</button>
+                        <% } %>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p class="no-notifications">No tienes notificaciones.</p>
+            <% } %>
+        </div>
+    </div> <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const markReadButtons = document.querySelectorAll('.mark-read-btn');
+
+            markReadButtons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const notificationCard = this.closest('.notification-card');
+                    const notificationId = notificationCard.dataset.id;
+                    const btn = this; // Guardar referencia al botón
+
+                    try {
+                        const response = await fetch('/asesor/notificaciones/marcar-leida', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ notificationId: notificationId })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            notificationCard.classList.remove('unread');
+                            notificationCard.classList.add('read');
+                            btn.remove(); // Eliminar el botón "Marcar como leída"
+                            // Opcional: Actualizar el contador de notificaciones en la campana sin recargar
+                            if (window.updateNotificationBell) {
+                                window.updateNotificationBell(); // Llama a la función global de la navbar
+                            }
+                        } else {
+                            alert('Error al marcar como leída: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error al marcar notificación como leída:', error);
+                        alert('Error al comunicar con el servidor.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
