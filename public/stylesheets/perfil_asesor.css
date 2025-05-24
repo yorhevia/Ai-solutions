@@ -5,121 +5,92 @@
 }
 
 body {
-    /* Aquí debería estar el contenido de las propiedades CSS del body.
-       El fragmento que me diste parece que estaba destinado a un contenedor
-       principal dentro del body, no al body en sí, o faltan propiedades CSS.
-       Si esto es para un .main-content o similar, se movería ahí.
-       Por ahora, lo dejo aquí con un comentario. */
-    
-    flex-grow: 1;
-    margin-left: auto;
-    margin-right: auto;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 2em;
-
+    flex-direction: column;
+    align-items: center; /* Centra los elementos hijos horizontalmente */
+    min-height: 100vh;
+    overflow-x: hidden; /* Oculta cualquier desbordamiento horizontal */
+    width: 100%; /* Asegura que el body no exceda el ancho */
 }
 
-/* Nuevos estilos para la sección de la foto dentro del contenedor */
-.profile-photo-section {
+.main-header {
+    background-color: #333;
+    color: white;
+    padding: 1em 2em;
+    width: 100%; /* Ocupa todo el ancho disponible */
     display: flex;
-    flex-direction: column; /* Coloca los elementos en columna */
-    align-items: center; /* Centra los elementos horizontalmente */
-    margin-bottom: 30px; /* Espacio con la siguiente sección */
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    width: 100%; /* Ocupa todo el ancho del contenedor */
-    text-align: center;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.profile-picture-wrapper {
-    width: 120px; /* Tamaño de la foto */
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-bottom: 15px; /* Espacio entre la imagen y el botón */
-    border: 3px solid #007bff;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    background-color: #CCCCCC;
-    color: #FFFFFF;
-    font-size: 4em;
+.header-left {
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
-.profile-picture-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+.header-left h2 {
+    color: white;
+    margin: 0;
 }
 
-.upload-button {
-    /* El botón ya no necesita posicionamiento absoluto, ya que está fuera del wrapper de la imagen */
-    background-color: #007bff; /* Color de fondo del botón */
-    color: white; /* Color del texto del botón */
-    padding: 10px 20px; /* Aumentado el padding para un mejor tamaño */
-    border-radius: 25px; /* Bordes más redondeados */
+.back-button {
+    color: white;
+    text-decoration: none;
+    margin-right: 1em;
+    font-size: 1.2em;
+}
+
+.back-button i {
+    margin-right: 0.5em;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.logout-button-header {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 0.7em 1.2em;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px; /* Aumentado el tamaño de la fuente */
+    font-size: 0.9em;
+    margin-right: 1em;
+}
+
+.logout-button-header:hover {
+    background-color: #777;
+}
+
+.profile-logo-container {
+    background-color: #444;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px; /* Espacio entre el icono y el texto */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    white-space: nowrap;
-    text-decoration: none; /* Asegúrate de que no tenga subrayado si es un label */
-    margin-top: 10px; /* Espacio superior para separarlo del círculo */
+    font-size: 1.2em;
 }
 
-.upload-button:hover {
-    background-color: #0056b3; /* Color de fondo al pasar el ratón */
-    transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el ratón */
+.profile-logo-container i.profile-logo {
+    color: white;
 }
 
-/* El .camera-icon-button ya no es necesario si el botón de subida está fuera del círculo */
-/* Puedes eliminar todo el bloque de .camera-icon-button si no lo usas */
-
-.upload-message, .error-message {
-    font-size: 0.85em;
-    margin-top: 5px;
-    padding: 5px 10px;
-    border-radius: 5px;
-    display: none; /* Controlado por JS */
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    text-align: center; /* Centrar el mensaje */
-}
-
-.upload-message.show {
-    opacity: 1;
-    background-color: #e0f7fa; /* Un azul claro suave */
-    color: #007bff;
-    border: 1px solid #007bff;
-    display: block;
-}
-
-.error-message.show {
-    opacity: 1;
-    background-color: #ffe0e0;
-    color: #d32f2f;
-    border: 1px solid #d32f2f;
-    display: block;
-}
-
-.success-message { /* Este es para el mensaje global, ya existía */
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    padding: 10px 20px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-    display: none; /* Oculto por defecto */
-    opacity: 0;
-    transition: opacity 0.5s ease;
+.container {
+    background-color: white;
+    padding: 2em;
+    margin-top: 2em;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 90%;
     max-width: 800px;
     flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
@@ -255,20 +226,48 @@ section {
 }
 
 section h2 {
-    /* Si tenías estilos específicos para h2 dentro de una sección, irían aquí */
+    margin-top: 0;
+    color: #555;
 }
 
-/* Selector global para span - si no es lo que quieres, elimínalo o hazlo más específico */
-span {
-    /* Aquí se define 'width: 20px' y 'text-align: center' y 'align-self: flex-start'
-       Lo más probable es que esto sea parte de .description-item i o similar,
-       no un estilo global para todos los span. Si esto es para iconos, muévelo a un selector de iconos. */
-    /*
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.icon {
+    color: #007bff;
+    margin-right: 1em;
     font-size: 1.1em;
     width: 20px;
     text-align: center;
-    align-self: flex-start;
-    */
+}
+
+span {
+    font-weight: bold;
+    color: #555;
+    margin-right: 0.5em;
+}
+
+.value {
+    color: #333;
+}
+
+.optional {
+    font-style: italic;
+    color: #777;
+}
+
+.edit-link {
+    color: #007bff;
+    text-decoration: none;
+    margin-left: 1em;
+    font-size: 0.9em;
+}
+
+.edit-link:hover {
+    text-decoration: underline;
 }
 
 .description-item {
@@ -278,16 +277,13 @@ span {
     margin-bottom: 1em;
 }
 
-/* Si este span tiene un icono, como en el ejemplo anterior */
-.description-item i { /* Asumo que era un 'i' o un 'span' con clase de icono */
-    color: #007bff; /* Color del icono */
-    margin-right: 0.5em;
+.description-item i.icon {
+    margin-right: 1em;
     font-size: 1.1em;
     width: 20px;
     text-align: center;
     align-self: flex-start;
 }
-
 
 .description-item > span { /* Se refiere al "Descripción Profesional:" */
     font-weight: bold;
@@ -318,11 +314,20 @@ span {
 .main-footer {
     background-color: #333;
     color: white;
-    /* Aquí puede que falten más propiedades CSS para el main-footer */
+    text-align: center;
+    padding: 1em 2em;
+    width: 100%;
+    margin-top: 2em;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Si tenías un selector span dentro de .main-footer, iría aquí */
-.main-footer span {
+.footer-content {
+    width: 100%;
+    padding: 0;
+}
+
+.footer-content p {
+    margin: 0.5em 0;
     font-size: 0.9em;
 }
 
@@ -335,15 +340,37 @@ span {
     }
 
     .header-left {
-        /* Estilos para .header-left en móviles */
+        margin-bottom: 10px;
+    }
+
+    .profile-logo-container {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .profile-logo {
+        font-size: 1.8em;
+        margin-right: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.5em;
     }
 
     .header-right {
-        /* Estilos para .header-right en móviles */
+        margin-top: 10px;
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
     }
 
-    /* Asumo que estos eran los estilos para .main-content en móvil */
-    .main-content {
+    .header-right button {
+        margin-left: auto;
+        margin-right: 10px;
+    }
+
+    .container {
+        width: 95%;
         margin-top: 15px;
         margin-bottom: 15px;
         padding: 1em; /* Ajusta el padding para pantallas pequeñas */
@@ -376,14 +403,32 @@ span {
         margin-bottom: 0.2em; /* Espacio entre la etiqueta y el valor */
     }
 
-    h2 {
-        /* Estilos para h2 en móviles */
+    .edit-link {
+        margin-left: 0;
+        align-self: flex-end; /* Alinea el enlace a la derecha en su propia línea */
     }
 
-    /* Si tenías estilos para span en móvil, irían aquí */
-    /* span {
-        font-size: 0.85em;
-    } */
+    .description-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .description-item i.icon {
+        margin-bottom: 0.5em;
+    }
+
+    .description-item > div {
+        width: 100%;
+    }
+
+    .description-item p.value {
+        margin-top: 0.1em;
+        line-height: 1.4;
+    }
+
+    .main-footer {
+        padding: 0.8em 1em;
+    }
 
     .footer-content p {
         font-size: 0.8em;

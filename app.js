@@ -8,14 +8,11 @@ var logger = require('morgan');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-const pg = require('pg'); // Cliente de PostgreSQL
-const pgSession = require('connect-pg-simple'); // Módulo del store de sesiones para PG
-
-const admin = require('./routes/firebase');
+const admin = require('./routes/firebase'); // Asegúrate de que esta importación sea correcta y de que firebase.js inicialice admin.firestore() y admin.auth() correctamente.
 
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users'); 
+var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -32,37 +29,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.set('trust proxy', 1);
 
-// ** Configuración del Pool de Conexiones de PostgreSQL **
-
-const pgPool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL, 
-    ssl: {
-        rejectUnauthorized: false 
-    }
-});
-
-// Opcional: Manejo de errores para el pool de la base de datos
-pgPool.on('error', (err) => {
-    console.error('Error inesperado en el pool de Postgres:', err);
-
-});
 
 
-// ** CONFIGURACIÓN DE LA SESIÓN con PostgreSQL Store **
+// ** CONFIGURACIÓN DE LA SESIÓN con el STORE POR DEFECTO (memoria) **
 app.use(session({
-
-
-    secret: '5c43dce9d60c0ed885f5db5d5b6ff7775bb4f20280c1d7f385f13a6c73488066357fb0796046a6be07f2d4d58ddeeda0f797e94586929ca0a101834745fbcdfe',
+    secret: '5c43dce9d60c0ed885f5db5d5b6ff7775bb4f20280c1d7f385f13a6c73488066357fb0796046a6be07f2d4d58ddeeda0f797e94586929ca0a101834745fbcdfe', // ¡Usa una variable de entorno para esto en producción!
     resave: false,
     saveUninitialized: false,
-    // --- Configuración del STORE de PostgreSQL ---
-    store: new (pgSession(session))({ 
-        pool: pgPool, 
-        tableName: 'session', 
-    }),
+ 
     cookie: {
         httpOnly: true,
-        // 'secure' se establecerá en true en producción (HTTPS) automáticamente por Render.
+        // 'secure' debe ser 'false' en desarrollo si no usas HTTPS.
+        // Render lo establecerá a 'true' en producción si el tráfico es HTTPS.
         secure: process.env.NODE_ENV === 'production',
         maxAge: 3600000 // 1 hora de duración para la cookie de sesión
     }

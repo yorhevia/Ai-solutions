@@ -5,13 +5,12 @@ const cors = require('cors');
 
 
 const requireAuth = require('../config/middleware'); 
-const admin = require('./firebase');
+const { admin, db, auth } = require('./firebase');
 const clienteController = require('./controllers/clienteController'); 
 const asesorController = require('./controllers/asesorController');     
 const editProfileController = require('./controllers/editProfileController');
 
-const db = admin.firestore();
-const auth = admin.auth(); 
+
 
 var router = express.Router();
 

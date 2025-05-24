@@ -1,26 +1,25 @@
 // routes/firebase.js
-// Este archivo se encargará de inicializar el SDK de Firebase Admin.
-
 const admin = require('firebase-admin');
 const path = require('path');
-// Importar dotenv si no está importado globalmente en app.js y lo necesitas aquí
-// require('dotenv').config(); 
 
 let serviceAccount;
-let firebaseInitialized = false; 
+let firebaseInitialized = false; // Puedes mantener esta variable si la usas para algo más, pero no es estrictamente necesaria para la exportación.
+
+// Variables para exportar, inicializadas a null o undefined
+let db = null;
+let auth = null; // Añadimos 'auth' aquí
 
 // 1. Intentar cargar las credenciales desde la variable de entorno (codificada en Base64)
-const serviceAccountBase64FromEnv = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64; // <-- ¡Usaremos este nombre!
+const serviceAccountBase64FromEnv = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
 if (serviceAccountBase64FromEnv) {
     let decodedJsonString;
     try {
-        // Decodificar la cadena Base64 a una cadena JSON
         decodedJsonString = Buffer.from(serviceAccountBase64FromEnv, 'base64').toString('utf8');
         console.log('Firebase: Variable de entorno decodificada de Base64.');
     } catch (error) {
         console.error('Firebase Error: No se pudo decodificar FIREBASE_SERVICE_ACCOUNT_BASE64 de Base64. Verifique el formato.', error);
-        decodedJsonString = null; // Si falla la decodificación, no intentar parsear
+        decodedJsonString = null;
     }
 
     if (decodedJsonString) {
@@ -29,13 +28,14 @@ if (serviceAccountBase64FromEnv) {
             console.log('Firebase: Credenciales cargadas desde la variable de entorno (Base64 decodificado).');
         } catch (error) {
             console.error('Firebase Error: No se pudo parsear el JSON decodificado. Verifique el contenido de la variable.', error);
-            serviceAccount = null; 
+            serviceAccount = null;
         }
     }
 }
 
 // 2. Si las credenciales no se cargaron de la variable de entorno, intentar cargar el archivo local
 if (!serviceAccount) {
+    // Asegúrate de que esta ruta sea correcta. Si 'firebase.js' está en 'routes', y 'serviceAccountKey.json' está en 'config', esta ruta es correcta.
     const localServiceAccountPath = path.resolve(__dirname, '../config/serviceAccountKey.json');
     try {
         serviceAccount = require(localServiceAccountPath);
@@ -50,19 +50,29 @@ if (!serviceAccount) {
 // 3. Inicializar Firebase Admin SDK si se obtuvieron las credenciales
 if (serviceAccount) {
     try {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            // databaseURL: "https://ai-finance-solutions-default-rtdb.googleapis.com"
-        });
-        const db = admin.firestore();
-        console.log('¡Firebase Admin SDK inicializado y conectado a Firebase!');
-        firebaseInitialized = true;
-        module.exports = { admin, db };
+        // Asegúrate de que la aplicación solo se inicialice una vez
+        if (!admin.apps.length) {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                // databaseURL: "https://ai-finance-solutions-default-rtdb.googleapis.com" // Descomenta si usas Realtime Database
+            });
+            console.log('¡Firebase Admin SDK inicializado y conectado a Firebase!');
+            firebaseInitialized = true; // Actualiza el estado
+        }
+        
+        // Asigna 'db' y 'auth' a las variables globales (o al menos fuera del if)
+        db = admin.firestore();
+        auth = admin.auth(); // Obtén la instancia de Auth
+
     } catch (error) {
         console.error('Firebase Error: No se pudo inicializar Firebase Admin SDK.', error);
-        module.exports = {};
+        // Si hay un error, `db` y `auth` permanecerán null/undefined, lo cual es manejado por el export final.
     }
 } else {
     console.warn('Firebase Warn: Firebase Admin SDK no se inicializó porque no se encontraron credenciales válidas.');
-    module.exports = {}; 
 }
+
+// Exporta las instancias, incluso si son null/undefined en caso de fallo de inicialización.
+// Esto evita el error de "admin is not defined" o "firestore is not a function"
+// en los módulos que las importan.
+module.exports = { admin, db, auth };
