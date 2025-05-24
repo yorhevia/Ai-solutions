@@ -108,7 +108,7 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
 });
 
 // --- RUTAS DE PERFIL ---
-router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfil);
+router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfilCliente);
 router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
 
 // --- RUTAS DE HOME ---
@@ -300,6 +300,8 @@ router.post('/cambiar-password', requireAuth, asesorController.changePassword);
 router.get('/consulta', (req, res) => {
     return res.render('asesor/consulta'); 
 });
+
+//Rutas de cliente
 router.get('/consultacliente', (req, res) => {
     return res.render('cliente/consultacliente'); 
 });
@@ -308,5 +310,16 @@ router.get('/formulariocliente', (req, res) => {
 });
 router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
 
+// Editar información personal del cliente
+router.post('/cliente/editar-info-personal', requireAuth, clienteController.editarInfoPersonalCliente);
 
+// Editar información financiera del cliente
+router.post('/cliente/editar-info-financiera', requireAuth, clienteController.editarInfoFinancieraCliente);
+
+// Subir foto de perfil del cliente
+router.post('/cliente/upload-profile-photo', requireAuth, upload.single('profilePhoto'), clienteController.uploadProfilePhotoCliente);
+
+// Rutas para cambiar contraseña del cliente
+router.get('/cliente/cambiar_password', requireAuth, clienteController.getChangePasswordPageCliente);
+router.post('/cliente/cambiar_password', requireAuth, clienteController.changePasswordCliente);
 module.exports = router;

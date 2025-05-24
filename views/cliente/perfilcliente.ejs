@@ -6,29 +6,8 @@
     <title>AI Finance Solutions - Perfil de Cliente</title>
     <link rel="stylesheet" href="/stylesheets/perfil_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script> <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaRegistroElement = document.querySelector('.value[data-date]');
-            if (fechaRegistroElement) {
-                const fechaOriginal = fechaRegistroElement.textContent;
-                
-                // Parsear la fecha. Moment.js debería entender el formato ISO que le llega del backend.
-                const parsedDate = moment(fechaOriginal);
-
-                if (parsedDate.isValid()) {
-        
-                    const fechaFormateada = parsedDate.locale('es').format('D [de] MMMM, YYYY');
-                    fechaRegistroElement.textContent = fechaFormateada;
-                    console.log('Cliente Frontend - Fecha formateada en español:', fechaFormateada); // Para depuración
-                } else {
-                    console.error('Cliente Frontend - Moment.js no pudo parsear la fecha:', fechaOriginal); // Para depuración
-                    fechaRegistroElement.textContent = 'Fecha de registro no disponible'; 
-                }
-            }
-        });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
 </head>
 <body>
 <header class="main-header">
@@ -50,48 +29,146 @@
     </div>
 </header>
 
+<div id="globalMessage" class="success-message"></div>
+
 <div class="container profile-container">
+    <section class="profile-photo-section">
+        <div class="profile-picture-wrapper">
+            <img id="profilePictureDisplay" src="<%= cliente.fotoPerfilUrl || 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=%EF%A3%BF' %>" alt="Foto de Perfil">
+        </div>
+        <input type="file" id="profilePictureUpload" accept="image/*" style="display: none;">
+        <label for="profilePictureUpload" class="upload-button">
+            <i class="fas fa-upload"></i> Subir Foto de Perfil
+        </label>
+        <span id="uploadMessage" class="upload-message">Por favor, sube una foto formal y clara de perfil. **Recomendado: 250px de ancho y 333px de alto.**</span>
+        <p id="profilePictureErrorMessage" class="error-message" style="display: none;"></p>
+    </section>
+
     <section class="profile-info">
         <h2>Información Personal</h2>
         <div class="info-item">
             <i class="fas fa-user icon"></i>
             <span>Nombre Completo:</span>
-            <span class="value"><%= cliente.nombre %> <%= cliente.apellido %></span>
+            <span class="value" id="displayNombre"><%= cliente.nombre %></span>
+            <span class="value" id="displayApellido"><%= cliente.apellido %></span>
         </div>
         <div class="info-item">
             <i class="fas fa-envelope icon"></i>
             <span>Correo Electrónico:</span>
-            <span class="value"><%= cliente.email %></span>
+            <span class="value" id="displayEmail"><%= cliente.email %></span>
         </div>
         <div class="info-item">
             <i class="fas fa-phone icon"></i>
             <span>Teléfono:</span>
-            <span class="value"><%= cliente.telefono %></span>
+            <span class="value" id="displayTelefono"><%= cliente.telefono %></span>
         </div>
         <% if (cliente.direccion) { %>
         <div class="info-item optional">
             <i class="fas fa-map-marker-alt icon"></i>
             <span>Dirección:</span>
-            <span class="value"><%= cliente.direccion %></span>
+            <span class="value" id="displayDireccion"><%= cliente.direccion %></span>
         </div>
         <% } %>
+        <a href="#" id="editPersonalLink" class="edit-link" style="margin-top: 15px;">
+            <i class="fas fa-edit"></i> Editar Información Personal
+        </a>
     </section>
+
+    <div id="editPersonalCard" class="edit-card">
+        <h3>Editar Información Personal</h3>
+        <p id="editPersonalErrorMessage" class="error-message" style="display: none;"></p>
+        <form id="editPersonalForm">
+            <div class="form-group">
+                <label for="editNombre">Nombre:</label>
+                <input type="text" id="editNombre" name="nombre" value="<%= cliente.nombre || '' %>" required>
+            </div>
+            <div class="form-group">
+                <label for="editApellido">Apellido:</label>
+                <input type="text" id="editApellido" name="apellido" value="<%= cliente.apellido || '' %>" required>
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email:</label>
+                <input type="email" id="editEmail" name="email" value="<%= cliente.email || '' %>" required>
+            </div>
+            <div class="form-group">
+                <label for="editTelefono">Teléfono:</label>
+                <input type="tel" id="editTelefono" name="telefono" value="<%= cliente.telefono || '' %>">
+            </div>
+            <div class="form-group">
+                <label for="editDireccion">Dirección:</label>
+                <input type="text" id="editDireccion" name="direccion" value="<%= cliente.direccion || '' %>">
+            </div>
+            <div class="button-group">
+                <button type="submit" class="save-button">Guardar</button>
+                <button type="button" id="cancelEditPersonalButton" class="cancel-button">Cancelar</button>
+            </div>
+        </form>
+    </div>
 
     <section class="financial-info">
         <h2>Información Financiera</h2>
         <div class="info-item">
             <i class="fas fa-chart-pie icon"></i>
             <span>Perfil de Riesgo:</span>
-            <span class="value"><%= cliente.perfil_riesgo %></span>
-            <a href="/perfil-riesgo" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            <span class="value" id="displayPerfilRiesgo"><%= cliente.perfil_riesgo %></span>
         </div>
         <div class="info-item">
             <i class="fas fa-bullseye icon"></i>
             <span>Objetivos Principales:</span>
-            <span class="value"><%= cliente.objetivo_principal %></span>
-            <a href="/objetivos-financieros" class="edit-link"><i class="fas fa-edit"></i> Editar</a>
+            <span class="value" id="displayObjetivoPrincipal"><%= cliente.objetivo_principal %></span>
         </div>
+        <a href="#" id="editFinancialLink" class="edit-link" style="margin-top: 15px;">
+            <i class="fas fa-edit"></i> Editar Información Financiera
+        </a>
     </section>
+
+    <div id="editFinancialCard" class="edit-card">
+        <h3>Editar Información Financiera</h3>
+        <p id="editFinancialErrorMessage" class="error-message" style="display: none;"></p>
+        <form id="editFinancialForm">
+            <section>
+                <h3>Objetivos Financieros Iniciales</h3>
+                <div class="form-group">
+                    <label for="editObjetivoPrincipal">Mi objetivo financiero principal es:</label>
+                    <select id="editObjetivoPrincipal" name="objetivo_principal">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Planificación para la jubilación" <%= cliente.objetivo_principal === 'Planificación para la jubilación' ? 'selected' : '' %>>Planificación para la jubilación</option>
+                        <option value="Compra de una vivienda" <%= cliente.objetivo_principal === 'Compra de una vivienda' ? 'selected' : '' %>>Compra de una vivienda</option>
+                        <option value="Educación de mis hijos" <%= cliente.objetivo_principal === 'Educación de mis hijos' ? 'selected' : '' %>>Educación de mis hijos</option>
+                        <option value="Inversión a largo plazo" <%= cliente.objetivo_principal === 'Inversión a largo plazo' ? 'selected' : '' %>>Inversión a largo plazo</option>
+                        <option value="Inversión a corto plazo" <%= cliente.objetivo_principal === 'Inversión a corto plazo' ? 'selected' : '' %>>Inversión a corto plazo</option>
+                        <option value="Otro" <%= cliente.objetivo_principal && !['Planificación para la jubilación', 'Compra de una vivienda', 'Educación de mis hijos', 'Inversión a largo plazo', 'Inversión a corto plazo'].includes(cliente.objetivo_principal) ? 'selected' : '' %>>Otro</option>
+                    </select>
+                </div>
+                <div class="form-group" id="otro_objetivo_div" style="display: none;">
+                    <label for="otro_objetivo">Especifica tu otro objetivo:</label>
+                    <input type="text" id="otro_objetivo" name="otro_objetivo" value="<%= cliente.objetivo_principal && !['Planificación para la jubilación', 'Compra de una vivienda', 'Educación de mis hijos', 'Inversión a largo plazo', 'Inversión a corto plazo'].includes(cliente.objetivo_principal) ? cliente.objetivo_principal : '' %>">
+                </div>
+            </section>
+
+            <section>
+                <h3>Perfil de Riesgo</h3>
+                <p>¿Cómo te sientes con la posibilidad de que tus inversiones suban o bajen de valor?</p>
+                <div class="form-group radio-group">
+                    <input type="radio" id="riesgo_conservador" name="perfil_riesgo" value="Conservador" <%= cliente.perfil_riesgo === 'Conservador' ? 'checked' : '' %>>
+                    <label for="riesgo_conservador">Prefiero inversiones seguras con bajo riesgo.</label>
+                </div>
+                <div class="form-group radio-group">
+                    <input type="radio" id="riesgo_moderado" name="perfil_riesgo" value="Moderado" <%= cliente.perfil_riesgo === 'Moderado' ? 'checked' : '' %>>
+                    <label for="riesgo_moderado">Estoy dispuesto a asumir un riesgo moderado para obtener mayores rendimientos.</label>
+                </div>
+                <div class="form-group radio-group">
+                    <input type="radio" id="riesgo_agresivo" name="perfil_riesgo" value="Agresivo" <%= cliente.perfil_riesgo === 'Agresivo' ? 'checked' : '' %>>
+                    <label for="riesgo_agresivo">Busco el mayor rendimiento posible y estoy dispuesto a asumir un riesgo alto.</label>
+                </div>
+            </section>
+
+            <div class="button-group">
+                <button type="submit" class="save-button">Guardar</button>
+                <button type="button" id="cancelEditFinancialButton" class="cancel-button">Cancelar</button>
+            </div>
+        </form>
+    </div>
 
     <section class="security-settings">
         <h2>Seguridad</h2>
@@ -99,7 +176,7 @@
             <i class="fas fa-key icon"></i>
             <span>Contraseña:</span>
             <span class="value">*********</span>
-            <a href="/cambiar-password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
+            <a href="/cliente/cambiar_password" class="edit-link"><i class="fas fa-edit"></i> Cambiar</a>
         </div>
     </section>
 
@@ -126,5 +203,299 @@
         <p>Crecimiento inteligente para tus finanzas.</p>
     </div>
 </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Script para formatear la fecha de registro
+        const fechaRegistroElement = document.querySelector('.value[data-date]');
+        if (fechaRegistroElement) {
+            const fechaOriginal = fechaRegistroElement.textContent;
+            const parsedDate = moment(fechaOriginal);
+
+            if (parsedDate.isValid()) {
+                const fechaFormateada = parsedDate.locale('es').format('D [de] MMMM, YYYY');
+                fechaRegistroElement.textContent = fechaFormateada;
+                console.log('Cliente Frontend: Fecha formateada en español (CORRECTA):', fechaFormateada);
+            } else {
+                console.error('Cliente Frontend: Moment.js no pudo parsear la fecha:', fechaOriginal);
+                fechaRegistroElement.textContent = 'Fecha de registro no disponible';
+            }
+        }
+
+        // --- VARIABLES Y FUNCIÓN DE MENSAJES ---
+        const globalMessage = document.getElementById('globalMessage');
+        let messageTimeout;
+
+        function showMessage(element, message, isSuccess = true, duration = 5000) {
+            clearTimeout(messageTimeout);
+            element.textContent = message;
+            element.className = isSuccess ? 'success-message show' : 'error-message show';
+            element.style.display = 'block';
+
+            messageTimeout = setTimeout(() => {
+                element.classList.remove('show');
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 500);
+            }, duration);
+        }
+
+        // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PERSONAL ---
+        const editPersonalLink = document.getElementById('editPersonalLink');
+        const editPersonalCard = document.getElementById('editPersonalCard');
+        const cancelEditPersonalButton = document.getElementById('cancelEditPersonalButton');
+        const editPersonalForm = document.getElementById('editPersonalForm');
+        const editPersonalErrorMessage = document.getElementById('editPersonalErrorMessage');
+
+        editPersonalLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            editPersonalCard.style.display = 'block';
+            editPersonalErrorMessage.style.display = 'none';
+            globalMessage.classList.remove('show');
+            globalMessage.style.display = 'none';
+            // Ocultar otras tarjetas de edición si están abiertas
+            editFinancialCard.style.display = 'none';
+        });
+
+        cancelEditPersonalButton.addEventListener('click', function() {
+            editPersonalCard.style.display = 'none';
+            editPersonalErrorMessage.style.display = 'none';
+            globalMessage.classList.remove('show');
+            globalMessage.style.display = 'none';
+        });
+
+        editPersonalForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(editPersonalForm);
+            const data = Object.fromEntries(formData.entries());
+
+            console.log('Cliente Frontend (Personal): Datos que se enviarán al backend:', data);
+
+            if (!data.nombre || !data.apellido || !data.email || !data.telefono) {
+                showMessage(editPersonalErrorMessage, 'Nombre, apellido, email y teléfono son obligatorios.', false);
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(data.email)) {
+                showMessage(editPersonalErrorMessage, 'El formato del correo electrónico no es válido.', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/cliente/editar-info-personal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                console.log('Cliente Frontend (Personal): Respuesta raw del servidor (status, ok):', response.status, response.ok);
+
+                const result = await response.json();
+                console.log('Cliente Frontend (Personal): Contenido de la respuesta JSON del servidor:', result);
+
+                if (response.ok) {
+                    document.getElementById('displayNombre').textContent = result.cliente.nombre;
+                    document.getElementById('displayApellido').textContent = result.cliente.apellido;
+                    document.getElementById('displayEmail').textContent = result.cliente.email;
+                    document.getElementById('displayTelefono').textContent = result.cliente.telefono;
+
+                    const displayDireccion = document.getElementById('displayDireccion');
+                    if (displayDireccion) {
+                        displayDireccion.textContent = result.cliente.direccion || '';
+                    }
+
+                    editPersonalCard.style.display = 'none';
+                    showMessage(globalMessage, '¡Información personal actualizada con éxito!', true);
+                } else {
+                    showMessage(editPersonalErrorMessage, result.message || 'Error al actualizar la información personal.', false);
+                }
+            } catch (error) {
+                console.error('Cliente Frontend (Personal): Error en la solicitud fetch o al procesar la respuesta:', error);
+                showMessage(globalMessage, 'Error de conexión o de red al actualizar información personal. Inténtalo de nuevo.', false);
+            }
+        });
+
+        // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN FINANCIERA ---
+        const editFinancialLink = document.getElementById('editFinancialLink');
+        const editFinancialCard = document.getElementById('editFinancialCard');
+        const cancelEditFinancialButton = document.getElementById('cancelEditFinancialButton');
+        const editFinancialForm = document.getElementById('editFinancialForm');
+        const editFinancialErrorMessage = document.getElementById('editFinancialErrorMessage');
+        const editObjetivoPrincipalSelect = document.getElementById('editObjetivoPrincipal');
+        const otroObjetivoDiv = document.getElementById('otro_objetivo_div');
+        const otroObjetivoInput = document.getElementById('otro_objetivo');
+
+        // Función para mostrar/ocultar el campo "Otro objetivo"
+        function toggleOtroObjetivo() {
+            if (editObjetivoPrincipalSelect.value === 'Otro') {
+                otroObjetivoDiv.style.display = 'block';
+                otroObjetivoInput.setAttribute('required', 'required');
+            } else {
+                otroObjetivoDiv.style.display = 'none';
+                otroObjetivoInput.removeAttribute('required');
+                otroObjetivoInput.value = ''; // Limpiar el valor si no es "Otro"
+            }
+        }
+
+        // Ejecutar al cargar la página para reflejar el estado actual
+        toggleOtroObjetivo();
+        // Escuchar cambios en el select de objetivo principal
+        editObjetivoPrincipalSelect.addEventListener('change', toggleOtroObjetivo);
+
+
+        editFinancialLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            editFinancialCard.style.display = 'block';
+            editFinancialErrorMessage.style.display = 'none';
+            globalMessage.classList.remove('show');
+            globalMessage.style.display = 'none';
+            // Ocultar otras tarjetas de edición si están abiertas
+            editPersonalCard.style.display = 'none';
+
+            // Asegurarse de que el estado de 'otro_objetivo_div' sea correcto al abrir el formulario
+            toggleOtroObjetivo();
+        });
+
+        cancelEditFinancialButton.addEventListener('click', function() {
+            editFinancialCard.style.display = 'none';
+            editFinancialErrorMessage.style.display = 'none';
+            globalMessage.classList.remove('show');
+            globalMessage.style.display = 'none';
+            // Restaurar el estado inicial (ocultar 'otro_objetivo_div' si no es "Otro")
+            toggleOtroObjetivo();
+        });
+
+        editFinancialForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(editFinancialForm);
+            const data = Object.fromEntries(formData.entries());
+
+            // Si el objetivo principal es "Otro", usa el valor del campo "otro_objetivo"
+            if (data.objetivo_principal === 'Otro') {
+                data.objetivo_principal = data.otro_objetivo;
+            }
+            // Eliminar el campo 'otro_objetivo' del objeto de datos antes de enviar
+            delete data.otro_objetivo;
+
+            console.log('Cliente Frontend (Financiera): Datos que se enviarán al backend:', data);
+
+            // Validaciones
+            if (!data.perfil_riesgo) {
+                showMessage(editFinancialErrorMessage, 'Debes seleccionar un perfil de riesgo.', false);
+                return;
+            }
+            if (!data.objetivo_principal || data.objetivo_principal.trim() === '') {
+                showMessage(editFinancialErrorMessage, 'Debes seleccionar un objetivo principal o especificarlo.', false);
+                return;
+            }
+
+
+            try {
+                const response = await fetch('/cliente/editar-info-financiera', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                console.log('Cliente Frontend (Financiera): Respuesta raw del servidor (status, ok):', response.status, response.ok);
+
+                const result = await response.json();
+                console.log('Cliente Frontend (Financiera): Contenido de la respuesta JSON del servidor:', result);
+
+                if (response.ok) {
+                    document.getElementById('displayPerfilRiesgo').textContent = result.cliente.perfil_riesgo;
+                    document.getElementById('displayObjetivoPrincipal').textContent = result.cliente.objetivo_principal;
+
+                    editFinancialCard.style.display = 'none';
+                    showMessage(globalMessage, '¡Información financiera actualizada con éxito!', true);
+                } else {
+                    showMessage(editFinancialErrorMessage, result.message || 'Error al actualizar la información financiera.', false);
+                }
+            } catch (error) {
+                console.error('Cliente Frontend (Financiera): Error en la solicitud fetch o al procesar la respuesta:', error);
+                showMessage(globalMessage, 'Error de conexión o de red al actualizar información financiera. Inténtalo de nuevo.', false);
+            }
+        });
+
+
+        //Lógica para la subida de foto de perfil
+        const profilePictureUpload = document.getElementById('profilePictureUpload');
+        const profilePictureDisplay = document.getElementById('profilePictureDisplay');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const profilePictureErrorMessage = document.getElementById('profilePictureErrorMessage');
+        const uploadButtonLabel = document.querySelector('.upload-button');
+
+        profilePictureUpload.addEventListener('change', async function() {
+            const file = this.files[0];
+            if (file) {
+                // Validar tamaño de archivo
+                const maxSizeMB = 5;
+                if (file.size > maxSizeMB * 1024 * 1024) {
+                    showMessage(profilePictureErrorMessage, `El archivo es demasiado grande. Máximo ${maxSizeMB}MB.`, false);
+                    uploadMessage.classList.remove('show');
+                    uploadMessage.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePictureDisplay.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                try {
+                    const formData = new FormData();
+                    formData.append('profilePhoto', file);
+
+                    showMessage(uploadMessage, 'Subiendo foto...', true, 99999);
+                    profilePictureErrorMessage.style.display = 'none';
+
+                    const response = await fetch('/cliente/upload-profile-photo', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    uploadMessage.classList.remove('show');
+                    uploadMessage.style.display = 'none';
+
+                    if (response.ok && result.success) {
+                        profilePictureDisplay.src = result.imageUrl;
+                        showMessage(globalMessage, '¡Foto de perfil subida y actualizada con éxito!', true);
+                    } else {
+                        showMessage(profilePictureErrorMessage, result.message || 'Error al subir la foto.', false);
+                    }
+                } catch (error) {
+                    console.error('Error al subir la foto:', error);
+                    uploadMessage.classList.remove('show');
+                    uploadMessage.style.display = 'none';
+                    showMessage(globalMessage, 'Error de conexión al subir la foto. Inténtalo de nuevo.', false);
+                }
+            } else {
+                showMessage(profilePictureErrorMessage, 'No se seleccionó ninguna foto.', false);
+                uploadMessage.classList.remove('show');
+                uploadMessage.style.display = 'none';
+            }
+        });
+
+        // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
+        if (uploadButtonLabel) {
+            uploadButtonLabel.addEventListener('click', function() {
+                uploadMessage.textContent = 'Por favor, sube una foto formal y clara de perfil. **Recomendado: 250px de ancho y 333px de alto.**';
+                uploadMessage.classList.add('show');
+                uploadMessage.style.display = 'block';
+                profilePictureErrorMessage.style.display = 'none';
+            });
+        }
+    });
+</script>
 </body>
 </html>
