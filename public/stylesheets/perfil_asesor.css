@@ -1,4 +1,4 @@
-/* ... (tu CSS existente hasta antes de .main-header, si lo hay) ... */
+/* ... (tu CSS existente hasta antes de .main-header) ... */
 
 * {
     box-sizing: border-box;
@@ -122,12 +122,123 @@ body {
     transition: opacity 0.5s ease;
     width: 90%;
     max-width: 800px;
+    flex-grow: 1; /* Permite que el contenedor principal ocupe el espacio restante */
+    margin-left: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
+    margin-right: auto; /* Centra el contenedor si no es hijo directo de un flexbox */
+    display: flex; /* Añade flexbox para organizar la foto y la info personal */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 2em; /* Espacio entre las secciones del contenedor */
+}
+
+/* Nuevos estilos para la sección de la foto dentro del contenedor */
+.profile-photo-section {
+    display: flex;
+    flex-direction: column; /* Coloca los elementos en columna */
+    align-items: center; /* Centra los elementos horizontalmente */
+    margin-bottom: 30px; /* Espacio con la siguiente sección */
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    text-align: center;
+}
+
+.profile-picture-wrapper {
+    width: 120px; /* Tamaño de la foto */
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 15px; /* Espacio entre la imagen y el botón */
+    border: 3px solid #007bff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    background-color: #CCCCCC;
+    color: #FFFFFF;
+    font-size: 4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-picture-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.upload-button {
+    /* El botón ya no necesita posicionamiento absoluto, ya que está fuera del wrapper de la imagen */
+    background-color: #007bff; /* Color de fondo del botón */
+    color: white; /* Color del texto del botón */
+    padding: 10px 20px; /* Aumentado el padding para un mejor tamaño */
+    border-radius: 25px; /* Bordes más redondeados */
+    cursor: pointer;
+    font-size: 16px; /* Aumentado el tamaño de la fuente */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre el icono y el texto */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none; /* Asegúrate de que no tenga subrayado si es un label */
+    margin-top: 10px; /* Espacio superior para separarlo del círculo */
+}
+
+.upload-button:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el ratón */
+}
+
+/* El .camera-icon-button ya no es necesario si el botón de subida está fuera del círculo */
+/* Puedes eliminar todo el bloque de .camera-icon-button */
+
+.upload-message, .error-message {
+    font-size: 0.85em;
+    margin-top: 5px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: none; /* Controlado por JS */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-align: center; /* Centrar el mensaje */
+}
+
+.upload-message.show {
+    opacity: 1;
+    background-color: #e0f7fa; /* Un azul claro suave */
+    color: #007bff;
+    border: 1px solid #007bff;
+    display: block;
+}
+
+.error-message.show {
+    opacity: 1;
+    background-color: #ffe0e0;
+    color: #d32f2f;
+    border: 1px solid #d32f2f;
+    display: block;
+}
+
+.success-message { /* Este es para el mensaje global, ya existía */
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: none; /* Oculto por defecto */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    width: 90%;
+    max-width: 800px;
 }
 
 .success-message.show {
     opacity: 1;
     display: block;
 }
+
 
 h2 {
     color: #333;
@@ -178,7 +289,7 @@ span {
 }
 
 
-.description-item > span { /* Se refiere al "Descripción Profesional:" o etiquetas similares */
+.description-item > span { /* Se refiere al "Descripción Profesional:" */
     font-weight: bold;
     color: #555;
     margin-right: 0.5em;
@@ -215,7 +326,6 @@ span {
     font-size: 0.9em;
 }
 
-
 /* MEDIA QUERIES */
 @media (max-width: 600px) {
     .main-header {
@@ -244,6 +354,26 @@ span {
     .profile-photo-section {
         padding-bottom: 1em; /* Más compacto en móvil */
         margin-bottom: 1.5em; /* Más compacto en móvil */
+    }
+
+    h2 {
+        font-size: 1.4em;
+        margin-bottom: 1em;
+    }
+
+    section {
+        margin-bottom: 1.5em;
+    }
+
+    .info-item {
+        flex-direction: column; /* Apila los elementos en pantallas pequeñas */
+        align-items: flex-start;
+        margin-bottom: 0.8em;
+    }
+
+    .info-item span {
+        margin-right: 0;
+        margin-bottom: 0.2em; /* Espacio entre la etiqueta y el valor */
     }
 
     h2 {

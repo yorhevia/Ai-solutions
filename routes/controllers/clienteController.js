@@ -3,13 +3,11 @@ const db = admin.firestore();
 
 exports.mostrarPerfil = async (req, res) => {
     try {
-
         const clienteUid = req.session.userId;
 
         if (!clienteUid) {
             return res.redirect('/login');
         }
-
 
         const clienteDoc = await db.collection('clientes').doc(clienteUid).get();
 

@@ -12,15 +12,6 @@
 <body>
     <header class="main-header">
         <div class="header-left">
-
-
-
-
-
-
-
-
-
             <a href="/homeasesor" class="back-button">
                 <i class="fas fa-arrow-left"></i>
             </a>
@@ -54,13 +45,7 @@
         </section>
 
         <section class="profile-info">
-
             <h2>Información Personal</h2>
-
-
-
-
-
             <div class="info-item">
                 <i class="fas fa-user icon"></i>
                 <span>Nombre Completo:</span>
@@ -80,14 +65,12 @@
                 <i class="fas fa-phone icon"></i>
                 <span>Teléfono:</span>
                 <span class="value" id="displayTelefono"><%= asesor.telefono %></span>
-
             </div>
             <% if (asesor.direccion) { %>
             <div class="info-item">
                 <i class="fas fa-map-marker-alt icon"></i>
                 <span>Dirección:</span>
                 <span class="value" id="displayDireccion"><%= asesor.direccion %></span>
-
             </div>
             <% } %>
 
@@ -206,8 +189,6 @@
                 <i class="fas fa-calendar-alt icon"></i>
                 <span>Fecha de Registro:</span>
                 <span class="value" data-date="<%= asesor.fechaRegistro %>"><%= asesor.fechaRegistro %></span>
-
-
             </div>
         </section>
     </div>

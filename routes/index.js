@@ -10,6 +10,8 @@ const clienteController = require('./controllers/clienteController');
 const asesorController = require('./controllers/asesorController');     
 const editProfileController = require('./controllers/editProfileController');
 
+const db = admin.firestore();
+const auth = admin.auth(); 
 
 var router = express.Router();
 
@@ -34,7 +36,6 @@ const upload = multer({
 });
 
 router.use(cors());
-
 
 // --- RUTAS DE UPLOAD DE FOTOS ---
 router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'), async (req, res) => {
@@ -80,11 +81,7 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         const imageUrl = imgurData.data.link;
         console.log('Imagen subida a Imgur:', imageUrl);
 
-
-
         const userId = req.session.userId;
-
-
 
         if (!userId) {
             return res.status(401).json({ success: false, message: 'Usuario no autenticado o ID de sesión no disponible.' });
@@ -101,15 +98,10 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
             imageUrl: imageUrl
         });
 
-
-
     } catch (error) {
         console.error('Error en el endpoint /upload-profile-photo:', error);
         if (error instanceof multer.MulterError) {
             return res.status(400).json({ success: false, message: `Error en la subida: ${error.message}` });
-
-
-
         }
         // Asegurarse de retornar aquí también
         return res.status(500).json({ success: false, message: 'Error interno del servidor al procesar la imagen.' });
@@ -201,70 +193,37 @@ router.post('/login', async (req, res) => {
     }
 });
 
-
-
-
 router.get('/registro', (req, res) => {
     return res.render('ingreso/registro'); 
 });
-
-
-
-router.post('/registro', async (req, res) => { // <-- ¡Corregido aquí!
-    let errorMessage = '';
-    const { email, password, confirmPassword } = req.body;
-
-    // Validación de campos
-    if (!email || !password || !confirmPassword) {
-        errorMessage = 'Todos los campos son obligatorios.';
-    } else if (password !== confirmPassword) {
-        errorMessage = 'Las contraseñas no coinciden.';
+router.post('/registro', async (req, res) => {
+    const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
+    // const auth = admin.auth(); // Ya importado arriba
+    if (contrasena !== confirmar_contrasena) {
+        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body }); // Ya tiene return, ¡bien!
     }
-
-    if (errorMessage) {
-        return res.render('auth/register', { errorMessage: errorMessage });
-    }
-
     try {
-        // 1. Crear el usuario en Firebase Authentication
-        const userRecord = await admin.auth().createUser({
+        const userRecord = await auth.createUser({
             email: email,
-            password: password,
+            password: contrasena,
+            displayName: `${nombre} ${apellido}`,
         });
-
-        const uid = userRecord.uid; // ID del usuario de Firebase Authentication
-
-        // 2. Guardar información adicional del usuario en Firestore
-        await db.collection('users').doc(uid).set({
-            email: email,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(), // Marca de tiempo del servidor
-           
-            status: 'active', // Estado inicial del usuario
-            role: 'user' // Rol por defecto
-        });
-
-       
-        req.session.userId = uid; // Guarda el UID en la sesión del usuario
-
-        // Redirigir a una página de éxito o al dashboard
-        return res.redirect('/dashboard'); // Ajusta a tu ruta de dashboard
-
+        console.log('Usuario registrado en Firebase Auth:', userRecord.uid);
+        req.session.userId = userRecord.uid;
+        req.session.userCreationTime = userRecord.metadata.creationTime;
+        return res.redirect('/dashboard'); 
     } catch (error) {
-        console.error('Error durante el registro:', error);
-
-        // Manejo de errores específicos de Firebase Auth
-        if (error?.errorInfo?.code === 'auth/email-already-in-use') {
-            errorMessage = 'El correo electrónico ya está en uso.';
+        console.error('Error al registrar usuario:', error);
+        let errorMessage = 'Error al registrar usuario. Por favor, inténtalo de nuevo.';
+        if (error?.errorInfo?.code === 'auth/email-already-exists') {
+            errorMessage = 'Este correo electrónico ya está en uso.';
         } else if (error?.errorInfo?.code === 'auth/invalid-email') {
-            errorMessage = 'El formato del correo electrónico no es válido.';
-        } else if (error?.errorInfo?.code === 'auth/weak-password') { // <-- Este es el error que te interesaba
+            errorMessage = 'El correo electrónico no es válido.';
+        } else if (error?.errorInfo?.code === 'auth/invalid-password') {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
-        } else {
-            errorMessage = 'Error en el registro. Inténtalo de nuevo.';
         }
-
-        // Renderizar la página de registro con el mensaje de error
-        return res.render('auth/register', { errorMessage: errorMessage });
+        // Asegurarse de retornar aquí
+        return res.render('ingreso/registro', { error: errorMessage, formData: req.body }); // Ya tiene return, ¡bien!
     }
 });
 
@@ -311,31 +270,22 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
 });
 
 // --- RUTA DASHBOARD ---
-
-
-
-
 router.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
-
     try {
         const clienteDoc = await db.collection('clientes').doc(userId).get();
         const asesorDoc = await db.collection('asesores').doc(userId).get();
-
         if (!clienteDoc.exists && !asesorDoc.exists) {
             return res.render('ingreso/seleccionar_tipo_usuario'); 
-
         } else if (clienteDoc.exists) {
             return res.redirect('/homecliente'); 
         } else if (asesorDoc.exists) {
             return res.redirect('/homeasesor'); 
         } else {
-
             console.error('Estado de perfil inconsistente para el usuario:', userId);
             // Asegurarse de retornar aquí
             return res.status(500).send('Error en el estado del perfil del usuario.');
         }
-
     } catch (error) {
         console.error('Error al verificar el perfil del usuario:', error);
         return res.status(500).send('Error al verificar el perfil del usuario.'); 
@@ -356,32 +306,8 @@ router.get('/consultacliente', (req, res) => {
 });
 router.get('/formulariocliente', (req, res) => {
     return res.render('cliente/formulariocliente'); 
-
 });
 router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = router;
