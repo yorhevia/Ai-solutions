@@ -3,224 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificar Identidad Asesor - AI Finance Solutions</title>
+    <title>AI Finance Solutions - Verificación de Identidad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/stylesheets/kyc.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    </head>
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+</head>
 <body>
+    <%- include('../partials/asesor_navbar') %>
 
-    <div class="container">
-        <h1>Verificación de Perfil de Asesor</h1>
-        <p class="description">
-            Para activar completamente tu perfil de asesor y cumplir con nuestras políticas de seguridad y cumplimiento (KYC), necesitamos verificar tu identidad y tus credenciales profesionales. Este es un paso fundamental para garantizar la confianza de nuestros clientes.
-        </p>
+    <div class="kyc-container">
+        <h1><i class="fas fa-shield-alt"></i> Verificación de Identidad y Credenciales</h1>
 
-        <% // Mensajes Flash (éxito o error) %>
-        <% if (typeof error !== 'undefined' && Array.isArray(error) && error.length > 0) { %>
+        <% if (error_msg && error_msg.length > 0) { %>
             <div class="error-message show">
-                <ul>
-                    <% error.forEach(function(msg) { %>
-                        <li><%= msg %></li>
-                    <% }); %>
-                </ul>
+                <% if (Array.isArray(error_msg)) { %>
+                    <ul>
+                        <% error_msg.forEach(msg => { %>
+                            <li><%= msg %></li>
+                        <% }); %>
+                    </ul>
+                <% } else { %>
+                    <%= error_msg %>
+                <% } %>
             </div>
         <% } %>
-
-        <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
-            <div class="error-message show">
-                <%= error_msg %>
-            </div>
-        <% } %>
-
-        <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+        <% if (success_msg && success_msg.length > 0) { %>
             <div class="success-message show">
                 <%= success_msg %>
             </div>
         <% } %>
-
-        <div class="verification-status-box">
-            <h3>Estado Actual de tu Verificación:</h3>
-
-            <div class="status-item">
-                <i class="fas fa-id-card <%= verificationStatus && verificationStatus.verification && verificationStatus.verification.status ? 'status-' + verificationStatus.verification.status : 'status-no-enviado' %>"></i>
-                <span class="status-text">Identidad (KYC):</span>
-                <span class="status-message">
-                    <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.status === 'verificado') { %>
-                        <span class="status-verificado">Verificado</span>
-                    <% } else if (verificationStatus && verificationStatus.verification && verificationStatus.verification.status === 'pendiente') { %>
-                        <span class="status-pendiente">Pendiente de Revisión</span>
-                    <% } else if (verificationStatus && verificationStatus.verification && verificationStatus.verification.status === 'rechazado') { %>
-                        <span class="status-rechazado">Rechazado</span>
-                    <% } else { %>
-                        <span class="status-no-enviado">No Enviado</span>
-                    <% } %>
-                </span>
-                <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.notes && verificationStatus.verification.status === 'rechazado') { %>
-                    <p class="observation-message"><i class="fas fa-info-circle"></i> Motivo: <%= verificationStatus.verification.notes %></p>
-                <% } %>
-                <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.status !== 'no-enviado') { %>
-                    <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.front) { %>
-                        <a href="<%= verificationStatus.verification.photos.front %>" target="_blank" class="view-document-link">
-                            <i class="fas fa-eye"></i> Ver Documento Enviado (Frontal)
-                        </a>
-                    <% } %>
-                    <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.back) { %>
-                        <a href="<%= verificationStatus.verification.photos.back %>" target="_blank" class="view-document-link">
-                            <i class="fas fa-eye"></i> Ver Documento Enviado (Trasera)
-                        </a>
-                    <% } %>
-                    <% if (verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.selfie) { %>
-                        <a href="<%= verificationStatus.verification.photos.selfie %>" target="_blank" class="view-document-link">
-                            <i class="fas fa-eye"></i> Ver Selfie Enviada
-                        </a>
-                    <% } %>
-                    <% if (verificationStatus && verificationStatus.verification.status === 'pendiente') { %>
-                        <p class="observation-message full-width"><i class="fas fa-hourglass-half"></i> Tu verificación de identidad está **pendiente de revisión**. Nuestro equipo la procesará a la brevedad. Recibirás una notificación cuando el estado cambie.</p>
-                    <% } %>
-                <% } %>
+        <% if (info_msg && info_msg.length > 0) { %>
+            <div class="info-message show">
+                <%= info_msg %>
             </div>
-
-            <div class="status-item">
-                <i class="fas fa-graduation-cap <%= verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && (verificationStatus.verificacion.titulo.estado === 'verificado' ? 'status-verificado' : verificationStatus.verificacion.titulo.estado === 'pendiente' ? 'status-pendiente' : verificationStatus.verificacion.titulo.estado === 'rechazado' ? 'status-rechazado' : 'status-no-enviado') %>"></i>
-                <span class="status-text">Título Universitario:</span>
-                <span class="status-message">
-                    <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.estado === 'verificado') { %>
-                        <span class="status-verificado">Verificado</span>
-                    <% } else if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.estado === 'pendiente') { %>
-                        <span class="status-pendiente">Pendiente de Revisión</span>
-                    <% } else if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.estado === 'rechazado') { %>
-                        <span class="status-rechazado">Rechazado</span>
-                    <% } else { %>
-                        <span class="status-no-enviado">No Enviado</span>
-                    <% } %>
-                </span>
-                <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.observaciones && verificationStatus.verificacion.titulo.estado === 'rechazado') { %>
-                    <p class="observation-message"><i class="fas fa-info-circle"></i> Motivo: <%= verificationStatus.verificacion.titulo.observaciones %></p>
-                <% } %>
-                <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.estado !== 'no-enviado') { %>
-                    <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.urlDocumento) { %>
-                        <a href="<%= verificationStatus.verificacion.titulo.urlDocumento %>" target="_blank" class="view-document-link">
-                            <i class="fas fa-eye"></i> Ver Título Enviado
-                        </a>
-                    <% } %>
-                    <% if (verificationStatus && verificationStatus.verificacion.titulo.estado === 'pendiente') { %>
-                        <p class="observation-message full-width"><i class="fas fa-hourglass-half"></i> Tu título universitario está **pendiente de revisión**. Nuestro equipo lo procesará a la brevedad. Recibirás una notificación cuando el estado cambie.</p>
-                    <% } %>
-                <% } %>
-            </div>
-
-            <div class="status-item">
-                <i class="fas fa-certificate <%= verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && (verificationStatus.verificacion.certificacion.estado === 'verificado' ? 'status-verificado' : verificationStatus.verificacion.certificacion.estado === 'pendiente' ? 'status-pendiente' : verificationStatus.verificacion.certificacion.estado === 'rechazado' ? 'status-rechazado' : 'status-no-enviado') %>"></i>
-                <span class="status-text">Certificación Profesional:</span>
-                <span class="status-message">
-                    <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.estado === 'verificado') { %>
-                        <span class="status-verificado">Verificada</span>
-                    <% } else if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.estado === 'pendiente') { %>
-                        <span class="status-pendiente">Pendiente de Revisión</span>
-                    <% } else if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.estado === 'rechazado') { %>
-                        <span class="status-rechazado">Rechazada</span>
-                    <% } else { %>
-                        <span class="status-no-enviado">No Enviada</span>
-                    <% } %>
-                </span>
-                <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.observaciones && verificationStatus.verificacion.certificacion.estado === 'rechazado') { %>
-                    <p class="observation-message"><i class="fas fa-info-circle"></i> Motivo: <%= verificationStatus.verificacion.certificacion.observaciones %></p>
-                <% } %>
-                <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.estado !== 'no-enviado') { %>
-                    <% if (verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.urlDocumento) { %>
-                        <a href="<%= verificationStatus.verificacion.certificacion.urlDocumento %>" target="_blank" class="view-document-link">
-                            <i class="fas fa-eye"></i> Ver Certificación Enviada
-                        </a>
-                    <% } %>
-                    <% if (verificationStatus && verificationStatus.verificacion.certificacion.estado === 'pendiente') { %>
-                        <p class="observation-message full-width"><i class="fas fa-hourglass-half"></i> Tu certificación profesional está **pendiente de revisión**. Nuestro equipo la procesará a la brevedad. Recibirás una notificación cuando el estado cambie.</p>
-                    <% } %>
-                <% } %>
-            </div>
-        </div>
-
-
-        <div class="verification-steps">
-            <h3>Pasos para la Verificación:</h3>
-            <ol>
-                <li>**Prepara tus Documentos:** Ten listos tu documento de identidad (Cédula, Pasaporte, Licencia), tu selfie con el documento, tu título universitario y cualquier certificación profesional que desees incluir. Asegúrate de que todas las imágenes o PDFs sean claras y legibles.</li>
-                <li>**Sube a Google Drive o Dropbox:** Accede a tu cuenta personal de Google Drive (<a href="https://drive.google.com/" target="_blank">drive.google.com</a>) o Dropbox (<a href="https://www.dropbox.com/" target="_blank">dropbox.com</a>). Sube cada uno de los documentos que necesitas verificar.</li>
-                <li>**Genera Enlaces Compartibles:** Para cada documento subido, haz clic derecho y busca la opción "Compartir" o "Generar enlace". Es **CRÍTICO** que configures el enlace para que "Cualquier persona con el enlace pueda ver" (o una opción similar que permita el acceso de lectura sin necesidad de login). Copia ese enlace.</li>
-                <li>**Pega los Enlaces en el Formulario:** Vuelve a este formulario y pega cada URL en el campo correspondiente. Asegúrate de que cada enlace sea el correcto para el documento solicitado.</li>
-                <li>**Envía tu Información:** Una vez que hayas pegado todos los enlaces y completado los demás campos, envía el formulario. Nuestro equipo revisará tus documentos a través de los enlaces proporcionados. Te notificaremos el estado de tu verificación.</li>
-            </ol>
-        </div>
+        <% } %>
 
         <form action="/asesor/verificar_identidad" method="POST" class="edit-card">
             <h2 class="form-section-title"><i class="fas fa-id-card"></i> Documentos de Identidad</h2>
-            <p class="description">Por favor, pega las URLs de los documentos que subiste a Google Drive o Dropbox, asegurándote de que los enlaces sean compartibles públicamente para su revisión (configura "Cualquier persona con el enlace puede ver").</p>
+            <p class="description">
+                Por favor, pega las URLs de los documentos que subiste a Google Drive o Dropbox, asegurándote de que los enlaces sean compartibles públicamente para su revisión (configura "Cualquier persona con el enlace puede ver").
+            </p>
 
-            <div class="form-group">
-                <label for="documentType">Tipo de Documento:</label>
-                <select id="documentType" name="documentType" required>
-                    <option value="">Selecciona un tipo de documento</option>
-                    <option value="cedula" <%= verificationStatus && verificationStatus.verification && verificationStatus.verification.documentType === 'cedula' ? 'selected' : '' %>>Cédula de Identidad</option>
-                    <option value="pasaporte" <%= verificationStatus && verificationStatus.verification && verificationStatus.verification.documentType === 'pasaporte' ? 'selected' : '' %>>Pasaporte</option>
-                    <option value="licencia_conducir" <%= verificationStatus && verificationStatus.verification && verificationStatus.verification.documentType === 'licencia_conducir' ? 'selected' : '' %>>Licencia de Conducir</option>
-                    <option value="otro" <%= verificationStatus && verificationStatus.verification && verificationStatus.verification.documentType === 'otro' ? 'selected' : '' %>>Otro (especificar en la nota)</option>
-                </select>
-            </div>
+            <%
+            const isIdentityVerified = asesor && asesor.verification && asesor.verification.status === 'verificado';
+            %>
 
-            <div class="form-group">
-                <label for="documentNumber">Número de Documento:</label>
-                <input type="text" id="documentNumber" name="documentNumber" placeholder="Número de identificación único" value="<%= verificationStatus && verificationStatus.verification && verificationStatus.verification.documentNumber || '' %>" required>
-            </div>
+            <% if (isIdentityVerified) { %>
+                <div class="info-message show">
+                    <i class="fas fa-info-circle"></i> Tu verificación de identidad ya ha sido **VERIFICADA**. No es necesario volver a enviarla.
+                </div>
+            <% } %>
 
-            <div class="form-group">
-                <label for="frontPhotoUrl">URL Foto Frontal del Documento:</label>
-                <input type="url" id="frontPhotoUrl" name="frontPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto frontal" value="<%= verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.front || '' %>" required>
-                <small>Ej: `https://drive.google.com/file/d/ABCD123xyz/view?usp=sharing`</small>
-            </div>
+            <fieldset>
+                <div class="form-group">
+                    <label for="documentType">Tipo de Documento:</label>
+                    <select id="documentType" name="documentType" required>
+                        <option value="">Selecciona un tipo de documento</option>
+                        <option value="cedula" <%= asesor && asesor.verification && asesor.verification.documentType === 'cedula' ? 'selected' : '' %>>Cédula de Identidad</option>
+                        <option value="pasaporte" <%= asesor && asesor.verification && asesor.verification.documentType === 'pasaporte' ? 'selected' : '' %>>Pasaporte</option>
+                        <option value="licencia_conducir" <%= asesor && asesor.verification && asesor.verification.documentType === 'licencia_conducir' ? 'selected' : '' %>>Licencia de Conducir</option>
+                        <option value="otro" <%= asesor && asesor.verification && asesor.verification.documentType === 'otro' ? 'selected' : '' %>>Otro (especificar en la nota)</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="backPhotoUrl">URL Foto Trasera del Documento (si aplica):</label>
-                <input type="url" id="backPhotoUrl" name="backPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto trasera" value="<%= verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.back || '' %>">
-                <small>Opcional para algunos documentos.</small>
-            </div>
+                <div class="form-group">
+                    <label for="documentNumber">Número de Documento:</label>
+                    <input type="text" id="documentNumber" name="documentNumber" placeholder="Número de identificación único" value="<%= asesor && asesor.verification && asesor.verification.documentNumber || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
+                </div>
 
-            <div class="form-group">
-                <label for="selfiePhotoUrl">URL Selfie con Documento:</label>
-                <input type="url" id="selfiePhotoUrl" name="selfiePhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu selfie con el documento" value="<%= verificationStatus && verificationStatus.verification && verificationStatus.verification.photos && verificationStatus.verification.photos.selfie || '' %>" required>
-                <small>Tu rostro debe ser visible y el documento legible.</small>
-            </div>
+                <div class="form-group">
+                    <label for="frontPhotoUrl">URL Foto Frontal del Documento:</label>
+                    <input type="url" id="frontPhotoUrl" name="frontPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto frontal" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.front || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
+                    <small>Ej: `https://drive.google.com/file/d/ABCD123xyz/view?usp=sharing`</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="backPhotoUrl">URL Foto Trasera del Documento (si aplica):</label>
+                    <input type="url" id="backPhotoUrl" name="backPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto trasera" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.back || '' %>" <%= isIdentityVerified ? 'readonly' : '' %>>
+                    <small>Opcional para algunos documentos.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="selfiePhotoUrl">URL Selfie con Documento:</label>
+                    <input type="url" id="selfiePhotoUrl" name="selfiePhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu selfie con el documento" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.selfie || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
+                    <small>Tu rostro debe ser visible y el documento legible.</small>
+                </div>
+            </fieldset>
 
             <h2 class="form-section-title"><i class="fas fa-graduation-cap"></i> Credenciales Profesionales</h2>
             <p class="description">Por favor, pega las URLs de tus documentos profesionales (título, certificaciones) subidos a Google Drive o Dropbox.</p>
 
-            <div class="form-group">
-                <label for="tituloUniversitarioUrl">URL Título Universitario:</label>
-                <input type="url" id="tituloUniversitarioUrl" name="tituloUniversitarioUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu título" value="<%= verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.titulo && verificationStatus.verificacion.titulo.urlDocumento || '' %>" required>
-            </div>
+            <%
+            const isTituloVerified = asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado';
+            const isCertificacionVerified = asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado';
+            %>
 
-            <div class="form-group">
-                <label for="certificacionProfesionalUrl">URL Certificación Profesional (Opcional):</label>
-                <input type="url" id="certificacionProfesionalUrl" name="certificacionProfesionalUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu certificación" value="<%= verificationStatus && verificationStatus.verificacion && verificationStatus.verificacion.certificacion && verificationStatus.verificacion.certificacion.urlDocumento || '' %>">
-            </div>
+            <% if (isTituloVerified) { %>
+                <div class="info-message show">
+                    <i class="fas fa-info-circle"></i> Tu título universitario ya ha sido **VERIFICADO**.
+                </div>
+            <% } %>
+            <fieldset> <div class="form-group">
+                    <label for="tituloUniversitarioUrl">URL Título Universitario:</label>
+                    <input type="url" id="tituloUniversitarioUrl" name="tituloUniversitarioUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu título" value="<%= asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento || '' %>" required <%= isTituloVerified ? 'readonly' : '' %>>
+                </div>
+            </fieldset>
+
+            <% if (isCertificacionVerified) { %>
+                <div class="info-message show">
+                    <i class="fas fa-info-circle"></i> Tu certificación profesional ya ha sido **VERIFICADA**.
+                </div>
+            <% } %>
+            <fieldset> <div class="form-group">
+                    <label for="certificacionProfesionalUrl">URL Certificación Profesional (Opcional):</label>
+                    <input type="url" id="certificacionProfesionalUrl" name="certificacionProfesionalUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu certificación" value="<%= asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento || '' %>" <%= isCertificacionVerified ? 'readonly' : '' %>>
+                </div>
+            </fieldset>
 
             <div class="form-group">
                 <label for="notes">Notas Adicionales (Opcional):</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Ej. si el documento es 'Otro', especifica aquí... o cualquier aclaración sobre tus documentos."><%= verificationStatus && verificationStatus.verification && verificationStatus.verification.notes || '' %></textarea>
+                <textarea id="notes" name="notes" rows="3" placeholder="Ej. si el documento es 'Otro', especifica aquí... o cualquier aclaración sobre tus documentos." <%= isIdentityVerified ? 'readonly' : '' %>><%= asesor && asesor.verification && asesor.verification.notes || '' %></textarea>
             </div>
 
-            <div class="button-group">
-                <button type="submit" class="save-button"><i class="fas fa-paper-plane"></i> Enviar para Verificación</button>
-                <a href="/perfilasesor" class="cancel-button"><i class="fas fa-times-circle"></i> Cancelar</a>
-            </div>
+            <% if (!isIdentityVerified || !isTituloVerified || !isCertificacionVerified) { %>
+                <div class="button-group">
+                    <button type="submit" class="save-button"><i class="fas fa-paper-plane"></i> Enviar para Verificación</button>
+                    <a href="/perfilasesor" class="cancel-button"><i class="fas fa-times-circle"></i> Cancelar</a>
+                </div>
+            <% } else { %>
+                <div class="info-message show full-width">
+                    <i class="fas fa-check-double"></i> Todas tus credenciales han sido **VERIFICADAS**. Puedes volver a tu <a href="/perfilasesor">perfil</a>.
+                </div>
+                <div class="button-group">
+                    <a href="/perfilasesor" class="cancel-button"><i class="fas fa-times-circle"></i> Volver al Perfil</a>
+                </div>
+            <% } %>
 
             <div class="privacy-note">
                 <p>Tu información será tratada con la máxima confidencialidad y solo se utilizará para fines de verificación de identidad y credenciales. Para más detalles, consulta nuestra <a href="/politica-privacidad">Política de Privacidad</a>.</p>
             </div>
+        </form>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-        });
-    </script>
-
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
 </body>
 </html>

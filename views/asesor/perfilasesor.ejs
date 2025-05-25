@@ -208,29 +208,31 @@
                     <span>Credenciales Profesionales:</span>
                     <span class="status-indicator 
                         <% 
-                        const hasTitulo = asesor.verificacion && asesor.verificacion.titulo && (asesor.verificacion.titulo.estado === 'verificado' || asesor.verificacion.titulo.estado === 'pendiente' || asesor.verificacion.titulo.estado === 'rechazado');
-                        const hasCertificacion = asesor.verificacion && asesor.verificacion.certificacion && (asesor.verificacion.certificacion.estado === 'verificado' || asesor.verificacion.certificacion.estado === 'pendiente' || asesor.verificacion.certificacion.estado === 'rechazado');
+                        const isTituloVerified = asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado';
+                        const isCertificacionVerified = asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado';
 
-                        const isAllVerified = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado') && (asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado');
-                        const isAnyPending = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente');
-                        const isAnyRejected = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'rechazado') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'rechazado');
+                        // Professional credentials are fully verified if title is verified, and either certification is verified or not provided.
+                        const isAllProfessionalVerified = isTituloVerified && (!asesor.verificacion.certificacion || isCertificacionVerified);
+
+                        const isAnyProfessionalPending = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente');
+                        const isAnyProfessionalRejected = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'rechazado') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'rechazado');
                         
-                        if (isAllVerified) { %>
+                        if (isAllProfessionalVerified) { %>
                             status-verificado
-                        <% } else if (isAnyPending) { %>
+                        <% } else if (isAnyProfessionalPending) { %>
                             status-pendiente
-                        <% } else if (isAnyRejected) { %>
+                        <% } else if (isAnyProfessionalRejected) { %>
                             status-rechazado
                         <% } else { %>
                             status-no-enviado
                         <% } %>
                     ">
                         <% 
-                        if (isAllVerified) { %>
+                        if (isAllProfessionalVerified) { %>
                             Verificado <i class="fas fa-check-circle"></i>
-                        <% } else if (isAnyPending) { %>
+                        <% } else if (isAnyProfessionalPending) { %>
                             Pendiente <i class="fas fa-hourglass-half"></i>
-                        <% } else if (isAnyRejected) { %>
+                        <% } else if (isAnyProfessionalRejected) { %>
                             Rechazado <i class="fas fa-times-circle"></i>
                         <% } else { %>
                             No Enviado <i class="fas fa-exclamation-triangle"></i>
@@ -238,12 +240,12 @@
                     </span>
                 </div>
                 <div class="verification-actions">
-                    <% if (!isAllVerified) { %>
+                    <% if (!isAllProfessionalVerified) { %>
                         <a href="/asesor/verificar_identidad" class="action-button primary-action">
                             <i class="fas fa-file-upload"></i>
-                            <% if (isAnyPending) { %>
+                            <% if (isAnyProfessionalPending) { %>
                                 Ver estado / Adjuntar más
-                            <% } else if (isAnyRejected) { %>
+                            <% } else if (isAnyProfessionalRejected) { %>
                                 Re-enviar Credenciales
                             <% } else { %>
                                 Subir Credenciales
@@ -297,7 +299,7 @@
                 const parsedDate = moment(fechaOriginal);
 
                 if (parsedDate.isValid()) {
-                    const fechaFormateada = parsedDate.locale('es').format('D [de] MMMM, YYYY');
+                    const fechaFormateada = parsedDate.locale('es').format('D [de] MMMM, YYYY'); // Corrected YYYY for full year
                     fechaRegistroElement.textContent = fechaFormateada;
                     console.log('Frontend: Fecha formateada en español (CORRECTA):', fechaFormateada);
                 } else {
@@ -541,7 +543,7 @@
                 }
             });
 
-               // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
+                // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
             if (uploadButtonLabel) {
                 uploadButtonLabel.addEventListener('click', function() {
                     // Solo mostrar el mensaje inicial de recomendación, no "Subiendo foto..."
@@ -555,4 +557,3 @@
     </script>
 </body>
 </html>
-
