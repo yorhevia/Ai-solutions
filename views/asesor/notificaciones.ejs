@@ -18,7 +18,7 @@
             <% if (notifications && notifications.length > 0) { %>
                 <% notifications.forEach(notification => { %>
                     <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-id="<%= notification.id %>">
-                        <span class="timestamp"><%= new Date(notification.timestamp._seconds * 1000).toLocaleString() %></span>
+                        <span class="timestamp"><%= new Date(notification.timestamp._seconds * 1000).toLocaleDateString() %></span>
                         <p class="message"><%- notification.message %></p> <% if (!notification.read) { %>
                             <button class="mark-read-btn">Marcar como leída</button>
                         <% } %>
