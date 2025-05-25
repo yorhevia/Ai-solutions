@@ -104,140 +104,78 @@
         <% } %>
     </div>
 
-    <div id="rejectionModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2>Motivo de Rechazo</h2>
-            <p>Por favor, especifique el motivo del rechazo para que el asesor pueda corregirlo.</p>
-
-            <label for="predefinedReason">Selecciona un motivo:</label>
-            <select id="predefinedReason">
-                <option value="">-- Selecciona una opción --</option>
-                <option value="Documento ilegible o de baja calidad">Documento ilegible o de baja calidad</option>
-                <option value="Información incompleta">Información incompleta en el documento</option>
-                <option value="Documento expirado">Documento expirado</option>
-                <option value="Documento no válido para el tipo de verificación">Documento no válido para el tipo de verificación</option>
-                <option value="Datos no coinciden con los registrados">Datos en el documento no coinciden con los registrados</option>
-                <option value="Formato de archivo incorrecto">Formato de archivo incorrecto</option>
-                <option value="Fotografía de identificación no clara o sin autofoto (selfie)">Fotografía de identificación no clara o sin autofoto (selfie)</option>
-                <option value="Otros">Otro (especifica en observaciones)</option>
-            </select>
-
-            <label for="rejectionNotes">Observaciones adicionales (opcional):</label>
-            <textarea id="rejectionNotes" placeholder="Escriba aquí observaciones adicionales, especialmente si seleccionó 'Otro'."></textarea>
-            <button id="confirmRejectButton" class="action-button reject-button">Confirmar Rechazo</button>
-        </div>
-    </div>
-
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const approveButtons = document.querySelectorAll('.approve-button');
-            const rejectButtons = document.querySelectorAll('.reject-button');
-            const rejectionModal = document.getElementById('rejectionModal');
-            const closeButton = document.querySelector('.modal .close-button');
-            const confirmRejectButton = document.getElementById('confirmRejectButton');
-            const rejectionNotes = document.getElementById('rejectionNotes');
-            const predefinedReasonSelect = document.getElementById('predefinedReason');
+    document.addEventListener('DOMContentLoaded', function() {
+    const approveButtons = document.querySelectorAll('.approve-button');
+    const rejectButtons = document.querySelectorAll('.reject-button'); // Todavía necesitamos seleccionar estos botones
 
-            let currentAsesorId = null;
-            let currentVerificationType = null; // 'kyc', 'titulo', 'certificacion'
-            let currentAction = null; // 'verificar' o 'rechazar'
+    // La lógica para el modal de rechazo, sus elementos y sus eventos ha sido eliminada
+    // currentAsesorId, currentVerificationType, currentAction ya no son necesarios globalmente
 
-            // Abrir modal de rechazo
-            rejectButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    currentAsesorId = this.dataset.asesorId;
-                    currentVerificationType = this.dataset.type;
-                    currentAction = this.dataset.action;
-                    rejectionNotes.value = ''; // Limpiar textarea
-                    predefinedReasonSelect.value = ''; // Limpiar selección predefinida
-                    rejectionModal.style.display = 'block';
+    // --- MANEJADOR PARA LOS BOTONES DE APROBAR Y RECHAZAR (AHORA SIMILARES) ---
+    // Unimos los listeners para 'approve-button' y 'reject-button' para simplificar
+    const actionButtons = document.querySelectorAll('.approve-button, .reject-button');
+
+    actionButtons.forEach(button => {
+        button.addEventListener('click', async function() {
+            const asesorId = this.dataset.asesorId;
+            const type = this.dataset.type;
+            const action = this.dataset.action; // 'verificar' o 'rechazar'
+
+            let confirmationMessage = '';
+            let successMessage = '';
+            let errorMessage = '';
+
+            if (action === 'verificar') {
+                confirmationMessage = `¿Estás seguro de que deseas APROBAR la verificación de ${type} para el asesor ${asesorId}?`;
+                successMessage = `¡Documento de ${type} aprobado con éxito!`;
+                errorMessage = `Error al procesar la aprobación:`;
+            } else if (action === 'rechazar') {
+                // Mensaje genérico para el rechazo
+                confirmationMessage = `¿Estás seguro de que deseas RECHAZAR la verificación de ${type} para el asesor ${asesorId}? Se enviará un mensaje genérico al asesor.`;
+                successMessage = `¡Documento de ${type} rechazado con éxito!`;
+                errorMessage = `Error al procesar el rechazo:`;
+            }
+
+            if (!confirm(confirmationMessage)) {
+                return; // Si el usuario cancela, no hacemos nada
+            }
+
+            try {
+                const response = await fetch('/admin/verificar-documento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        asesorId: asesorId,
+                        type: type,
+                        action: action,
+                        // selectedReason y customNotes ya no se envían
+                    })
                 });
-            });
 
-            // Cerrar modal
-            closeButton.addEventListener('click', function() {
-                rejectionModal.style.display = 'none';
-            });
+                const result = await response.json();
 
-            window.addEventListener('click', function(event) {
-                if (event.target == rejectionModal) {
-                    rejectionModal.style.display = 'none';
+                if (response.ok && result.success) {
+                    alert(successMessage);
+                    window.location.reload();
+                } else {
+                    alert(`${errorMessage} ${result.message || 'Error desconocido'}`);
                 }
-            });
-
-            // Confirmar rechazo
-            confirmRejectButton.addEventListener('click', function() {
-                const selectedReason = predefinedReasonSelect.value;
-                const customNotes = rejectionNotes.value.trim();
-
-                let finalNotes = '';
-                if (selectedReason && selectedReason !== 'Otros') {
-                    finalNotes = selectedReason;
-                } else if (selectedReason === 'Otros' && customNotes) {
-                    finalNotes = `Otro: ${customNotes}`;
-                } else if (customNotes) {
-                    finalNotes = customNotes; // Si solo se escriben notas sin seleccionar razón
-                } else if (!selectedReason && !customNotes) {
-                    alert('Por favor, selecciona un motivo de rechazo o ingresa observaciones.');
-                    return;
-                }
-
-                // Si hay una razón predefinida Y notas adicionales (que no sean 'Otros'), las combinamos
-                if (selectedReason && selectedReason !== 'Otros' && customNotes) {
-                    finalNotes = `${selectedReason}. ${customNotes}`;
-                }
-
-                rejectionModal.style.display = 'none';
-                processVerification(currentAsesorId, currentVerificationType, currentAction, finalNotes);
-            });
-
-            // Aprobar
-            approveButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    currentAsesorId = this.dataset.asesorId;
-                    currentVerificationType = this.dataset.type;
-                    currentAction = this.dataset.action;
-                    // No se necesitan notas para aprobar, se envía null
-                    processVerification(currentAsesorId, currentVerificationType, currentAction, null);
-                });
-            });
-
-            async function processVerification(asesorId, type, action, notes) {
-                try {
-                    const response = await fetch('/admin/verificar-documento', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            asesorId: asesorId,
-                            type: type, // 'kyc', 'titulo', 'certificacion'
-                            action: action, // 'verificar', 'rechazar'
-                            notes: notes // Solo para rechazo
-                        })
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`¡Documento de ${type} ${action === 'verificar' ? 'aprobado' : 'rechazado'} con éxito!`);
-                        // Recargar la página para ver los cambios actualizados
-                        window.location.reload();
-                    } else {
-                        alert(`Error al procesar la verificación: ${result.message || 'Error desconocido'}`);
-                    }
-                } catch (error) {
-                    console.error('Error en la solicitud de verificación:', error);
-                    alert('Error de conexión o de red al procesar la solicitud.');
-                }
+            } catch (error) {
+                console.error(`Error en la solicitud de ${action}:`, error);
+                alert(`Error de conexión o de red al procesar la solicitud de ${action}.`);
             }
         });
-    </script>
+    });
 
- 
+    // Los listeners para abrir y cerrar el modal han sido eliminados
+    // Así como la lógica para confirmRejectButton
+});
+    </script>
 </body>
 </html>

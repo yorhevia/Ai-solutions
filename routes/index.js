@@ -3,12 +3,10 @@ var express = require('express');
 const multer = require('multer');
 const fetch = require('node-fetch');
 const cors = require('cors');
-const moment = require('moment'); // Agregado para manejar fechas
-const { v4: uuidv4 } = require('uuid'); // Agregado para generar IDs únicos
+const moment = require('moment');
+const { v4: uuidv4 } = require('uuid');
 
-// Importa requireAuth desde el archivo original
 const requireAuth = require('../config/middleware');
-// isAdmin SÍ necesita importarse aquí, ya que se usará directamente en este archivo
 const isAdmin = require('../config/middlewareisadmin');
 
 const { admin, db, auth } = require('./firebase');
@@ -41,16 +39,15 @@ const upload = multer({
 router.use(cors());
 
 // --- Función auxiliar para añadir notificación ---
-// (Movida aquí para ser accesible en varias rutas)
 async function addNotificationToUser(userId, message, link = '#') {
     try {
         const asesorRef = db.collection('asesores').doc(userId);
         const notification = {
-            id: uuidv4(), // ID único para la notificación
+            id: uuidv4(),
+            timestamp: new Date(), // Fecha actual del servidor de Node.js
             message: message,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(), // Fecha del servidor
             read: false,
-            link: link // Enlace opcional a un recurso relacionado
+            link: link
         };
         await asesorRef.update({
             notifications: admin.firestore.FieldValue.arrayUnion(notification)
@@ -94,8 +91,8 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
             console.error('Error al subir a Imgur:', imgurData);
             const errorMessage = imgurData.data && typeof imgurData.data === 'object' && imgurData.data.error
-                                    ? imgurData.data.error
-                                    : 'Error desconocido al subir la imagen a Imgur.';
+                                        ? imgurData.data.error
+                                        : 'Error desconocido al subir la imagen a Imgur.';
             return res.status(imgurResponse.status || 500).json({
                 success: false,
                 message: errorMessage
@@ -140,7 +137,6 @@ router.get('/homecliente', requireAuth, (req, res) => {
     return res.render('cliente/homecliente');
 });
 router.get('/homeasesor', requireAuth, async (req, res) => {
-    // Asumiendo que req.userEmail está disponible desde requireAuth
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
     const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor';
 
@@ -210,8 +206,6 @@ router.post('/login', async (req, res) => {
         const uid = firebaseResponse.localId;
         console.log('Usuario autenticado con éxito en Firebase (REST API). UID:', uid);
         req.session.userId = uid;
-        // Establecer userEmail en la sesión o en req.userEmail si no lo está ya en el middleware requireAuth
-        // (Esto es importante para el dashboard si el email no se obtiene en requireAuth)
         req.userEmail = email; 
         return res.redirect('/dashboard');
     } catch (error) {
@@ -237,7 +231,6 @@ router.post('/registro', async (req, res) => {
         console.log('Usuario registrado en Firebase Auth:', userRecord.uid);
         req.session.userId = userRecord.uid;
         req.session.userCreationTime = userRecord.metadata.creationTime;
-        // También aquí, es útil establecer el email en req.userEmail o sesión para el dashboard
         req.userEmail = email; 
         return res.redirect('/dashboard');
     } catch (error) {
@@ -298,31 +291,24 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
 router.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
 
-    // Obtener el email del usuario (ya lo tenemos de requireAuth)
     const userEmail = req.userEmail; 
 
-    // Obtener la lista de administradores desde .env
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
 
     try {
-        // 1. **VERIFICAR SI ES ADMINISTRADOR PRIMERO**
         if (adminEmails.includes(userEmail)) {
             console.log(`Usuario ${userEmail} es administrador. Redirigiendo a /admin/verificaciones_pendientes.`);
-            return res.redirect('/admin/verificaciones_pendientes'); // Redirigir a la URL completa del admin
+            return res.redirect('/admin/verificaciones_pendientes');
         }
 
-        // 2. Si no es administrador, procede con la lógica existente para asesor/cliente
         const clienteDoc = await db.collection('clientes').doc(userId).get();
         const asesorDoc = await db.collection('asesores').doc(userId).get();
 
         if (!clienteDoc.exists && !asesorDoc.exists) {
-            // Si el usuario no tiene perfil de cliente ni asesor, redirigir a selección de tipo
             return res.render('ingreso/seleccionar_tipo_usuario');
         } else if (clienteDoc.exists) {
-            // Si tiene perfil de cliente
             return res.redirect('/homecliente');
         } else if (asesorDoc.exists) {
-            // Si tiene perfil de asesor
             return res.redirect('/homeasesor');
         } else {
             console.error('Estado de perfil inconsistente para el usuario:', userId);
@@ -369,9 +355,7 @@ router.get('/cliente/cambiar_password', requireAuth, clienteController.getChange
 router.post('/cliente/cambiar_password', requireAuth, clienteController.changePasswordCliente);
 
 
-
 // Ruta para mostrar la página de verificaciones pendientes (solo para admin)
-// La URL será /admin/verificaciones-pendientes
 router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req, res) => {
     try {
         const asesoresRef = db.collection('asesores');
@@ -383,9 +367,7 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
             const asesor = doc.data();
             asesor._id = doc.id; 
 
-            // Verificar si algún tipo de verificación está pendiente
             const kycPending = asesor.verification && asesor.verification.status === 'pendiente';
-            // Asegúrate de que estás accediendo correctamente a 'verificacion.titulo.estado' y 'verificacion.certificacion.estado'
             const tituloPending = asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente';
             const certificacionPending = asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente';
 
@@ -394,7 +376,6 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
             }
         });
         
-        // Renderiza la vista que está en views/admin/verificaciones_pendientes.ejs
         res.render('admin/verificaciones_pendientes', { asesoresPendientes: asesoresPendientes });
     } catch (error) {
         console.error('Error al cargar verificaciones pendientes (Firestore):', error);
@@ -403,9 +384,9 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
 });
 
 // Ruta para procesar la aprobación o rechazo de documentos
-// La URL será /admin/verificar-documento
 router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res) => {
-    const { asesorId, type, action, notes } = req.body; // 'notes' puede ser un texto predefinido o personalizado
+    // Ya no esperamos selectedReason ni customNotes
+    const { asesorId, type, action } = req.body; 
 
     if (!asesorId || !type || !action) {
         return res.status(400).json({ success: false, message: 'Datos incompletos para la verificación.' });
@@ -421,9 +402,9 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
         const updateData = {};
         let statusPath;
-        let notesPath; // Ruta para las observaciones del rechazo
-        let notificationMessage = ''; // Mensaje que se guardará como notificación
-        let notificationLink = '/perfilasesor'; // Enlace por defecto para el asesor
+        let notesPath;
+        let notificationMessage = ''; 
+        let notificationLink = '/perfilasesor'; 
 
         switch (type) {
             case 'kyc':
@@ -447,24 +428,23 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
         if (action === 'verificar') {
             updateData[statusPath] = 'verificado';
-            updateData[notesPath] = null; // Limpiar notas si se aprueba
-            notificationMessage += " ¡Felicidades! Ya puedes acceder a todas las funcionalidades."; // Mensaje para aprobación
+            updateData[notesPath] = null; 
+            notificationMessage += " ¡Felicidades! Ya puedes acceder a todas las funcionalidades."; 
         } else if (action === 'rechazar') {
-            if (!notes) {
-                return res.status(400).json({ success: false, message: 'Las observaciones son obligatorias para el rechazo.' });
-            }
+            // Mensaje de rechazo predefinido/genérico
+            const predefinedRejectionMessage = `Tu documento fue rechazado. Esto puede deberse a: documento ilegible, información incompleta, documento expirado o no válido, datos no coincidentes, formato incorrecto, o foto no clara. Por favor, revisa tu documento y vuelve a subirlo.`;
+            
             updateData[statusPath] = 'rechazado';
-            updateData[notesPath] = notes; // Guardar las notas de rechazo
-            notificationMessage += ` Motivo: ${notes}. Por favor, corrige y vuelve a subir el documento.`; // Añadir motivo al mensaje de notificación
+            updateData[notesPath] = predefinedRejectionMessage; // Guardar el mensaje genérico
+            notificationMessage = `Tu documento fue rechazado. Motivo: ${predefinedRejectionMessage}`; // Usa el mismo mensaje para la notificación
+
         } else {
             return res.status(400).json({ success: false, message: 'Acción inválida.' });
         }
 
         await asesorRef.update(updateData);
 
-        // --- Sistema de Notificaciones: Guardar la notificación ---
         await addNotificationToUser(asesorId, notificationMessage, notificationLink);
-        // --- FIN Sistema de Notificaciones ---
 
         res.json({ success: true, message: `Verificación de ${type} actualizada a ${updateData[statusPath]}.` });
 
@@ -484,12 +464,10 @@ router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
             return res.status(404).send('Perfil de asesor no encontrado.');
         }
         const asesorData = asesorDoc.data();
-        // Obtener solo las notificaciones y ordenarlas por más reciente primero
         const notifications = (asesorData.notifications || []).sort((a, b) => {
-            // Manejar el caso donde timestamp podría no existir o no ser un objeto Timestamp de Firestore
-            const timeA = b.timestamp && b.timestamp._seconds !== undefined ? b.timestamp._seconds : 0;
-            const timeB = a.timestamp && a.timestamp._seconds !== undefined ? a.timestamp._seconds : 0;
-            return timeA - timeB; // Esto ordena del más nuevo al más viejo
+            const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+            const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+            return timeA - timeB; 
         });
 
         res.render('asesor/notificaciones', { notifications: notifications });
@@ -514,7 +492,7 @@ router.post('/asesor/notificaciones/marcar-leida', requireAuth, async (req, res)
         const notifications = asesorDoc.data().notifications || [];
         const updatedNotifications = notifications.map(notif => {
             if (notif.id === notificationId) {
-                return { ...notif, read: true }; // Marcar como leído
+                return { ...notif, read: true };
             }
             return notif;
         });
@@ -540,14 +518,13 @@ router.get('/api/asesor/notificaciones-resumen', requireAuth, async (req, res) =
         const notifications = asesorData.notifications || [];
 
         const unreadCount = notifications.filter(notif => !notif.read).length;
-        // Obtener las últimas 3 notificaciones (leídas o no) ordenadas por fecha
         const latestNotifications = notifications
-                                    .sort((a, b) => {
-                                        const timeA = b.timestamp && b.timestamp._seconds !== undefined ? b.timestamp._seconds : 0;
-                                        const timeB = a.timestamp && a.timestamp._seconds !== undefined ? a.timestamp._seconds : 0;
-                                        return timeA - timeB; // Más reciente primero
-                                    })
-                                    .slice(0, 3); // Obtener solo las 3 más recientes
+                                        .sort((a, b) => {
+                                            const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+                                            const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+                                            return timeA - timeB; 
+                                        })
+                                        .slice(0, 3); 
 
         res.json({ success: true, unreadCount: unreadCount, latestNotifications: latestNotifications });
 
