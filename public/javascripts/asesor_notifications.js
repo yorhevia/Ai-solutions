@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 listItem.classList.remove('unread');
                                 fetchNotifications(); // Volver a cargar para actualizar el contador
                             }
-                            // Opcional: Cerrar el dropdown después de hacer clic
                             notificationDropdown.classList.remove('show');
                         });
 

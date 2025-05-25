@@ -56,7 +56,7 @@ exports.postEditPersonalAndContactInfo = async (req, res) => {
 
         await db.collection('asesores').doc(asesorUid).update(updateData);
 
-        // Actualizar displayName en Firebase Authentication (opcional pero recomendado)
+        // Actualizar displayName en Firebase Authentication
         await admin.auth().updateUser(asesorUid, {
             displayName: `${nombre} ${apellido}`,
         });

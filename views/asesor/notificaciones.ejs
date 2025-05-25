@@ -58,7 +58,6 @@
                             notificationCard.classList.remove('unread');
                             notificationCard.classList.add('read');
                             btn.remove(); // Eliminar el botón "Marcar como leída"
-                            // Opcional: Actualizar el contador de notificaciones en la campana sin recargar
                             if (window.updateNotificationBell) {
                                 window.updateNotificationBell(); // Llama a la función global de la navbar
                             }

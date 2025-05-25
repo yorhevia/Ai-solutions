@@ -338,7 +338,7 @@
                 editPersonalErrorMessage.style.display = 'none';
                 globalMessage.classList.remove('show');
                 globalMessage.style.display = 'none';
-                editProfessionalCard.style.display = 'none'; // Asegúrate de cerrar la otra tarjeta
+                editProfessionalCard.style.display = 'none'; 
             });
 
             cancelEditPersonalButton.addEventListener('click', function() {
@@ -416,7 +416,7 @@
                 editProfessionalErrorMessage.style.display = 'none';
                 globalMessage.classList.remove('show');
                 globalMessage.style.display = 'none';
-                editPersonalCard.style.display = 'none'; // Asegúrate de cerrar la otra tarjeta
+                editPersonalCard.style.display = 'none';
             });
 
             cancelEditProfessionalButton.addEventListener('click', function() {
@@ -546,7 +546,7 @@
                 // Mostrar el mensaje formal al hacer clic en el botón de subir foto (la etiqueta)
             if (uploadButtonLabel) {
                 uploadButtonLabel.addEventListener('click', function() {
-                    // Solo mostrar el mensaje inicial de recomendación, no "Subiendo foto..."
+                    // Solo mostrar el mensaje inicial de recomendación
                     uploadMessage.textContent = 'Por favor, sube una foto formal y clara de perfil. **Recomendado: 250px de ancho y 333px de alto.**';
                     uploadMessage.classList.add('show');
                     uploadMessage.style.display = 'block';

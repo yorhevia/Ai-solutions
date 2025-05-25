@@ -1,5 +1,3 @@
-// Middleware para verificar si el usuario es administrador usando .env
-
 const isAdmin = async (req, res, next) => {
     if (!req.userEmail) {
         console.warn('Error: userEmail no disponible en req. Es posible que requireAuth no se haya ejecutado o haya fallado.');

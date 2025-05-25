@@ -110,13 +110,10 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
     const approveButtons = document.querySelectorAll('.approve-button');
-    const rejectButtons = document.querySelectorAll('.reject-button'); // Todavía necesitamos seleccionar estos botones
+    const rejectButtons = document.querySelectorAll('.reject-button'); 
 
-    // La lógica para el modal de rechazo, sus elementos y sus eventos ha sido eliminada
-    // currentAsesorId, currentVerificationType, currentAction ya no son necesarios globalmente
 
-    // --- MANEJADOR PARA LOS BOTONES DE APROBAR Y RECHAZAR (AHORA SIMILARES) ---
-    // Unimos los listeners para 'approve-button' y 'reject-button' para simplificar
+    // --- MANEJADOR PARA LOS BOTONES DE APROBAR Y RECHAZAR (AHORA SIMILARES)
     const actionButtons = document.querySelectorAll('.approve-button, .reject-button');
 
     actionButtons.forEach(button => {
@@ -173,8 +170,6 @@
         });
     });
 
-    // Los listeners para abrir y cerrar el modal han sido eliminados
-    // Así como la lógica para confirmRejectButton
 });
     </script>
 </body>

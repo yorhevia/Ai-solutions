@@ -16,7 +16,6 @@ exports.mostrarPerfilCliente = async (req, res) => {
 
         if (!clienteDoc.exists) {
             console.warn(`Perfil de cliente no encontrado en Firestore para UID: ${clienteUid}`);
-            // Si el perfil no existe, puedes renderizar una vista con campos vacíos o un mensaje
             return res.status(404).render('cliente/perfilcliente', {
                 cliente: {
                     nombre: 'Usuario',
@@ -126,7 +125,7 @@ exports.editarInfoFinancieraCliente = async (req, res) => {
         }
 
         // Validaciones básicas
-        if (!perfil_riesgo) { // Ahora perfil_riesgo siempre vendrá si se selecciona un radio
+        if (!perfil_riesgo) { 
             return res.status(400).json({ success: false, message: 'El perfil de riesgo es obligatorio.' });
         }
         if (!objetivo_principal || objetivo_principal.trim() === '') { // Validar si el objetivo final está vacío
@@ -211,21 +210,12 @@ exports.uploadProfilePhotoCliente = async (req, res) => {
 
 // --- Función para renderizar el formulario de cambio de contraseña del cliente (GET) ---
 exports.getChangePasswordPageCliente = (req, res) => {
-    // --- AGREGAR ESTOS CONSOLE.LOG ---
     console.log('--- INICIO: GET /cliente/cambiar_password ---');
-    // Los mensajes flash ya están en res.locals gracias al middleware de app.js
-    console.log('Recuperando mensajes flash para renderizar la vista (desde res.locals):');
-    console.log('  - success_msg:', res.locals.success_msg);
-    console.log('  - error_msg:', res.locals.error_msg);
-    console.log('  - errors (array):', res.locals.error);
-    // --- FIN AGREGAR CONSOLE.LOG ---
 
     res.render('cliente/cambiar_password', {
-        user: req.user // Solo pasas el usuario, los flashes ya están en res.locals
+        user: req.user 
     });
-    // --- AGREGAR ESTE CONSOLE.LOG ---
-    console.log('--- FIN: GET /cliente/cambiar_password (Vista renderizada) ---');
-    // --- FIN AGREGAR CONSOLE.LOG ---
+ 
 };
 
 // --- Función para manejar la lógica de cambio de contraseña del cliente (POST) ---
@@ -233,11 +223,6 @@ exports.changePasswordCliente = async (req, res) => {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
     const errors = [];
 
-    // --- AGREGAR ESTOS CONSOLE.LOG ---
-    console.log('--- INICIO: POST /cliente/cambiar_password ---');
-    console.log('Datos recibidos en el POST:', req.body);
-    console.log('UserID en sesión (req.session.userId):', req.session.userId);
-    // --- FIN AGREGAR CONSOLE.LOG ---
 
     // Validaciones
     if (!currentPassword || !newPassword || !confirmNewPassword) {
@@ -251,14 +236,6 @@ exports.changePasswordCliente = async (req, res) => {
     }
 
     if (errors.length > 0) {
-        // --- AGREGAR ESTOS CONSOLE.LOG ---
-        console.log('Validación fallida. Errores:', errors);
-        // --- FIN AGREGAR CONSOLE.LOG ---
-        req.flash('error', errors); // Establece el array de errores
-        // --- AGREGAR ESTE CONSOLE.LOG ---
-        console.log('Flash "error" establecido. Redirigiendo a /cliente/cambiar_password');
-        console.log('--- FIN: POST /cliente/cambiar_password (Redirección con errores) ---');
-        // --- FIN AGREGAR CONSOLE.LOG ---
         return res.redirect('/cliente/cambiar_password'); // Redirige de vuelta al formulario del cliente
     }
 
@@ -266,27 +243,14 @@ exports.changePasswordCliente = async (req, res) => {
         const clienteUid = req.session.userId;
 
         if (!clienteUid) {
-            // --- AGREGAR ESTOS CONSOLE.LOG ---
-            console.log('Error: clienteUid no encontrado en sesión. Redirigiendo a /login');
-            // --- FIN AGREGAR CONSOLE.LOG ---
             req.flash('error_msg', 'Usuario no autenticado para cambiar la contraseña.');
             return res.redirect('/login');
         }
 
-        // Utilizar Firebase Admin SDK para actualizar la contraseña
-        // NOTA IMPORTANTE: El Admin SDK NO verifica la contraseña actual.
-        // Si necesitas verificar 'currentPassword' por seguridad (lo cual es muy recomendado),
-        // deberías re-autenticar al usuario usando el SDK de Firebase en el cliente
-        // y luego pasar el ID Token verificado al backend, o usar una Firebase Callable Function.
         await auth.updateUser(clienteUid, {
             password: newPassword
         });
 
-        // --- AGREGAR ESTOS CONSOLE.LOG ---
-        console.log('Contraseña actualizada con éxito para UID:', clienteUid);
-        console.log('Flash "success_msg" establecido. Redirigiendo a /perfilcliente');
-        console.log('--- FIN: POST /cliente/cambiar_password (Éxito) ---');
-        // --- FIN AGREGAR CONSOLE.LOG ---
         req.flash('success_msg', '¡Contraseña actualizada con éxito!');
         res.redirect('/perfilcliente'); // Redirige al perfil del cliente
 
@@ -309,11 +273,6 @@ exports.changePasswordCliente = async (req, res) => {
                     errorMessage = `Error de Firebase: ${err.message}`;
             }
         }
-        // --- AGREGAR ESTOS CONSOLE.LOG ---
-        console.log('Error en bloque try-catch. Flash "error_msg" establecido:', errorMessage);
-        console.log('Redirigiendo a /cliente/cambiar_password');
-        console.log('--- FIN: POST /cliente/cambiar_password (Error en try-catch) ---');
-        // --- FIN AGREGAR CONSOLE.LOG ---
         req.flash('error_msg', errorMessage);
         res.redirect('/cliente/cambiar_password');
     }

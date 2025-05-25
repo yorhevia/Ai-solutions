@@ -1,4 +1,3 @@
-// Importa Firebase Auth desde tu archivo de configuración de Firebase
 const { auth } = require('../routes/firebase'); 
 
 function requireAuth(req, res, next) {

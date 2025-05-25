@@ -81,8 +81,6 @@
         notificationBell.addEventListener('click', function(event) {
             event.preventDefault(); // Evita que el enlace recargue la página
             notificationDropdown.classList.toggle('show');
-            // Cuando se abre el dropdown, si se quiere que se marquen como leídas al verlas,
-            // se necesitaría una petición POST adicional aquí. Por ahora, solo se actualiza al cargar.
         });
 
         // Cierra el dropdown si se hace clic fuera de él
@@ -94,7 +92,6 @@
 
         // Cargar notificaciones al cargar la página
         window.updateNotificationBell();
-        // Opcional: Actualizar notificaciones cada cierto tiempo (ej. cada minuto)
-        // setInterval(window.updateNotificationBell, 60000);
+
     });
 </script>

@@ -1,5 +1,3 @@
-// controllers/asesorController.js
-
 // Importa las instancias de Firebase admin SDK
 const admin = require('firebase-admin');
 const db = admin.firestore();
@@ -87,7 +85,7 @@ exports.mostrarPerfilAsesor = async (req, res) => {
             user: req.user,
             success_msg: req.flash('success_msg'),
             error_msg: req.flash('error_msg'),
-            info_msg: req.flash('info_msg'), // Añadir info_msg aquí
+            info_msg: req.flash('info_msg'),
             error: req.flash('error')
         });
     } catch (error) {
@@ -253,7 +251,7 @@ exports.getVerificationPageAsesor = async (req, res) => {
             asesor: asesorData,
             success_msg: req.flash('success_msg'),
             error_msg: req.flash('error_msg'),
-            info_msg: req.flash('info_msg'), // Añadir info_msg aquí
+            info_msg: req.flash('info_msg'),
             error: req.flash('error')
         });
     } catch (error) {
@@ -504,7 +502,7 @@ exports.postVerifyIdentityAsesor = async (req, res) => {
 };
 
 
-// --- Funciones para Cliente (sin cambios significativos, se mantienen como referencia) ---
+
 
 // Muestra el perfil del cliente
 exports.mostrarPerfilCliente = async (req, res) => {

@@ -38,7 +38,8 @@ const upload = multer({
 
 router.use(cors());
 
-// --- Función auxiliar para añadir notificación ---
+
+// Función auxiliar para añadir notificación
 async function addNotificationToUser(userId, message, link = '#') {
     try {
         const asesorRef = db.collection('asesores').doc(userId);
@@ -58,107 +59,19 @@ async function addNotificationToUser(userId, message, link = '#') {
     }
 }
 
-// --- RUTAS DE UPLOAD DE FOTO DE PERFIL ---
-router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No se subió ningún archivo.' });
-        }
 
-        if (!imgurClientId) {
-            console.error('ERROR: IMGUR_CLIENT_ID no está configurado en las variables de entorno.');
-            return res.status(500).json({ success: false, message: 'Error de configuración del servidor. Contacte al administrador.' });
-        }
+//Rutas de Acceso y Autenticación Login, Registro, Logout
 
-        const imageBase64 = req.file.buffer.toString('base64');
-
-        const imgurResponse = await fetch('https://api.imgur.com/3/image', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Client-ID ${imgurClientId}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                image: imageBase64,
-                type: 'base64',
-                title: `Foto de perfil de asesor ${req.session.userId || 'desconocido'}`,
-                description: `Subida desde AI Finance Solutions el ${new Date().toISOString()}`
-            })
-        });
-
-        const imgurData = await imgurResponse.json();
-
-        if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
-            console.error('Error al subir a Imgur:', imgurData);
-            const errorMessage = imgurData.data && typeof imgurData.data === 'object' && imgurData.data.error
-                                        ? imgurData.data.error
-                                        : 'Error desconocido al subir la imagen a Imgur.';
-            return res.status(imgurResponse.status || 500).json({
-                success: false,
-                message: errorMessage
-            });
-        }
-
-        const imageUrl = imgurData.data.link;
-        console.log('Imagen subida a Imgur:', imageUrl);
-
-        const userId = req.session.userId;
-
-        if (!userId) {
-            return res.status(401).json({ success: false, message: 'Usuario no autenticado o ID de sesión no disponible.' });
-        }
-
-        await db.collection('asesores').doc(userId).update({
-            fotoPerfilUrl: imageUrl
-        });
-        console.log(`URL de foto de perfil actualizada en Firestore para el asesor ${userId}: ${imageUrl}`);
-
-        return res.json({
-            success: true,
-            message: 'Foto de perfil subida y actualizada correctamente.',
-            imageUrl: imageUrl
-        });
-
-    } catch (error) {
-        console.error('Error en el endpoint /upload-profile-photo:', error);
-        if (error instanceof multer.MulterError) {
-            return res.status(400).json({ success: false, message: `Error en la subida: ${error.message}` });
-        }
-        return res.status(500).json({ success: false, message: 'Error interno del servidor al procesar la imagen.' });
-    }
-});
-
-// --- RUTAS DE PERFIL ---
-router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfilCliente);
-router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
-
-// --- RUTAS DE HOME ---
-router.get('/homecliente', requireAuth, (req, res) => {
-    return res.render('cliente/homecliente');
-});
-router.get('/homeasesor', requireAuth, async (req, res) => {
-    const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
-    const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor';
-
-    return res.render('asesor/homeasesor', { userRole: userRole, currentPage: 'home' });
-});
-
-// --- RUTAS DE ACCESO ---
+// Ruta de bienvenida
 router.get('/', (req, res) => {
     return res.render('welcome');
 });
+
+// Rutas de Login
 router.get('/login', (req, res) => {
     return res.render('ingreso/login');
 });
-router.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.error('Error al destruir la sesión:', err);
-            return res.status(500).send('Error al cerrar sesión.');
-        }
-        return res.redirect('/login');
-    });
-});
+
 router.post('/login', async (req, res) => {
     const { email, contrasena } = req.body;
     if (!email || !contrasena) {
@@ -206,7 +119,7 @@ router.post('/login', async (req, res) => {
         const uid = firebaseResponse.localId;
         console.log('Usuario autenticado con éxito en Firebase (REST API). UID:', uid);
         req.session.userId = uid;
-        req.userEmail = email; 
+        req.userEmail = email;
         return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error general en la ruta /login:', error);
@@ -214,9 +127,11 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Rutas de Registro de Cuenta (Firebase Auth)
 router.get('/registro', (req, res) => {
     return res.render('ingreso/registro');
 });
+
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
     if (contrasena !== confirmar_contrasena) {
@@ -231,7 +146,7 @@ router.post('/registro', async (req, res) => {
         console.log('Usuario registrado en Firebase Auth:', userRecord.uid);
         req.session.userId = userRecord.uid;
         req.session.userCreationTime = userRecord.metadata.creationTime;
-        req.userEmail = email; 
+        req.userEmail = email;
         return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error al registrar usuario:', error);
@@ -247,13 +162,29 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// --- RUTAS DE REGISTRO DE PERFIL ---
+// Ruta de Logout
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al destruir la sesión:', err);
+            return res.status(500).send('Error al cerrar sesión.');
+        }
+        return res.redirect('/login');
+    });
+});
+
+
+
+//Rutas de Registro de Perfil Información Adicional
+
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
     return res.render('ingreso/registrocliente');
 });
+
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
     return res.render('ingreso/registroasesor');
 });
+
 router.post('/registro-perfil', requireAuth, async (req, res) => {
     const { tipo_usuario, ...formData } = req.body;
     const userId = req.session.userId;
@@ -287,17 +218,16 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
     }
 });
 
-// --- RUTA DASHBOARD ---
+
+// Ruta del Dashboard (redirige según el tipo de usuario)
 router.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
-
-    const userEmail = req.userEmail; 
+    const userEmail = req.userEmail;
 
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
 
     try {
         if (adminEmails.includes(userEmail)) {
-            console.log(`Usuario ${userEmail} es administrador. Redirigiendo a /admin/verificaciones_pendientes.`);
             return res.redirect('/admin/verificaciones_pendientes');
         }
 
@@ -320,25 +250,24 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     }
 });
 
-// --- RUTAS DE CAMBIO DE CONTRASEÑA (Existentes) ---
-router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage); 
-router.post('/cambiar-password', requireAuth, asesorController.changePassword); 
-
-router.get('/consulta', (req, res) => {
-    return res.render('asesor/consulta');
+// Rutas Home
+router.get('/homecliente', requireAuth, (req, res) => {
+    return res.render('cliente/homecliente');
 });
 
-// --- Rutas de Verificación de Identidad para Asesor (MODIFICADA para URLs) ---
-router.get('/asesor/verificar_identidad', requireAuth, asesorController.getVerificationPageAsesor);
-router.post('/asesor/verificar_identidad', requireAuth, asesorController.postVerifyIdentityAsesor);
+router.get('/homeasesor', requireAuth, async (req, res) => {
+    const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
+    const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor';
 
-//Rutas de cliente
-router.get('/consultacliente', (req, res) => {
-    return res.render('cliente/consultacliente');
+    return res.render('asesor/homeasesor', { userRole: userRole, currentPage: 'home' });
 });
-router.get('/formulariocliente', (req, res) => {
-    return res.render('cliente/formulariocliente');
-});
+
+
+// Rutas de Perfil
+router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfilCliente);
+router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
+
+// Rutas de Edición de Perfil
 router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
 
 // Editar información personal del cliente
@@ -347,12 +276,103 @@ router.post('/cliente/editar-info-personal', requireAuth, clienteController.edit
 // Editar información financiera del cliente
 router.post('/cliente/editar-info-financiera', requireAuth, clienteController.editarInfoFinancieraCliente);
 
-// Subir foto de perfil del cliente
+// Subir foto de perfil (general, usada por ambos roles)
+router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No se subió ningún archivo.' });
+        }
+
+        if (!imgurClientId) {
+            console.error('ERROR: IMGUR_CLIENT_ID no está configurado en las variables de entorno.');
+            return res.status(500).json({ success: false, message: 'Error de configuración del servidor. Contacte al administrador.' });
+        }
+
+        const imageBase64 = req.file.buffer.toString('base64');
+
+        const imgurResponse = await fetch('https://api.imgur.com/3/image', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Client-ID ${imgurClientId}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageBase64,
+                type: 'base64',
+                title: `Foto de perfil de asesor ${req.session.userId || 'desconocido'}`,
+                description: `Subida desde AI Finance Solutions el ${new Date().toISOString()}`
+            })
+        });
+
+        const imgurData = await imgurResponse.json();
+
+        if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
+            console.error('Error al subir a Imgur:', imgurData);
+            const errorMessage = imgurData.data && typeof imgurData.data === 'object' && imgurData.data.error
+                                    ? imgurData.data.error
+                                    : 'Error desconocido al subir la imagen a Imgur.';
+            return res.status(imgurResponse.status || 500).json({
+                success: false,
+                message: errorMessage
+            });
+        }
+
+        const imageUrl = imgurData.data.link;
+        console.log('Imagen subida a Imgur:', imageUrl);
+
+        const userId = req.session.userId;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Usuario no autenticado o ID de sesión no disponible.' });
+        }
+
+        await db.collection('asesores').doc(userId).update({
+            fotoPerfilUrl: imageUrl
+        });
+        console.log(`URL de foto de perfil actualizada en Firestore para el asesor ${userId}: ${imageUrl}`);
+
+        return res.json({
+            success: true,
+            message: 'Foto de perfil subida y actualizada correctamente.',
+            imageUrl: imageUrl
+        });
+
+    } catch (error) {
+        console.error('Error en el endpoint /upload-profile-photo:', error);
+        if (error instanceof multer.MulterError) {
+            return res.status(400).json({ success: false, message: `Error en la subida: ${error.message}` });
+        }
+        return res.status(500).json({ success: false, message: 'Error interno del servidor al procesar la imagen.' });
+    }
+});
+
+// Subir foto de perfil del cliente (usando el mismo multer 'upload')
 router.post('/cliente/upload-profile-photo', requireAuth, upload.single('profilePhoto'), clienteController.uploadProfilePhotoCliente);
+
+// Rutas de cambio de contraseña para Asesor
+router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage);
+router.post('/cambiar-password', requireAuth, asesorController.changePassword);
 
 // Rutas para cambiar contraseña del cliente
 router.get('/cliente/cambiar_password', requireAuth, clienteController.getChangePasswordPageCliente);
 router.post('/cliente/cambiar_password', requireAuth, clienteController.changePasswordCliente);
+
+
+router.get('/consulta', (req, res) => {
+    return res.render('asesor/consulta');
+});
+
+router.get('/consultacliente', (req, res) => {
+    return res.render('cliente/consultacliente');
+});
+
+router.get('/formulariocliente', (req, res) => {
+    return res.render('cliente/formulariocliente');
+});
+
+
+router.get('/asesor/verificar_identidad', requireAuth, asesorController.getVerificationPageAsesor);
+router.post('/asesor/verificar_identidad', requireAuth, asesorController.postVerifyIdentityAsesor);
 
 
 // Ruta para mostrar la página de verificaciones pendientes (solo para admin)
@@ -365,7 +385,7 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
 
         snapshot.forEach(doc => {
             const asesor = doc.data();
-            asesor._id = doc.id; 
+            asesor._id = doc.id;
 
             const kycPending = asesor.verification && asesor.verification.status === 'pendiente';
             const tituloPending = asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente';
@@ -375,7 +395,7 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
                 asesoresPendientes.push(asesor);
             }
         });
-        
+
         res.render('admin/verificaciones_pendientes', { asesoresPendientes: asesoresPendientes });
     } catch (error) {
         console.error('Error al cargar verificaciones pendientes (Firestore):', error);
@@ -385,8 +405,7 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
 
 // Ruta para procesar la aprobación o rechazo de documentos
 router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res) => {
-    // Ya no esperamos selectedReason ni customNotes
-    const { asesorId, type, action } = req.body; 
+    const { asesorId, type, action } = req.body;
 
     if (!asesorId || !type || !action) {
         return res.status(400).json({ success: false, message: 'Datos incompletos para la verificación.' });
@@ -403,8 +422,8 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
         const updateData = {};
         let statusPath;
         let notesPath;
-        let notificationMessage = ''; 
-        let notificationLink = '/perfilasesor'; 
+        let notificationMessage = '';
+        let notificationLink = '/perfilasesor';
 
         switch (type) {
             case 'kyc':
@@ -415,7 +434,7 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
             case 'titulo':
                 statusPath = 'verificacion.titulo.estado';
                 notesPath = 'verificacion.titulo.observaciones';
-                notificationMessage = `Tu **Título Profesional** ha sido **${action === 'verificar' ? 'aprobado' : 'rechazado'}**.`;
+                notificationMessage = `Tu **Título Profesional** ha sido **${action === 'verificar' ? 'aprobado' : 'rechazada'}**.`;
                 break;
             case 'certificacion':
                 statusPath = 'verificacion.certificacion.estado';
@@ -428,15 +447,14 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
         if (action === 'verificar') {
             updateData[statusPath] = 'verificado';
-            updateData[notesPath] = null; 
-            notificationMessage += " ¡Felicidades! Ya puedes acceder a todas las funcionalidades."; 
+            updateData[notesPath] = null;
+            notificationMessage += " ¡Felicidades! Ya puedes acceder a todas las funcionalidades.";
         } else if (action === 'rechazar') {
-            // Mensaje de rechazo predefinido/genérico
             const predefinedRejectionMessage = `Tu documento fue rechazado. Esto puede deberse a: documento ilegible, información incompleta, documento expirado o no válido, datos no coincidentes, formato incorrecto, o foto no clara. Por favor, revisa tu documento y vuelve a subirlo.`;
-            
+
             updateData[statusPath] = 'rechazado';
-            updateData[notesPath] = predefinedRejectionMessage; // Guardar el mensaje genérico
-            notificationMessage = `Tu documento fue rechazado. Motivo: ${predefinedRejectionMessage}`; // Usa el mismo mensaje para la notificación
+            updateData[notesPath] = predefinedRejectionMessage;
+            notificationMessage = `Tu documento fue rechazado. Motivo: ${predefinedRejectionMessage}`;
 
         } else {
             return res.status(400).json({ success: false, message: 'Acción inválida.' });
@@ -467,7 +485,7 @@ router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
         const notifications = (asesorData.notifications || []).sort((a, b) => {
             const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
             const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
-            return timeA - timeB; 
+            return timeA - timeB;
         });
 
         res.render('asesor/notificaciones', { notifications: notifications });
@@ -519,12 +537,12 @@ router.get('/api/asesor/notificaciones-resumen', requireAuth, async (req, res) =
 
         const unreadCount = notifications.filter(notif => !notif.read).length;
         const latestNotifications = notifications
-                                        .sort((a, b) => {
-                                            const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
-                                            const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
-                                            return timeA - timeB; 
-                                        })
-                                        .slice(0, 3); 
+                                            .sort((a, b) => {
+                                                const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
+                                                const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
+                                                return timeA - timeB;
+                                            })
+                                            .slice(0, 3);
 
         res.json({ success: true, unreadCount: unreadCount, latestNotifications: latestNotifications });
 

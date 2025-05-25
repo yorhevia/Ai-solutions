@@ -8,7 +8,7 @@ var logger = require('morgan');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-const admin = require('./routes/firebase'); // Asegúrate de que esta importación sea correcta y de que firebase.js inicialice admin.firestore() y admin.auth() correctamente.
+const admin = require('./routes/firebase'); 
 
 
 var indexRouter = require('./routes/index');
@@ -39,7 +39,7 @@ app.use(session({
  
     cookie: {
         httpOnly: true,
-        // 'secure' debe ser 'false' en desarrollo si no usas HTTPS.
+        // 'secure' debe ser 'false' en desarrollo si no se usa HTTPS.
         // Render lo establecerá a 'true' en producción si el tráfico es HTTPS.
         secure: process.env.NODE_ENV === 'production',
         maxAge: 3600000 // 1 hora de duración para la cookie de sesión
@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter); // Asegúrate de que esta línea es necesaria
+app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
