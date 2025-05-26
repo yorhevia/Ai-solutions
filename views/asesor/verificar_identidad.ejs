@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/stylesheets/kyc.css">
     <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+   
 </head>
 <body>
     <%- include('../partials/asesor_navbar') %>
@@ -39,6 +40,16 @@
         <% } %>
 
         <form action="/asesor/verificar_identidad" method="POST" class="edit-card">
+            <div class="tutorial-box">
+                <p class="mandatory-step-title"><i class="fas fa-exclamation-circle"></i> PASO OBLIGATORIO: Subir Documentos a Google Drive/Dropbox</p>
+                <p>Para garantizar la seguridad y privacidad de tus documentos, te pedimos que subas las fotos de tus documentos de identidad y credenciales profesionales a un servicio de almacenamiento en la nube como **Google Drive** o **Dropbox**.</p>
+                <p>Asegúrate de configurar los enlaces como **"Cualquier persona con el enlace puede ver"** para que podamos revisarlos. Luego, pega las URLs públicas en los campos correspondientes a continuación.</p>
+                <p>Si necesitas ayuda, puedes consultar:</p>
+                <ul>
+                    <li><a href="https://support.google.com/drive/answer/2494822?hl=es" target="_blank">Cómo compartir archivos en Google Drive</a></li>
+                    <li><a href="https://help.dropbox.com/es-es/files-folders/share/create-share-link" target="_blank">Cómo crear enlaces compartidos en Dropbox</a></li>
+                </ul>
+            </div>
             <h2 class="form-section-title"><i class="fas fa-id-card"></i> Documentos de Identidad</h2>
             <p class="description">
                 Por favor, pega las URLs de los documentos que subiste a Google Drive o Dropbox, asegurándote de que los enlaces sean compartibles públicamente para su revisión (configura "Cualquier persona con el enlace puede ver").
@@ -103,7 +114,8 @@
                     <i class="fas fa-info-circle"></i> Tu título universitario ya ha sido **VERIFICADO**.
                 </div>
             <% } %>
-            <fieldset> <div class="form-group">
+            <fieldset> 
+                <div class="form-group">
                     <label for="tituloUniversitarioUrl">URL Título Universitario:</label>
                     <input type="url" id="tituloUniversitarioUrl" name="tituloUniversitarioUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu título" value="<%= asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento || '' %>" required <%= isTituloVerified ? 'readonly' : '' %>>
                 </div>
@@ -114,7 +126,8 @@
                     <i class="fas fa-info-circle"></i> Tu certificación profesional ya ha sido **VERIFICADA**.
                 </div>
             <% } %>
-            <fieldset> <div class="form-group">
+            <fieldset> 
+                <div class="form-group">
                     <label for="certificacionProfesionalUrl">URL Certificación Profesional (Opcional):</label>
                     <input type="url" id="certificacionProfesionalUrl" name="certificacionProfesionalUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu certificación" value="<%= asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento || '' %>" <%= isCertificacionVerified ? 'readonly' : '' %>>
                 </div>
