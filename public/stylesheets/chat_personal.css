@@ -1,0 +1,391 @@
+/* public/stylesheets/chat_personal.css - Estilo Normal/Básico con Centrado y Footer */
+
+/* Estilos globales para el body de la página del chat */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Apila el contenido verticalmente: navbar, main-content-wrapper, footer */
+    min-height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
+    box-sizing: border-box;
+}
+
+/* El main-content-wrapper ayudará a centrar el chat y dejar espacio para la navbar y el footer */
+.main-content-wrapper {
+    flex-grow: 1; /* Permite que este wrapper ocupe todo el espacio disponible */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente el chat-container */
+    align-items: center; /* Centra verticalmente el chat-container */
+    padding-top: 70px; /* Espacio para la navbar fija (asumiendo 70px de alto) */
+    padding-bottom: 50px; /* Espacio para el footer (asumiendo 50px de alto) */
+    box-sizing: border-box;
+    width: 100%; /* Asegura que ocupe todo el ancho disponible */
+}
+
+/* Contenedor principal del chat */
+.chat-container {
+    width: 100%;
+    max-width: 700px;
+    height: calc(100vh - 200px); /* Ajusta la altura del chat para dejar espacio para navbar, footer y márgenes */
+    min-height: 500px; /* Altura mínima para que no sea muy pequeño en pantallas grandes */
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 20px; /* Margen para que no toque los bordes en pantallas muy pequeñas */
+}
+
+/* Encabezado del chat */
+.chat-header {
+    background-color: #343a40; /* Gris oscuro */
+    color: white;
+    padding: 15px 20px;
+    font-size: 1.1em;
+    font-weight: normal;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 1.1em;
+    color: inherit;
+}
+
+#chatHeaderUserName {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+/* Contenedor de mensajes */
+.messages-container {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #fdfdfd;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Estilos base para cada mensaje - SIN GLOBOS */
+.message {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    word-wrap: break-word;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e0e0e0; /* Separador entre mensajes */
+}
+
+.message:last-child {
+    border-bottom: none; /* No hay separador en el último mensaje */
+}
+
+/* Estilos para "Mis mensajes" (enviados por el usuario actual) */
+.my-message {
+    align-self: flex-end; /* Aún alineado a la derecha */
+    text-align: right; /* Alinea el texto a la derecha */
+    color: #333;
+    background-color: transparent; /* No hay fondo de globo */
+}
+
+/* Estilos para mensajes de otros usuarios */
+.other-message {
+    align-self: flex-start; /* Alineado a la izquierda */
+    text-align: left; /* Alinea el texto a la izquierda */
+    color: #333;
+    background-color: transparent; /* No hay fondo de globo */
+}
+
+/* Nombre del remitente */
+.sender-name {
+    font-weight: bold;
+    font-size: 0.95em;
+    color: #007bff; /* Azul primario para el nombre */
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Nombre del remitente en mis mensajes */
+.my-message .sender-name {
+    color: #28a745; /* Verde para mi nombre */
+    text-align: right;
+}
+
+/* Contenido del mensaje de texto */
+.message-content p {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+/* Timestamp del mensaje */
+.message .timestamp {
+    font-size: 0.7em;
+    color: #6c757d; /* Gris más oscuro para el timestamp */
+    margin-top: 5px;
+    display: block;
+}
+
+.my-message .timestamp {
+    text-align: right;
+}
+
+.other-message .timestamp {
+    text-align: left;
+}
+
+/* Estilos para enlaces de archivos */
+.message a {
+    color: #007bff;
+    text-decoration: underline; /* Subrayado para un aspecto de enlace más clásico */
+    font-weight: normal;
+    display: inline-flex; /* Permite que el icono esté junto al texto */
+    align-items: center;
+    gap: 5px;
+}
+
+.message a:hover {
+    color: #0056b3;
+}
+
+.message a .fas {
+    font-size: 1em;
+}
+
+/* Área de entrada de mensajes */
+.chat-input-area {
+    display: flex;
+    padding: 12px 15px;
+    background-color: #f1f3f5;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-input-area input[type="text"] {
+    flex-grow: 1;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 0.95em;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.chat-input-area input[type="text"]:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Botones de iconos (enviar, adjuntar, videollamada) */
+.chat-input-area .icon-button {
+    background-color: #6c757d; /* Gris más neutro para los botones */
+    color: white;
+    border: none;
+    border-radius: 5px; /* Bordes cuadrados o ligeramente redondeados */
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    flex-shrink: 0;
+}
+
+.chat-input-area .icon-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.chat-input-area .icon-button:active {
+    transform: translateY(0);
+    background-color: #495057;
+}
+
+/* Estilos específicos para el botón de enviar (papel avión) */
+#sendMessageButton {
+    background-color: #007bff; /* Azul para el botón de enviar */
+}
+
+#sendMessageButton:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para el modal de videollamada */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 900px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#jitsiContainer {
+    width: 100%;
+    height: 500px;
+    background-color: #000;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Estilos del footer (reutilizado de otras vistas) */
+.main-footer {
+    background-color: #343a40; /* Dark background */
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 5px solid #007bff; /* Accent color */
+    width: 100%; /* Ocupa todo el ancho */
+    flex-shrink: 0; /* Evita que se encoja */
+}
+
+.footer-content p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .main-content-wrapper {
+        padding-top: 60px; /* Ajuste para navbar en móviles */
+        padding-bottom: 40px; /* Ajuste para footer en móviles */
+    }
+    .chat-container {
+        height: calc(100vh - 150px); /* Ajusta altura para móviles */
+        margin: 10px;
+        max-width: 95%;
+        min-height: 400px;
+    }
+    .chat-header {
+        padding: 12px 15px;
+        font-size: 1em;
+    }
+    .messages-container {
+        padding: 10px;
+    }
+    .message {
+        padding: 6px 0;
+    }
+    .sender-name {
+        font-size: 0.9em;
+    }
+    .message-content p {
+        font-size: 0.9em;
+    }
+    .message .timestamp {
+        font-size: 0.65em;
+    }
+    .chat-input-area {
+        padding: 10px 12px;
+        gap: 6px;
+    }
+    .chat-input-area input[type="text"] {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+    .chat-input-area .icon-button {
+        width: 38px;
+        height: 38px;
+        font-size: 1em;
+    }
+    .modal-content {
+        width: 98%;
+        padding: 15px;
+    }
+    #jitsiContainer {
+        height: 350px;
+    }
+    .main-footer {
+        padding: 15px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content-wrapper {
+        padding-top: 50px; /* Ajuste más pequeño para navbar en móviles muy pequeños */
+        padding-bottom: 30px; /* Ajuste más pequeño para footer */
+    }
+    .chat-container {
+        border-radius: 0;
+        margin: 0;
+        height: calc(100vh - 100px); /* Ocupa casi toda la altura para dar espacio a navbar y footer */
+        min-height: unset; /* Permite que sea más flexible */
+    }
+    .chat-header {
+        border-radius: 0;
+    }
+    .messages-container {
+        padding: 8px;
+        gap: 8px;
+    }
+    .chat-input-area {
+        padding: 8px;
+    }
+    .chat-input-area input[type="text"] {
+        font-size: 0.85em;
+    }
+    .chat-input-area .icon-button {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9em;
+    }
+    #jitsiContainer {
+        height: 280px;
+    }
+}

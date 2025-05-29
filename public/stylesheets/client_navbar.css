@@ -1,0 +1,177 @@
+/* Estilos generales de la cabecera */
+.main-header {
+    background-color: #007bff; /* Color de fondo azul */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    border-radius: 8px; /* Bordes redondeados */
+    margin-bottom: 20px; /* Margen inferior para separar del contenido */
+}
+
+.header-left .header-title-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.main-header h2 {
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+/* Estilos de la navegación principal */
+.main-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Para que los enlaces se envuelvan */
+    justify-content: center; /* Centra los enlaces en la barra de navegación */
+}
+
+.main-nav li {
+    margin: 0 15px;
+}
+
+.main-nav .nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espacio entre el icono y el texto */
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Estilos del lado derecho de la cabecera */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre los elementos del lado derecho */
+}
+
+.profile-logo-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.profile-logo-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.profile-logo-container:hover {
+    transform: scale(1.1);
+}
+
+.profile-logo {
+    font-size: 24px;
+    color: #007bff; /* Color del icono de perfil */
+}
+
+.logout-button-header {
+    background-color: #dc3545; /* Rojo para cerrar sesión */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.logout-button-header:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .main-nav {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .main-nav li {
+        margin: 5px 0;
+        width: 100%;
+    }
+
+    .main-nav .nav-link {
+        padding: 10px;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-around; /* Distribuye los botones en el centro */
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header {
+        padding: 10px;
+    }
+
+    .main-header h2 {
+        font-size: 1.3em;
+    }
+
+    .logout-button-header {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .profile-logo-container {
+        width: 35px;
+        height: 35px;
+    }
+
+    .profile-logo {
+        font-size: 20px;
+    }
+}

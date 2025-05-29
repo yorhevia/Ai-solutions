@@ -1,0 +1,589 @@
+/* General Body and Container Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    flex: 1;
+    max-width: 900px; /* Ancho ajustado para la calculadora */
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.company-valuation-dashboard h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2.8em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.5px;
+}
+
+.company-valuation-dashboard h1 .fas {
+    margin-right: 15px;
+    font-size: 1.1em;
+    color: #3498db;
+}
+
+.company-valuation-dashboard .description {
+    text-align: center;
+    color: #666;
+    font-size: 1.15em;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.valuation-card {
+    background-color: #f8f9fa; /* Fondo ligeramente diferente para la tarjeta principal */
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex; /* Mantener flex para la estructura vertical */
+    flex-direction: column;
+    gap: 30px;
+    align-items: center; /* Centrar los elementos hijos */
+}
+
+/* Ensure the form itself is a flex container for its sections */
+.valuation-card form {
+    display: flex;
+    flex-direction: column; /* Apila las secciones de entrada verticalmente */
+    width: 100%; /* Por defecto, ocupa todo el ancho disponible */
+    max-width: 700px; /* Limita el ancho máximo en pantallas grandes */
+}
+
+/* Input Section Styles */
+.input-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px; /* Añade margen entre las secciones dentro del formulario */
+}
+
+/* Remove bottom margin from the last input section in the form */
+.valuation-card form .input-section:last-of-type {
+    margin-bottom: 0;
+}
+
+
+.input-section h2 {
+    color: #34495e; /* Un gris azulado para los subtítulos */
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.input-section h2 .fas {
+    color: #3498db;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    position: relative; /* For tooltip positioning */
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.form-group input[type="number"],
+.form-group select {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box; /* Incluye padding y border en el ancho */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="number"]:focus,
+.form-group select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+/* Tooltip styles */
+.custom-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    white-space: nowrap;
+    z-index: 10;
+    bottom: 100%; /* Position above the input */
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px); /* Adjust for arrow and spacing */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.custom-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -5px; /* Position the arrow below the tooltip */
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background-color: #333;
+    z-index: 9;
+}
+
+.form-group:hover .custom-tooltip,
+.custom-tooltip.show-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0); /* Move up slightly on hover */
+}
+
+
+/* Button Group */
+.button-group {
+    display: flex;
+    justify-content: center; /* Centra los botones dentro del grupo */
+    gap: 15px;
+    margin-top: 20px;
+    width: fit-content; /* El grupo de botones se ajusta a su contenido */
+    margin-left: auto; /* Centra el grupo de botones horizontalmente */
+    margin-right: auto; /* Centra el grupo de botones horizontalmente */
+    flex-wrap: nowrap; /* Evita que los botones se envuelvan por defecto */
+}
+
+.calculate-button, .reset-button, .pdf-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-top: 0;
+}
+
+.calculate-button {
+    background-color: #2ecc71; /* Verde para calcular */
+    color: white;
+    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+    margin-right: 15px;
+}
+
+.calculate-button:hover {
+    background-color: #27ae60;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.4);
+}
+
+.reset-button {
+    background-color: #95a5a6; /* Gris para limpiar */
+    color: white;
+    box-shadow: 0 4px 10px rgba(149, 165, 166, 0.3);
+}
+
+.reset-button:hover {
+    background-color: #7f8c8d;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(149, 165, 166, 0.4);
+}
+
+.pdf-button { /* New PDF button styles */
+    background-color: #e74c3c; /* Rojo para PDF */
+    color: white;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+    margin-left: 15px; /* Adjust margin to separate from reset button */
+}
+
+.pdf-button:hover {
+    background-color: #c0392b;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+}
+
+
+.results-section {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    max-width: 700px; /* Limita el ancho máximo en pantallas grandes */
+    background-color: #e8f6fd; /* Fondo azul claro para resultados */
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #d0eafb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: 40px; /* Separación de la sección de inputs */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribuye el contenido verticalmente */
+    align-items: center; /* Centra horizontalmente los elementos hijos */
+}
+
+.results-section h2 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #cce7f7;
+    padding-bottom: 10px;
+}
+
+.results-section h2 .fas {
+    color: #3498db;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #e0e0e0;
+    font-size: 1.1em;
+    color: #444;
+    width: 100%; /* Asegura que los items ocupen todo el ancho para la alineación */
+}
+
+.result-item:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.result-item .value {
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+.net-valuation {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #aed6f1; /* Borde superior más prominente */
+    font-size: 1.3em;
+    font-weight: 700;
+    width: 100%; /* Asegura que ocupe todo el ancho para la alineación */
+}
+
+.net-valuation .value.positive {
+    color: #28a745; /* Verde fuerte para superávit */
+}
+
+.net-valuation .value.negative {
+    color: #dc3545; /* Rojo fuerte para déficit */
+}
+
+.advice-message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    line-height: 1.5;
+    text-align: center;
+    font-weight: 500;
+    width: 100%; /* Asegura que ocupe todo el ancho para la alineación */
+}
+
+.advice-message.positive-advice {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.advice-message.negative-advice {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.advice-message.neutral-advice {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 350px; /* Altura fija para que la gráfica tenga un límite */
+    margin-top: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra horizontalmente el contenido (título y canvas) */
+    justify-content: center; /* Centra verticalmente el contenido */
+}
+
+.chart-container h3 {
+    text-align: center;
+    color: #34495e;
+    font-size: 1.4em;
+    margin-bottom: 15px;
+}
+
+/* Ajuste para que el canvas de la gráfica ocupe todo el espacio de su contenedor */
+#fcfChart {
+    width: 100% !important; /* Asegura que la gráfica ocupe el ancho completo */
+    height: 100% !important; /* Asegura que la gráfica ocupe la altura completa de su contenedor */
+}
+
+/* Footer styles (assuming it's included from a partial) */
+.main-footer {
+    background-color: #333333; /* Cambiado a #333333 */
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+    margin-top: 50px;
+    border-top-left-radius: 0; /* Eliminado el radio para hacerlo cuadrado */
+    border-top-right-radius: 0; /* Eliminado el radio para hacerlo cuadrado */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content p {
+    margin: 8px 0;
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Blurred background */
+    -webkit-backdrop-filter: blur(5px); /* For Safari */
+    display: flex; /* Usar flex para centrar el contenido */
+    align-items: center; /* Centrar verticalmente */
+    justify-content: center; /* Centrar horizontalmente */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Centra el contenido en el modal */
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content h2 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-content h2 .fas {
+    color: #17a2b8; /* Icon color for modal title */
+}
+
+.modal-content h3 {
+    color: #34495e;
+    font-size: 1.4em;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 5px;
+}
+
+.modal-content p, .modal-content li {
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.modal-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.modal-content li {
+    margin-bottom: 8px;
+}
+
+.modal-content strong {
+    color: #2c3e50;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+    .company-valuation-dashboard h1 {
+        font-size: 2.2em;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .company-valuation-dashboard h1 .fas {
+        margin-right: 0;
+    }
+    .company-valuation-dashboard .description {
+        font-size: 1em;
+        margin-bottom: 30px;
+    }
+    .input-section h2 {
+        font-size: 1.5em;
+    }
+    .form-group label {
+        font-size: 0.9em;
+    }
+    .form-group input[type="number"],
+    .form-group select {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+    .calculate-button, .reset-button, .pdf-button {
+        padding: 12px 20px;
+        font-size: 1em;
+        margin-right: 10px;
+        margin-left: 0; /* Reset margin for mobile */
+    }
+    .results-section {
+        padding: 20px;
+    }
+    .results-section h2 {
+        font-size: 1.8em;
+    }
+    .result-item {
+        font-size: 1em;
+    }
+    .result-item .value {
+        font-size: 1.1em;
+    }
+    /* Stack buttons vertically on smaller screens */
+    .button-group {
+        flex-direction: column;
+        width: 100%; /* Take full width when stacked */
+        align-items: center; /* Center stacked buttons */
+    }
+    .calculate-button, .reset-button, .pdf-button {
+        width: 100%; /* Make buttons full width when stacked */
+        margin-bottom: 10px; /* Add space between stacked buttons */
+    }
+    .chart-container {
+        height: 300px; /* Ajuste para pantallas más pequeñas */
+    }
+    /* Modal responsive adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    .company-valuation-dashboard h1 {
+        font-size: 1.8em;
+    }
+    .company-valuation-dashboard .description {
+        font-size: 0.9em;
+    }
+    .input-section {
+        padding: 15px;
+    }
+    .input-section h2 {
+        font-size: 1.3em;
+    }
+    .calculate-button, .reset-button, .pdf-button {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+    .results-section {
+        padding: 20px;
+    }
+    .results-section h2 {
+        font-size: 1.6em;
+    }
+    .chart-container {
+        height: 250px; /* Más ajuste para móviles muy pequeños */
+    }
+}

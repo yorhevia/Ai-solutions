@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Gestión de Riesgos: VaR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/riesgos_mercado.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@1.9.5/dist/jstat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="risk-management-dashboard">
+            <h1><i class="fas fa-chart-area"></i> Gestión de Riesgos: Value at Risk (VaR)</h1>
+            <p class="description">Cuantifica la pérdida potencial de una inversión en un período determinado con un nivel de confianza específico, debido a movimientos adversos del mercado.</p>
+
+            <div class="risk-card">
+                <form id="varForm">
+                    <section class="input-section var-inputs-section">
+                        <h2><i class="fas fa-calculator"></i> Parámetros del VaR</h2>
+                        <div class="form-group">
+                            <label for="montoInversion">Monto de la Inversión ($):</label>
+                            <input type="number" id="montoInversion" name="montoInversion" placeholder="Ej: 100000" min="0" value="0" data-tooltip="El valor total del portafolio o la inversión que deseas analizar.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="volatilidad">Volatilidad Anual (Desviación Estándar, %):</label>
+                            <input type="number" id="volatilidad" name="volatilidad" placeholder="Ej: 20" min="0.1" max="100" step="0.1" value="0" data-tooltip="La desviación estándar anual de los retornos del activo o portafolio. Indica cuán volátil es el precio.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="horizonteTemporal">Horizonte Temporal (Días):</label>
+                            <input type="number" id="horizonteTemporal" name="horizonteTemporal" placeholder="Ej: 1" min="1" max="250" value="0" data-tooltip="El número de días sobre el cual deseas calcular el VaR. (Ej: 1 día, 10 días).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nivelConfianza">Nivel de Confianza (%):</label>
+                            <input type="number" id="nivelConfianza" name="nivelConfianza" placeholder="Ej: 95" min="70" max="99.9" step="0.1" value="0" data-tooltip="La probabilidad de que la pérdida no exceda el VaR. Los valores comunes son 95% o 99%.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-chart-bar"></i> Calcular VaR</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section" id="resultsSection">
+                    <h2><i class="fas fa-info-circle"></i> Resultados del VaR</h2>
+                    <div class="result-item">
+                        <span>Valor en Riesgo (VaR):</span>
+                        <span id="varValue" class="value positive">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Pérdida Potencial Máxima:</span>
+                        <span id="maxLossValue" class="value negative">$0.00</span>
+                    </div>
+                    <p id="varAdvice" class="advice-message"></p>
+                    <div class="chart-container">
+                        <h3>Distribución de Retornos y VaR</h3>
+                        <canvas id="varChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> ¿Qué es el VaR?</h2>
+            <p>El **Value at Risk (VaR)** es una métrica utilizada para estimar la máxima pérdida potencial de una inversión en un período de tiempo determinado, con un nivel de confianza específico.</p>
+
+            <h3>Campos de Entrada y lo que explican:</h3>
+            <ul>
+                <li>
+                    <strong>Monto de la Inversión ($):</strong>
+                    <p>El valor monetario total del activo o portafolio que estás analizando. Representa la cantidad de dinero expuesta al riesgo.</p>
+                </li>
+                <li>
+                    <strong>Volatilidad Anual (Desviación Estándar, %):</p>
+                    <p>Es una medida de la dispersión de los retornos de un activo o portafolio. Una mayor volatilidad implica un mayor riesgo. Se expresa como un porcentaje anualizado.</p>
+                </li>
+                <li>
+                    <strong>Horizonte Temporal (Días):</p>
+                    <p>El número de días sobre el cual deseas calcular el VaR. (Ej: 1 día, 10 días). El VaR se escala con la raíz cuadrada del tiempo.</p>
+                </li>
+                <li>
+                    <strong>Nivel de Confianza (%):</p>
+                    <p>La probabilidad de que la pérdida real no exceda el VaR. Por ejemplo, un VaR al 95% significa que hay un 5% de probabilidad de que la pérdida sea mayor al VaR.</p>
+                </li>
+            </ul>
+
+            <h3>Resultados que obtendrás:</h3>
+            <ul>
+                <li>
+                    <strong>Valor en Riesgo (VaR):</strong> El valor monetario que se espera no exceder como pérdida en el horizonte temporal y nivel de confianza dados.
+                </li>
+                <li>
+                    <strong>Pérdida Potencial Máxima:</strong> El mismo VaR, pero expresado como una pérdida esperada.
+                </li>
+                <li>
+                    <strong>Distribución de Retornos y VaR (Gráfica):</strong> Una visualización de una distribución normal, mostrando dónde se sitúa el VaR en relación con las pérdidas posibles.
+                </li>
+            </ul>
+            <p>El VaR es una herramienta útil, pero ten en cuenta que asume una distribución normal de los retornos y no considera eventos extremos (colas gordas o "cisnes negros").</p>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMessageModalButton">&times;</span>
+            <p id="messageModalText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const varForm = document.getElementById('varForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+            const montoInversionInput = document.getElementById('montoInversion');
+            const volatilidadInput = document.getElementById('volatilidad');
+            const horizonteTemporalInput = document.getElementById('horizonteTemporal');
+            const nivelConfianzaInput = document.getElementById('nivelConfianza');
+
+            const varValueSpan = document.getElementById('varValue');
+            const maxLossValueSpan = document.getElementById('maxLossValue');
+            const varAdviceP = document.getElementById('varAdvice');
+            const varChartCanvas = document.getElementById('varChart');
+            const resultsSection = document.getElementById('resultsSection');
+            let varChart;
+
+            // Global variables to store the calculated VaR loss amount and chart data for PDF generation
+            let currentVaRLossAmount = 0;
+            let currentChartLabels = [];
+            let currentChartData = [];
+
+            // Global variables to store the parsed input values for PDF generation
+            let displayMontoInversion = 0;
+            let displayVolatilidadAnual = 0;
+            let displayHorizonteTemporal = 0;
+            let displayNivelConfianza = 0;
+
+            const explanationModal = document.getElementById('explanationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+
+            // Mostrar el modal al cargar la página
+            explanationModal.style.display = 'flex'; // Usar flex para centrado CSS
+
+            // Cerrar el modal al hacer clic en el botón de cerrar
+            closeModalButton.addEventListener('click', () => {
+                explanationModal.style.display = 'none';
+            });
+
+            // Cerrar el modal al hacer clic fuera del contenido del modal
+            window.addEventListener('click', (event) => {
+                if (event.target == explanationModal) {
+                    explanationModal.style.display = 'none';
+                }
+            });
+
+            // Function to show a generic message modal
+            function showGenericMessage(message) {
+                const messageModal = document.getElementById('messageModal');
+                const messageModalText = document.getElementById('messageModalText');
+                messageModalText.textContent = message;
+                messageModal.style.display = 'flex';
+            }
+
+            // Close generic message modal
+            const closeMessageModalButton = document.getElementById('closeMessageModalButton');
+            closeMessageModalButton.addEventListener('click', () => {
+                document.getElementById('messageModal').style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target == document.getElementById('messageModal')) {
+                    document.getElementById('messageModal').style.display = 'none';
+                }
+            });
+
+            // Tooltip management using event delegation
+            let activeTooltip = null;
+
+            function hideAllTooltips() {
+                document.querySelectorAll('.custom-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('show-tooltip');
+                });
+                activeTooltip = null;
+            }
+
+            document.body.addEventListener('mouseover', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusin', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            // Función principal para calcular el VaR
+            function calculateVaR() {
+                // Inicializar variables globales para asegurar que siempre tengan un valor
+                currentVaRLossAmount = 0;
+                currentChartLabels = [];
+                currentChartData = [];
+
+                // Obtener valores de los inputs, usando 0 como valor predeterminado si no son números
+                let montoInversion = parseFloat(montoInversionInput.value) || 0;
+                let volatilidadAnual = parseFloat(volatilidadInput.value) / 100 || 0;
+                let horizonteTemporal = parseInt(horizonteTemporalInput.value) || 0;
+                let nivelConfianza = parseFloat(nivelConfianzaInput.value) / 100 || 0;
+
+                // Store the parsed values in global variables for PDF generation and consistent display
+                displayMontoInversion = montoInversion;
+                displayVolatilidadAnual = (parseFloat(volatilidadInput.value) || 0); // Store as percentage for display
+                displayHorizonteTemporal = horizonteTemporal;
+                displayNivelConfianza = (parseFloat(nivelConfianzaInput.value) || 0); // Store as percentage for display
+
+
+                let varCalculado = 0;
+                let perdidaPotencialMaxima = 0;
+                let adviceMessage = '';
+                let adviceClass = 'advice-message positive-advice';
+
+                // Use a flag to track if inputs are valid for a meaningful calculation
+                const inputsAreValid = montoInversion > 0 && volatilidadAnual > 0 && horizonteTemporal > 0 && nivelConfianza > 0 && nivelConfianza < 1;
+
+                if (!inputsAreValid) {
+                    adviceMessage = 'Por favor, introduce valores válidos para todos los campos. El Nivel de Confianza debe estar entre 0 y 100 (exclusivo). Los resultados del VaR se muestran como 0 debido a entradas inválidas.';
+                    adviceClass = 'advice-message negative-advice';
+                    // Call updateChart with default safe values to ensure chart data arrays are populated
+                    // This ensures the PDF table for chart points doesn't break
+                    updateChart(0, 0.0001, 1, 0.0001, 0); // Use minimal valid values for chart generation
+                } else {
+                    // Desviación estándar diaria (asumiendo 252 días hábiles al año)
+                    const volatilidadDiaria = volatilidadAnual / Math.sqrt(252);
+
+                    // Cuantil Z para el nivel de confianza (usando jStat.normal.inv)
+                    const zScore = jStat.normal.inv(1 - nivelConfianza, 0, 1);
+
+                    // Calcular VaR
+                    varCalculado = montoInversion * Math.abs(zScore) * volatilidadDiaria * Math.sqrt(horizonteTemporal);
+                    perdidaPotencialMaxima = -varCalculado;
+
+                    // Ensure results are finite numbers after calculation
+                    if (isNaN(varCalculado) || !isFinite(varCalculado)) {
+                        varCalculado = 0;
+                        perdidaPotencialMaxima = 0;
+                        adviceMessage = 'Error en el cálculo del VaR. Los resultados se muestran como 0.';
+                        adviceClass = 'advice-message negative-advice';
+                    }
+
+                    currentVaRLossAmount = varCalculado; // Store for PDF
+                    updateChart(montoInversion, volatilidadDiaria, horizonteTemporal, nivelConfianza, zScore);
+
+                    // Only generate this specific advice message if inputs were valid and calculation was successful
+                    if (adviceMessage === '') { // If no error message was set above
+                        adviceMessage = `Con una inversión de $${montoInversion.toLocaleString('es-VE')} y una volatilidad anual del ${displayVolatilidadAnual}%, hay un ${ (100 - displayNivelConfianza).toFixed(1)}% de probabilidad de que tu pérdida no exceda los $${varCalculado.toFixed(2).toLocaleString('es-VE')} en ${horizonteTemporal} día(s).`;
+                    }
+                }
+
+                updateResults(varCalculado, perdidaPotencialMaxima);
+                varAdviceP.textContent = adviceMessage;
+                varAdviceP.className = adviceClass;
+                resultsSection.style.display = 'block';
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Función para actualizar los spans de resultados
+            function updateResults(varCalculado, perdidaPotencialMaxima) {
+                varValueSpan.textContent = `$${varCalculado.toFixed(2).toLocaleString('es-VE')}`;
+                maxLossValueSpan.textContent = `$${perdidaPotencialMaxima.toFixed(2).toLocaleString('es-VE')}`;
+            }
+
+            // Función para actualizar la gráfica de distribución normal
+            function updateChart(montoInversion, volatilidadDiaria, horizonteTemporal, nivelConfianza, zScore) {
+                if (varChart) {
+                    varChart.destroy();
+                }
+
+                // Generar puntos para la distribución normal
+                const mean = 0; // Se asume que el retorno esperado es 0 para el cálculo de VaR
+                let stdDev = volatilidadDiaria * Math.sqrt(horizonteTemporal);
+
+                // Asegurarse de que stdDev no sea cero para la función PDF
+                if (stdDev <= 0) {
+                    stdDev = 0.0001; // Un valor pequeño para evitar errores en jStat.normal.pdf
+                }
+
+                // Rango para la gráfica (ej: +/- 3 desviaciones estándar)
+                const minX = mean - 3 * stdDev;
+                const maxX = mean + 3 * stdDev;
+                const numPoints = 100;
+                const step = (maxX - minX) / numPoints;
+
+                currentChartLabels = []; // Reset global chart data
+                currentChartData = []; // Reset global chart data
+
+                for (let i = 0; i <= numPoints; i++) {
+                    const x = minX + i * step;
+                    currentChartLabels.push((x * montoInversion).toFixed(0)); // Convertir a pérdida monetaria
+                    currentChartData.push(jStat.normal.pdf(x, mean, stdDev)); // Función de densidad de probabilidad
+                }
+
+                // Marcador para el VaR en la gráfica (pérdida)
+                const varReturn = zScore * stdDev; // Retorno en el que se encuentra el VaR
+                const varLossAmountForChart = montoInversion * varReturn; // Cantidad monetaria del VaR
+
+                varChart = new Chart(varChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: currentChartLabels,
+                        datasets: [
+                            {
+                                label: 'Densidad de Probabilidad de Retornos',
+                                data: currentChartData,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0
+                            },
+                            {
+                                // Línea para el VaR
+                                type: 'line',
+                                label: `VaR (${(nivelConfianza * 100).toFixed(1)}%)`,
+                                data: [
+                                    { x: (varLossAmountForChart).toFixed(0), y: 0 },
+                                    { x: (varLossAmountForChart).toFixed(0), y: jStat.normal.pdf(varReturn, mean, stdDev) }
+                                ],
+                                borderColor: '#e74c3c',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                pointRadius: 0,
+                                fill: false,
+                                showLine: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#333',
+                                    font: { size: 14 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        return `Pérdida/Ganancia: $${context[0].label}`;
+                                    },
+                                    label: function(context) {
+                                        if (context.dataset.label.includes('VaR')) {
+                                            return `VaR: $${Math.abs(varLossAmountForChart).toFixed(2).toLocaleString('es-VE')}`;
+                                        }
+                                        return `Probabilidad: ${context.parsed.y.toFixed(4)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Pérdida / Ganancia Potencial ($)',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                ticks: {
+                                    color: '#666',
+                                    callback: function(value) {
+                                        return `$${value.toLocaleString('es-VE')}`;
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Densidad de Probabilidad',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                ticks: {
+                                    color: '#666',
+                                    callback: function(value) {
+                                        return value.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para generar el PDF
+            function generatePdf() {
+                console.log('generatePdf() called.');
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                try {
+                    // Recopilar datos de las variables globales que ya están procesadas
+                    // Asegurarse de que sean números válidos antes de usarlos
+                    const montoInversion = parseFloat(displayMontoInversion) || 0;
+                    const volatilidadAnual = parseFloat(displayVolatilidadAnual) || 0;
+                    const horizonteTemporal = parseInt(displayHorizonteTemporal) || 0;
+                    const nivelConfianza = parseFloat(displayNivelConfianza) || 0;
+
+                    const varValue = parseFloat(currentVaRLossAmount) || 0;
+                    const maxLossValue = -varValue; // Esto es consistente con cómo se muestra
+                    const varAdvice = varAdviceP.textContent || 'No hay consejo disponible.'; // Fallback para el consejo
+
+                    console.log('PDF Data - montoInversion (parsed):', montoInversion, 'volatilidadAnual (parsed):', volatilidadAnual, 'horizonteTemporal (parsed):', horizonteTemporal, 'nivelConfianza (parsed):', nivelConfianza);
+                    console.log('PDF Data - varValue (parsed):', varValue, 'maxLossValue (parsed):', maxLossValue, 'varAdvice:', varAdvice);
+                    console.log('PDF Data - currentChartLabels:', currentChartLabels);
+                    console.log('PDF Data - currentChartData:', currentChartData);
+
+
+                    // Título
+                    doc.setFontSize(22);
+                    doc.text("Reporte de Gestión de Riesgos: VaR", 105, 20, null, null, "center");
+
+                    // Fecha de Generación
+                    doc.setFontSize(10);
+                    doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                    let yOffset = 40; // Posición inicial Y para el contenido
+
+                    // Sección de Parámetros del VaR
+                    doc.setFontSize(16);
+                    doc.text("Parámetros del VaR", 20, yOffset);
+                    yOffset += 10;
+
+                    const inputData = [
+                        ['Monto de la Inversión:', `$${montoInversion.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Volatilidad Anual:', `${volatilidadAnual.toFixed(1)}%`],
+                        ['Horizonte Temporal:', `${horizonteTemporal} día(s)`],
+                        ['Nivel de Confianza:', `${nivelConfianza.toFixed(1)}%`]
+                    ];
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Parámetro', 'Valor']],
+                        body: inputData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 90 },
+                            1: { cellWidth: 'auto' }
+                        },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+
+                    // Sección de Resultados del VaR
+                    doc.setFontSize(16);
+                    doc.text("Resultados del VaR", 20, yOffset);
+                    yOffset += 10;
+
+                    const resultsData = [
+                        ['Valor en Riesgo (VaR):', `$${varValue.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Pérdida Potencial Máxima:', `$${maxLossValue.toFixed(2).toLocaleString('es-VE')}`]
+                    ];
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Concepto', 'Monto ($)']],
+                        body: resultsData,
+                        theme: 'grid',
+                        styles: { fontSize: 12, cellPadding: 3, overflow: 'linebreak', fontStyle: 'bold' },
+                        headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 90 },
+                            1: { cellWidth: 'auto' }
+                        },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+
+                    // Sección de Distribución de Retornos y VaR - Puntos Clave
+                    if (currentChartLabels.length > 0 && currentChartData.length > 0) {
+                        doc.setFontSize(16);
+                        doc.text("Distribución de Retornos y VaR - Puntos Clave", 20, yOffset);
+                        yOffset += 10;
+
+                        const chartTableData = [];
+                        // Add VaR point explicitly
+                        chartTableData.push([
+                            `VaR (${(nivelConfianza * 100).toFixed(1)}%)`, // Usar nivelConfianza ya parseado, convertir a porcentaje
+                            `$${varValue.toFixed(2).toLocaleString('es-VE')}` // Usar varValue ya parseado
+                        ]);
+
+                        // Add a few more points from the chart data for context
+                        const stepForPdfChart = Math.floor(currentChartLabels.length / 5); // Show 5-6 points
+                        for (let i = 0; i < currentChartLabels.length; i += stepForPdfChart) {
+                            const labelValue = parseFloat(currentChartLabels[i]) || 0; // Asegurarse de que labelValue sea un número
+                            const varLossRounded = Math.round(varValue); // Usar Math.round para la comparación
+
+                            if (!isNaN(labelValue) && Math.round(labelValue) !== varLossRounded) { // Redondear labelValue para la comparación también
+                                 chartTableData.push([
+                                    `$${labelValue.toLocaleString('es-VE')}`,
+                                    `${(parseFloat(currentChartData[i]) || 0).toFixed(4)} (Probabilidad)` // Asegurarse de que chart data sea un número
+                                ]);
+                            }
+                        }
+                         // Ensure the last point is added if not already
+                        if (currentChartLabels.length > 0) {
+                            const lastLabelValue = parseFloat(currentChartLabels[currentChartLabels.length - 1]) || 0;
+                            const varLossRounded = Math.round(varValue);
+
+                            if (!isNaN(lastLabelValue) && (currentChartLabels.length - 1) % stepForPdfChart !== 0 && Math.round(lastLabelValue) !== varLossRounded) {
+                                chartTableData.push([
+                                    `$${lastLabelValue.toLocaleString('es-VE')}`,
+                                    `${(parseFloat(currentChartData[currentChartLabels.length - 1]) || 0).toFixed(4)} (Probabilidad)`
+                                ]);
+                            }
+                        }
+
+
+                        doc.autoTable({
+                            startY: yOffset,
+                            head: [['Concepto', 'Valor']],
+                            body: chartTableData,
+                            theme: 'grid',
+                            styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                            margin: { left: 20, right: 20 },
+                            didDrawPage: function (data) {
+                                yOffset = data.cursor.y + 10;
+                            }
+                        });
+                        yOffset = doc.autoTable.previous.finalY + 15;
+                    } else {
+                        // If no chart data, add a message to the PDF
+                        doc.setFontSize(12);
+                        doc.setTextColor(150, 150, 150);
+                        doc.text("No hay datos de gráfica disponibles para mostrar.", 20, yOffset);
+                        yOffset += 15;
+                    }
+
+                    // Consejo
+                    doc.setFontSize(14);
+                    doc.setTextColor(50, 50, 50); // Darker text for advice
+                    doc.text("Consejo:", 20, yOffset);
+                    yOffset += 7;
+                    doc.setFontSize(12);
+                    const splitAdviceText = doc.splitTextToSize(varAdvice, doc.internal.pageSize.width - 40);
+                    doc.text(splitAdviceText, 20, yOffset);
+                    yOffset += (splitAdviceText.length * 7) + 10;
+
+                    // Guardar el PDF
+                    doc.save("reporte_gestion_riesgos_VaR.pdf");
+                    console.log('PDF save initiated successfully.');
+                } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    showGenericMessage('Ocurrió un error al generar el PDF. Por favor, revisa la consola para más detalles.');
+                }
+            }
+
+            varForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                calculateVaR();
+            });
+
+            resetButton.addEventListener('click', function() {
+                varForm.reset();
+                // Establecer todos los valores a 0 explícitamente
+                montoInversionInput.value = "0";
+                volatilidadInput.value = "0";
+                horizonteTemporalInput.value = "0";
+                nivelConfianzaInput.value = "0";
+                updateResults(0, 0);
+                varAdviceP.textContent = '';
+                varAdviceP.className = 'advice-message';
+                // Al resetear, también se actualiza el gráfico con valores predeterminados (cero)
+                updateChart(0, 0.0001, 1, 0.0001, 0); // Pasa valores que no causen NaN/Infinity
+                currentVaRLossAmount = 0; // Reset global chart data
+                currentChartLabels = [];
+                currentChartData = [];
+                // Reset global display variables as well
+                displayMontoInversion = 0;
+                displayVolatilidadAnual = 0;
+                displayHorizonteTemporal = 0;
+                displayNivelConfianza = 0;
+
+                hideAllTooltips();
+                resultsSection.style.display = 'none'; // Hide results section on reset
+            });
+
+            // Event Listener para el nuevo botón de generar PDF
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Calcular el VaR inicial al cargar la página
+            calculateVaR();
+        });
+    </script>
+</body>
+</html>

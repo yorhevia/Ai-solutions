@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Clientes Asignados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/lista_clientes.css"> </head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <button class="back-button" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+
+        <main class="clients-dashboard">
+            <h1><i class="fas fa-users"></i> Clientes Asignados</h1>
+            <p class="description">Aquí puedes ver la lista de todos los clientes que tienes asignados, gestionar su información y acceder a sus herramientas de análisis.</p>
+
+            <section class="clients-list-section">
+                <h2>Tus Clientes</h2>
+                <div class="search-bar">
+                    <input type="text" id="clientSearch" placeholder="Buscar cliente por nombre o ID...">
+                    <button id="searchButton"><i class="fas fa-search"></i> Buscar</button>
+                </div>
+                
+                <div class="clients-grid" id="clientsGrid">
+                    <div class="client-card">
+                        <div class="client-info">
+                            <i class="fas fa-user-circle client-avatar"></i>
+                            <h3>Juan Pérez</h3>
+                            <p>ID: C001</p>
+                            <p>Email: juan.perez@example.com</p>
+                            <p>Teléfono: +123 456 7890</p>
+                        </div>
+                        <div class="client-actions">
+                            <a href="/clientes/C001/perfil" class="action-button view-profile">
+                                <i class="fas fa-address-card"></i> Ver Perfil
+                            </a>
+                            <button class="action-button delete-client" onclick="alert('Funcionalidad de eliminar cliente en desarrollo.')">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="client-card">
+                        <div class="client-info">
+                            <i class="fas fa-user-circle client-avatar"></i>
+                            <h3>María García</h3>
+                            <p>ID: C002</p>
+                            <p>Email: maria.garcia@example.com</p>
+                            <p>Teléfono: +123 987 6543</p>
+                        </div>
+                        <div class="client-actions">
+                            <a href="/clientes/C002/perfil" class="action-button view-profile">
+                                <i class="fas fa-address-card"></i> Ver Perfil
+                            </a>
+                            <button class="action-button delete-client">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                
+                <div class="no-clients-message" style="display:none;">
+                    <p><i class="fas fa-info-circle"></i> No se encontraron clientes que coincidan con la búsqueda.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientSearchInput = document.getElementById('clientSearch');
+            const searchButton = document.getElementById('searchButton');
+            const clientsGrid = document.getElementById('clientsGrid');
+            const clientCards = clientsGrid.querySelectorAll('.client-card');
+            const noClientsMessage = document.querySelector('.no-clients-message');
+
+            function filterClients() {
+                const searchText = clientSearchInput.value.toLowerCase();
+                let foundClients = 0;
+
+                clientCards.forEach(card => {
+                    const clientName = card.querySelector('h3').textContent.toLowerCase();
+                    const clientId = card.querySelector('p').textContent.toLowerCase();
+
+                    if (clientName.includes(searchText) || clientId.includes(searchText)) {
+                        card.style.display = 'block';
+                        foundClients++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (foundClients === 0) {
+                    noClientsMessage.style.display = 'block';
+                } else {
+                    noClientsMessage.style.display = 'none';
+                }
+            }
+
+            // Event listeners
+            searchButton.addEventListener('click', filterClients);
+            clientSearchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    filterClients();
+                } else {
+                    // Opcional: filtrar mientras se escribe
+                    filterClients(); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>

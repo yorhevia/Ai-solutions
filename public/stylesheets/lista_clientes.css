@@ -1,0 +1,367 @@
+/* Importa las fuentes si no están ya en asesor_navbar.css o un global.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Global Box-sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* General Body and Container Styles - Adaptado de tus otros archivos */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    flex: 1;
+    max-width: 1000px; /* Un poco más ancho para la lista de clientes */
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-out;
+    position: relative; /* Para posicionamiento de elementos internos si es necesario */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Back Button (similar al que ya creamos) */
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #3498db;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 25px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+}
+
+.back-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-button .fas {
+    font-size: 0.9em;
+}
+
+
+/* Clients Dashboard Main Styles */
+.clients-dashboard h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2.8em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.5px;
+}
+
+.clients-dashboard h1 .fas {
+    margin-right: 15px;
+    font-size: 1.1em;
+    color: #3498db;
+}
+
+.clients-dashboard .description {
+    text-align: center;
+    color: #666;
+    font-size: 1.15em;
+    margin-bottom: 40px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.clients-list-section {
+    background-color: #f8f9fa; /* Fondo ligeramente diferente para la sección principal */
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.clients-list-section h2 {
+    color: #34495e;
+    font-size: 2em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    width: 100%; /* Ocupa todo el ancho */
+    justify-content: center;
+}
+
+.clients-list-section h2 .fas {
+    color: #3498db;
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    width: 100%;
+    max-width: 600px; /* Ancho máximo para la barra de búsqueda */
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.search-bar input[type="text"] {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar input[type="text"]:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.search-bar button {
+    background-color: #2ecc71; /* Verde para el botón de buscar */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.search-bar button:hover {
+    background-color: #27ae60;
+    transform: translateY(-1px);
+}
+
+/* Clients Grid */
+.clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Columnas responsivas */
+    gap: 25px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.client-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.client-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.client-avatar {
+    font-size: 3.5em; /* Tamaño del icono de avatar */
+    color: #3498db;
+    margin-bottom: 15px;
+}
+
+.client-info h3 {
+    margin: 10px 0 8px;
+    color: #2c3e50;
+    font-size: 1.5em;
+}
+
+.client-info p {
+    font-size: 0.95em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.client-actions {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se envuelvan */
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none; /* Para los enlaces */
+    color: white;
+    border: none;
+}
+
+.view-profile {
+    background-color: #3498db; /* Azul para ver perfil */
+}
+
+.view-profile:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+.perform-analysis {
+    background-color: #f39c12; /* Naranja para análisis */
+}
+
+.perform-analysis:hover {
+    background-color: #e67e22;
+    transform: translateY(-1px);
+}
+
+.delete-client {
+    background-color: #e74c3c; /* Rojo para eliminar */
+}
+
+.delete-client:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Mensaje de no clientes encontrados */
+.no-clients-message {
+    text-align: center;
+    padding: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    color: #777;
+    font-size: 1.1em;
+    margin-top: 30px;
+    background-color: #fefefe;
+    width: 100%;
+}
+
+.no-clients-message .fas {
+    margin-right: 10px;
+    color: #888;
+}
+
+
+/* Footer styles (assuming it's included from a partial) */
+.main-footer {
+    background-color: #333333; /* Color de fondo del footer */
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+    margin-top: 50px;
+    border-radius: 0; /* Asegura que sea cuadrado */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content p {
+    margin: 8px 0;
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+    .clients-dashboard h1 {
+        font-size: 2.2em;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .clients-dashboard h1 .fas {
+        margin-right: 0;
+    }
+    .clients-dashboard .description {
+        font-size: 1em;
+        margin-bottom: 30px;
+    }
+    .clients-list-section h2 {
+        font-size: 1.8em;
+    }
+    .search-bar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .search-bar input[type="text"],
+    .search-bar button {
+        width: 100%;
+    }
+    .client-card {
+        padding: 15px;
+    }
+    .client-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .action-button {
+        width: 100%;
+        justify-content: center; /* Centrar el texto y el icono en botones apilados */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    .clients-dashboard h1 {
+        font-size: 1.8em;
+    }
+    .clients-dashboard .description {
+        font-size: 0.9em;
+    }
+    .clients-list-section h2 {
+        font-size: 1.5em;
+    }
+    .client-avatar {
+        font-size: 3em;
+    }
+    .client-info h3 {
+        font-size: 1.3em;
+    }
+}

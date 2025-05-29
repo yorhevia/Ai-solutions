@@ -1,0 +1,258 @@
+/* Estilos generales para la página de la calculadora de presupuesto */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    flex: 1;
+    max-width: 900px; /* Ancho ajustado para la calculadora */
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.analysis-tools-dashboard h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2.8em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.5px;
+}
+
+.analysis-tools-dashboard h1 .fas {
+    margin-right: 15px;
+    font-size: 1.1em;
+    color: #3498db;
+}
+
+.analysis-tools-dashboard .description {
+    text-align: center;
+    color: #666;
+    font-size: 1.15em;
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.tools-list {
+    background-color: #f8f9fa; /* Fondo ligeramente diferente para la tarjeta principal */
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.tools-list h2 {
+    color: #34495e; /* Un gris azulado para los subtítulos */
+    font-size: 2em;
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    justify-content: center;
+}
+
+.tool-card {
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.tool-icon {
+    font-size: 3.5em;
+    color: #3498db; /* Azul principal para los iconos */
+    margin-bottom: 15px;
+}
+
+.tool-card h3 {
+    font-size: 1.5em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.tool-card p {
+    font-size: 0.95em;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Footer styles */
+.main-footer {
+    background-color: #333333; /* Color de fondo del footer */
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+    margin-top: 50px;
+    border-radius: 0; /* Asegura que sea cuadrado */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content p {
+    margin: 8px 0;
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px;
+        padding: 20px;
+    }
+    .analysis-tools-dashboard h1 {
+        font-size: 2.2em;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .analysis-tools-dashboard h1 .fas {
+        margin-right: 0;
+    }
+    .analysis-tools-dashboard .description {
+        font-size: 1em;
+        margin-bottom: 30px;
+    }
+    .tools-list {
+        padding: 20px;
+    }
+    .tools-list h2 {
+        font-size: 1.8em;
+        margin-bottom: 25px;
+    }
+    .tool-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .tool-icon {
+        font-size: 3em;
+    }
+    .tool-card h3 {
+        font-size: 1.3em;
+    }
+    .tool-card p {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    .analysis-tools-dashboard h1 {
+        font-size: 1.8em;
+    }
+    .analysis-tools-dashboard .description {
+        font-size: 0.9em;
+    }
+    .tools-list {
+        padding: 15px;
+    }
+    .tools-list h2 {
+        font-size: 1.6em;
+    }
+    .tool-grid {
+        grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+        gap: 15px;
+    }
+    .tool-icon {
+        font-size: 2.5em;
+    }
+    .tool-card h3 {
+        font-size: 1.2em;
+    }
+    .tool-card p {
+        font-size: 0.85em;
+    }
+}
+/* Estilos para el botón de Volver/Atrás */
+.back-button {
+    display: inline-flex; /* Para alinear el icono y el texto */
+    align-items: center;
+    gap: 8px; /* Espacio entre el icono y el texto */
+    background-color: #3498db; /* Un azul amigable */
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 25px; /* Espacio debajo del botón */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    text-decoration: none; /* En caso de que uses un <a> en lugar de <button> */
+}
+
+.back-button:hover {
+    background-color: #2980b9; /* Azul más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño efecto de elevación */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra suave */
+}
+
+.back-button .fas {
+    font-size: 0.9em; /* Ajusta el tamaño del icono */
+}
+
+/* Si optas por el enlace en lugar del botón, puedes usar estos estilos */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #3498db; /* Color del texto del enlace */
+    text-decoration: none; /* Sin subrayado por defecto */
+    font-weight: 600;
+    margin-bottom: 25px;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: #2980b9;
+    text-decoration: underline; /* Subrayado al pasar el ratón */
+}

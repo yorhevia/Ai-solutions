@@ -8,26 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/es.min.js"></script>
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css">
 </head>
 <body>
-<header class="main-header">
-    <div class="header-left">
-        <a href="/homecliente" class="back-button">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h2>Perfil de Cliente</h2>
-    </div>
-    <div class="header-right">
-        <button class="logout-button-header" onclick="window.location.href='/logout'">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-        </button>
-        <div class="profile-logo-container">
-            <a href="/homecliente" class="home-link">
-                <i class="fas fa-home profile-logo"></i>
-            </a>
-        </div>
-    </div>
-</header>
+<%- include('../partials/client_navbar') %>
 
 <div id="globalMessage" class="success-message"></div>
 

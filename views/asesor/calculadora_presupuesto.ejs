@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Calculadora de Presupuesto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/calculadora_presupuesto.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="budget-calculator-dashboard">
+            <h1><i class="fas fa-calculator"></i> Calculadora de Presupuesto</h1>
+            <p class="description">Ayuda a tus clientes a visualizar y gestionar sus ingresos y gastos para una salud financiera óptima.</p>
+
+            <div class="calculator-card">
+                <form id="budgetForm">
+                    <section class="input-section income-section">
+                        <h2><i class="fas fa-dollar-sign"></i> Ingresos Mensuales</h2>
+                        <div class="form-group">
+                            <label for="salario">Salario Neto:</label>
+                            <input type="number" id="salario" name="salario" placeholder="Ej: 2500" min="0" value="0" data-tooltip="Ingresa tu salario neto mensual.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ingresosAdicionales">Ingresos Adicionales:</label>
+                            <input type="number" id="ingresosAdicionales" name="ingresosAdicionales" placeholder="Ej: 500" min="0" value="0" data-tooltip="Ingresa cualquier otro ingreso mensual (bonos, freelance, etc.).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section fixed-expenses-section">
+                        <h2><i class="fas fa-home"></i> Gastos Fijos Mensuales</h2>
+                        <div class="form-group">
+                            <label for="alquiler">Alquiler/Hipoteca:</label>
+                            <input type="number" id="alquiler" name="alquiler" placeholder="Ej: 800" min="0" value="0" data-tooltip="Gastos en la renta del hogar o cuota hipotecaria.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="servicios">Servicios (Luz, Agua, Gas, Internet):</label>
+                            <input type="number" id="servicios" name="servicios" placeholder="Ej: 150" min="0" value="0" data-tooltip="Costo mensual de luz, agua, gas, internet, etc.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transporteFijo">Transporte Fijo (cuotas, abonos):</label>
+                            <input type="number" id="transporteFijo" name="transporteFijo" placeholder="Ej: 50" min="0" value="0" data-tooltip="Gastos fijos de transporte (cuotas de auto, abonos de transporte público).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="seguros">Seguros:</label>
+                            <input type="number" id="seguros" name="seguros" placeholder="Ej: 70" min="0" value="0" data-tooltip="Costos mensuales de seguros (salud, auto, hogar, vida).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="deudasFijas">Cuotas de Deudas (préstamos, tarjetas):</label>
+                            <input type="number" id="deudasFijas" name="deudasFijas" placeholder="Ej: 200" min="0" value="0" data-tooltip="Pagos mensuales de préstamos, tarjetas de crédito, etc.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section variable-expenses-section">
+                        <h2><i class="fas fa-shopping-bag"></i> Gastos Variables Mensuales</h2>
+                        <div class="form-group">
+                            <label for="alimentacion">Alimentación (supermercado, restaurantes):</label>
+                            <input type="number" id="alimentacion" name="alimentacion" placeholder="Ej: 400" min="0" value="0" data-tooltip="Gastos en supermercado, restaurantes, y comida en general.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="entretenimiento">Entretenimiento y Ocio:</label>
+                            <input type="number" id="entretenimiento" name="entretenimiento" placeholder="Ej: 100" min="0" value="0" data-tooltip="Gastos en ocio, hobbies, salidas, suscripciones.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ropa">Ropa y Cuidado Personal:</label>
+                            <input type="number" id="ropa" name="ropa" placeholder="Ej: 50" min="0" value="0" data-tooltip="Gastos en vestimenta y productos de cuidado personal.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transporteVariable">Transporte Variable (gasolina, taxis):</label>
+                            <input type="number" id="transporteVariable" name="transporteVariable" placeholder="Ej: 80" min="0" value="0" data-tooltip="Gastos variables de transporte (gasolina, taxis, viajes ocasionales).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="otrosGastos">Otros Gastos Variables:</label>
+                            <input type="number" id="otrosGastos" name="otrosGastos" placeholder="Ej: 30" min="0" value="0" data-tooltip="Cualquier otro gasto mensual que varíe (regalos, donaciones, imprevistos).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-chart-bar"></i> Calcular Presupuesto</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section">
+                    <h2><i class="fas fa-clipboard-list"></i> Resumen del Presupuesto</h2>
+                    <div class="result-item">
+                        <span>Total de Ingresos:</span>
+                        <span id="totalIngresos" class="value income-value">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total de Gastos Fijos:</span>
+                        <span id="totalGastosFijos" class="value expense-value">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total de Gastos Variables:</span>
+                        <span id="totalGastosVariables" class="value expense-value">$0.00</span>
+                    </div>
+                    <div class="result-item net-budget">
+                        <span>Presupuesto Neto (Ingresos - Gastos):</span>
+                        <span id="presupuestoNeto" class="value net-value">$0.00</span>
+                    </div>
+                    <p id="budgetAdvice" class="advice-message"></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> ¿Cómo usar la Calculadora de Presupuesto?</h2>
+            <p>Esta herramienta te ayuda a **visualizar y gestionar tus ingresos y gastos mensuales** para obtener una imagen clara de tu salud financiera. Es fundamental para identificar dónde va tu dinero y tomar decisiones informadas.</p>
+
+            <h3>Campos de Entrada y lo que explican:</h3>
+            <ul>
+                <li>
+                    <strong>Ingresos Mensuales:</strong>
+                    <p>Aquí debes introducir todas las fuentes de dinero que recibes mensualmente. Incluye tu salario neto (después de impuestos) y cualquier ingreso adicional como trabajos freelance, bonos, rentas, etc.</p>
+                </li>
+                <li>
+                    <strong>Gastos Fijos Mensuales:</strong>
+                    <p>Son aquellos gastos que suelen ser la misma cantidad cada mes y son difíciles de cambiar a corto plazo. Ejemplos: alquiler/hipoteca, servicios básicos (luz, agua, gas, internet), transporte fijo (cuotas de auto, abonos), seguros y cuotas de deudas (préstamos, tarjetas de crédito).</p>
+                </li>
+                <li>
+                    <strong>Gastos Variables Mensuales:</strong>
+                    <p>Estos gastos fluctúan de un mes a otro y sobre los cuales tienes más control. Ejemplos: alimentación (supermercado, restaurantes), entretenimiento y ocio, ropa y cuidado personal, transporte variable (gasolina, taxis) y otros gastos que no encajan en las categorías anteriores.</p>
+                </li>
+            </ul>
+
+            <h3>Resultados que obtendrás:</h3>
+            <ul>
+                <li>
+                    <strong>Total de Ingresos:</strong> La suma de todos tus ingresos mensuales.
+                </li>
+                <li>
+                    <strong>Total de Gastos Fijos:</strong> La suma de todos tus gastos fijos mensuales.
+                </li>
+                <li>
+                    <strong>Total de Gastos Variables:</strong> La suma de todos tus gastos variables mensuales.
+                </li>
+                <li>
+                    <strong>Presupuesto Neto (Ingresos - Gastos):</strong> La diferencia entre tus ingresos totales y tus gastos totales (fijos + variables).
+                    <ul>
+                        <li>Si el resultado es **positivo (+)**: Tienes un superávit. Estás gastando menos de lo que ganas. ¡Felicidades!</li>
+                        <li>Si el resultado es **negativo (-)**: Tienes un déficit. Estás gastando más de lo que ganas. Necesitas revisar tus gastos.</li>
+                        <li>Si el resultado es **cero (0)**: Tu presupuesto está equilibrado.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Consejo Personalizado:</strong> Un mensaje basado en tu presupuesto neto para ayudarte a tomar mejores decisiones financieras.
+                </li>
+            </ul>
+            <p>Utiliza esta información para identificar áreas de mejora, establecer metas de ahorro y alcanzar tus objetivos financieros.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const budgetForm = document.getElementById('budgetForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+            const totalIngresosSpan = document.getElementById('totalIngresos');
+            const totalGastosFijosSpan = document.getElementById('totalGastosFijos');
+            const totalGastosVariablesSpan = document.getElementById('totalGastosVariables');
+            const presupuestoNetoSpan = document.getElementById('presupuestoNeto');
+            const budgetAdviceP = document.getElementById('budgetAdvice');
+
+            const explanationModal = document.getElementById('explanationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+
+            // Tooltip management using event delegation
+            let activeTooltip = null;
+
+            function hideAllTooltips() {
+                document.querySelectorAll('.custom-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('show-tooltip');
+                });
+                activeTooltip = null;
+            }
+
+            document.body.addEventListener('mouseover', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusin', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+
+            // Mostrar el modal al cargar la página
+            explanationModal.style.display = 'flex'; // Usar flex para centrado CSS
+
+            // Cerrar el modal al hacer clic en el botón de cerrar
+            closeModalButton.addEventListener('click', () => {
+                explanationModal.style.display = 'none';
+            });
+
+            // Cerrar el modal al hacer clic fuera del contenido del modal
+            window.addEventListener('click', (event) => {
+                if (event.target == explanationModal) {
+                    explanationModal.style.display = 'none';
+                }
+            });
+
+            // Función para calcular el presupuesto
+            function calculateBudget() {
+                // Obtener valores de ingresos
+                const salario = parseFloat(document.getElementById('salario').value) || 0;
+                const ingresosAdicionales = parseFloat(document.getElementById('ingresosAdicionales').value) || 0;
+                const totalIngresos = salario + ingresosAdicionales;
+
+                // Obtener valores de gastos fijos
+                const alquiler = parseFloat(document.getElementById('alquiler').value) || 0;
+                const servicios = parseFloat(document.getElementById('servicios').value) || 0;
+                const transporteFijo = parseFloat(document.getElementById('transporteFijo').value) || 0;
+                const seguros = parseFloat(document.getElementById('seguros').value) || 0;
+                const deudasFijas = parseFloat(document.getElementById('deudasFijas').value) || 0;
+                const totalGastosFijos = alquiler + servicios + transporteFijo + seguros + deudasFijas;
+
+                // Obtener valores de gastos variables
+                const alimentacion = parseFloat(document.getElementById('alimentacion').value) || 0;
+                const entretenimiento = parseFloat(document.getElementById('entretenimiento').value) || 0;
+                const ropa = parseFloat(document.getElementById('ropa').value) || 0;
+                const transporteVariable = parseFloat(document.getElementById('transporteVariable').value) || 0;
+                const otrosGastos = parseFloat(document.getElementById('otrosGastos').value) || 0;
+                const totalGastosVariables = alimentacion + entretenimiento + ropa + transporteVariable + otrosGastos;
+
+                // Calcular presupuesto neto
+                const presupuestoNeto = totalIngresos - (totalGastosFijos + totalGastosVariables);
+
+                // Mostrar resultados
+                totalIngresosSpan.textContent = `$${totalIngresos.toFixed(2)}`;
+                totalGastosFijosSpan.textContent = `$${totalGastosFijos.toFixed(2)}`;
+                totalGastosVariablesSpan.textContent = `$${totalGastosVariables.toFixed(2)}`;
+                presupuestoNetoSpan.textContent = `$${presupuestoNeto.toFixed(2)}`;
+
+                // Aplicar estilos y consejos según el presupuesto neto
+                if (presupuestoNeto > 0) {
+                    presupuestoNetoSpan.classList.remove('negative');
+                    presupuestoNetoSpan.classList.add('positive');
+                    budgetAdviceP.textContent = `¡Excelente! Tienes un superávit de presupuesto. Considera ahorrar o invertir este excedente.`;
+                    budgetAdviceP.className = 'advice-message positive-advice';
+                } else if (presupuestoNeto < 0) {
+                    presupuestoNetoSpan.classList.remove('positive');
+                    presupuestoNetoSpan.classList.add('negative');
+                    budgetAdviceP.textContent = `¡Cuidado! Tienes un déficit de presupuesto. Es crucial revisar tus gastos y buscar áreas para reducir.`;
+                    budgetAdviceP.className = 'advice-message negative-advice';
+                } else {
+                    presupuestoNetoSpan.classList.remove('positive', 'negative');
+                    budgetAdviceP.textContent = `Tu presupuesto está equilibrado. ¡Buen trabajo!`;
+                    budgetAdviceP.className = 'advice-message neutral-advice';
+                }
+            }
+
+            // Función para generar el PDF
+            function generatePdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Obtener los valores actuales de los campos de entrada
+                const salario = parseFloat(document.getElementById('salario').value) || 0;
+                const ingresosAdicionales = parseFloat(document.getElementById('ingresosAdicionales').value) || 0;
+                const alquiler = parseFloat(document.getElementById('alquiler').value) || 0;
+                const servicios = parseFloat(document.getElementById('servicios').value) || 0;
+                const transporteFijo = parseFloat(document.getElementById('transporteFijo').value) || 0;
+                const seguros = parseFloat(document.getElementById('seguros').value) || 0;
+                const deudasFijas = parseFloat(document.getElementById('deudasFijas').value) || 0;
+                const alimentacion = parseFloat(document.getElementById('alimentacion').value) || 0;
+                const entretenimiento = parseFloat(document.getElementById('entretenimiento').value) || 0;
+                const ropa = parseFloat(document.getElementById('ropa').value) || 0;
+                const transporteVariable = parseFloat(document.getElementById('transporteVariable').value) || 0;
+                const otrosGastos = parseFloat(document.getElementById('otrosGastos').value) || 0;
+
+                const totalIngresos = salario + ingresosAdicionales;
+                const totalGastosFijos = alquiler + servicios + transporteFijo + seguros + deudasFijas;
+                const totalGastosVariables = alimentacion + entretenimiento + ropa + transporteVariable + otrosGastos;
+                const presupuestoNeto = totalIngresos - (totalGastosFijos + totalGastosVariables);
+                const adviceText = budgetAdviceP.textContent;
+
+                // Título
+                doc.setFontSize(22);
+                doc.text("Reporte de Presupuesto Mensual", 105, 20, null, null, "center");
+
+                // Fecha de Generación
+                doc.setFontSize(10);
+                doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                let yOffset = 40; // Posición inicial Y para el contenido
+
+                // Sección de Ingresos
+                doc.setFontSize(16);
+                doc.text("Ingresos Mensuales", 20, yOffset);
+                yOffset += 10;
+
+                const ingresosData = [
+                    ['Salario Neto', `$${salario.toFixed(2)}`],
+                    ['Ingresos Adicionales', `$${ingresosAdicionales.toFixed(2)}`],
+                    ['Total de Ingresos', `$${totalIngresos.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: ingresosData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Gastos Fijos
+                doc.setFontSize(16);
+                doc.text("Gastos Fijos Mensuales", 20, yOffset);
+                yOffset += 10;
+
+                const gastosFijosData = [
+                    ['Alquiler/Hipoteca', `$${alquiler.toFixed(2)}`],
+                    ['Servicios (Luz, Agua, Gas, Internet)', `$${servicios.toFixed(2)}`],
+                    ['Transporte Fijo (cuotas, abonos)', `$${transporteFijo.toFixed(2)}`],
+                    ['Seguros', `$${seguros.toFixed(2)}`],
+                    ['Cuotas de Deudas (préstamos, tarjetas)', `$${deudasFijas.toFixed(2)}`],
+                    ['Total de Gastos Fijos', `$${totalGastosFijos.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: gastosFijosData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Gastos Variables
+                doc.setFontSize(16);
+                doc.text("Gastos Variables Mensuales", 20, yOffset);
+                yOffset += 10;
+
+                const gastosVariablesData = [
+                    ['Alimentación (supermercado, restaurantes)', `$${alimentacion.toFixed(2)}`],
+                    ['Entretenimiento y Ocio', `$${entretenimiento.toFixed(2)}`],
+                    ['Ropa y Cuidado Personal', `$${ropa.toFixed(2)}`],
+                    ['Transporte Variable (gasolina, taxis)', `$${transporteVariable.toFixed(2)}`],
+                    ['Otros Gastos Variables', `$${otrosGastos.toFixed(2)}`],
+                    ['Total de Gastos Variables', `$${totalGastosVariables.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: gastosVariablesData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Resumen Final
+                doc.setFontSize(18);
+                doc.setTextColor(44, 62, 80); // Un color oscuro para el resumen
+                doc.text("Resumen del Presupuesto", 20, yOffset);
+                yOffset += 10;
+
+                const resumenData = [
+                    ['Total de Ingresos', `$${totalIngresos.toFixed(2)}`],
+                    ['Total de Gastos Fijos', `$${totalGastosFijos.toFixed(2)}`],
+                    ['Total de Gastos Variables', `$${totalGastosVariables.toFixed(2)}`],
+                    ['Presupuesto Neto', `$${presupuestoNeto.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: resumenData,
+                    theme: 'grid',
+                    styles: { fontSize: 12, cellPadding: 3, overflow: 'linebreak', fontStyle: 'bold' },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Consejo
+                doc.setFontSize(14);
+                doc.setTextColor(50, 50, 50); // Darker text for advice
+                doc.text("Consejo:", 20, yOffset);
+                yOffset += 7;
+                doc.setFontSize(12);
+                const splitAdviceText = doc.splitTextToSize(adviceText, doc.internal.pageSize.width - 40);
+                doc.text(splitAdviceText, 20, yOffset);
+                yOffset += (splitAdviceText.length * 7) + 10;
+
+                // Guardar el PDF
+                doc.save("reporte_presupuesto.pdf");
+            }
+
+
+            // Event Listener para el formulario
+            budgetForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevenir el envío del formulario
+                calculateBudget();
+            });
+
+            // Event Listener para el botón de limpiar
+            resetButton.addEventListener('click', function() {
+                budgetForm.reset(); // Reinicia todos los campos del formulario
+                // Restablecer los valores mostrados a 0 y quitar estilos
+                totalIngresosSpan.textContent = `$0.00`;
+                totalGastosFijosSpan.textContent = `$0.00`;
+                totalGastosVariablesSpan.textContent = `$0.00`;
+                presupuestoNetoSpan.textContent = `$0.00`;
+                presupuestoNetoSpan.classList.remove('positive', 'negative');
+                budgetAdviceP.textContent = '';
+                budgetAdviceP.className = 'advice-message'; // Reiniciar la clase de consejo
+                // Ocultar todos los tooltips al resetear
+                hideAllTooltips();
+            });
+
+            // Event Listener para el nuevo botón de generar PDF
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Calcular el presupuesto inicialmente y inicializar tooltips
+            calculateBudget();
+        });
+    </script>
+</body>
+</html>

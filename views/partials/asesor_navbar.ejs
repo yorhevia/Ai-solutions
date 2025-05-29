@@ -1,9 +1,13 @@
- <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+<link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
 <header class="navbar">
     <a href="/homeasesor" class="navbar-brand">AI Finance Solutions</a>
+    
     <nav class="navbar-nav">
+        <a href="/homeasesor" class="nav-link">Inicio</a>
         <a href="/perfilasesor" class="nav-link">Mi Perfil</a>
         <a href="/consulta" class="nav-link">Consulta</a>
+        <a href="/herramientas-analisis" class="nav-link">Herramientas de Análisis</a>
+        <a href="/chat-personal" class="nav-link">Chat Personal <i class="fas fa-comments"></i></a>
         <div class="nav-item notifications-dropdown">
             <a href="#" class="nav-link notification-bell" id="notificationBell">
                 <i class="fas fa-bell"></i>
@@ -22,9 +26,6 @@
     </nav>
 </header>
 
-
-    
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const notificationBell = document.getElementById('notificationBell');
@@ -33,7 +34,7 @@
         const latestNotificationsDiv = document.getElementById('latest-notifications');
 
         // Función para cargar y actualizar las notificaciones
-        window.updateNotificationBell = async function() { // Hacerla global para usarla desde notificaciones.ejs
+        window.updateNotificationBell = async function() { 
             try {
                 const response = await fetch('/api/asesor/notificaciones-resumen');
                 const data = await response.json();
@@ -45,20 +46,17 @@
                     notificationCount.textContent = count;
                     notificationCount.style.display = count > 0 ? 'block' : 'none';
 
-                    latestNotificationsDiv.innerHTML = ''; // Limpiar notificaciones anteriores
+                    latestNotificationsDiv.innerHTML = ''; 
 
                     if (latest.length > 0) {
                         latest.forEach(notif => {
-                            // Limitar la longitud del mensaje para el dropdown
                             const message = notif.message.length > 60 ? notif.message.substring(0, 57) + '...' : notif.message;
-                            // Manejar el timestamp que viene de Firestore (objeto Timestamp)
                             const notificationDate = notif.timestamp && notif.timestamp._seconds
                                 ? new Date(notif.timestamp._seconds * 1000).toLocaleDateString()
                                 : 'Fecha no disponible';
 
-
                             const item = document.createElement('a');
-                            item.href = '/asesor/notificaciones'; // Ir a la página de notificaciones al hacer clic
+                            item.href = '/asesor/notificaciones'; 
                             item.classList.add('dropdown-item');
                             if (!notif.read) {
                                 item.classList.add('font-weight-bold');
@@ -72,14 +70,14 @@
                 }
             } catch (error) {
                 console.error('Error al cargar notificaciones en la barra de navegación:', error);
-                notificationCount.textContent = '!'; // Indicador de error
+                notificationCount.textContent = '!'; 
                 notificationCount.style.display = 'block';
             }
         };
 
         // Evento para mostrar/ocultar el dropdown
         notificationBell.addEventListener('click', function(event) {
-            event.preventDefault(); // Evita que el enlace recargue la página
+            event.preventDefault(); 
             notificationDropdown.classList.toggle('show');
         });
 

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Planificación Financiera Integral y Metas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/proyecciones_financieras.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    
+  
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="financial-projections-dashboard">
+            <h1><i class="fas fa-hand-holding-usd"></i> Planificación Financiera Integral y Metas</h1>
+            <p class="description">Diseña tu futuro financiero. Define tus metas, evalúa diferentes escenarios y calcula la probabilidad de alcanzar tus objetivos con una planificación estratégica.</p>
+
+            <div class="projections-card">
+                <form id="financialProjectionsForm">
+                    <section class="input-section personal-finance-data-section">
+                        <h2><i class="fas fa-wallet"></i> Tus Datos Financieros Actuales</h2>
+                        <div class="form-group">
+                            <label for="ingresosAnuales">Ingresos Anuales Netos ($):</label>
+                            <input type="number" id="ingresosAnuales" name="ingresosAnuales" placeholder="Ej: 60000" min="0" value="0" required data-tooltip="Total de ingresos netos que recibes anualmente.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gastosAnuales">Gastos Anuales Totales ($):</label>
+                            <input type="number" id="gastosAnuales" name="gastosAnuales" placeholder="Ej: 45000" min="0" value="0" required data-tooltip="Total de gastos anuales, incluyendo vivienda, transporte, alimentación, etc.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ahorroAnual">Ahorro/Inversión Anual Adicional ($):</label>
+                            <input type="number" id="ahorroAnual" name="ahorroAnual" placeholder="Ej: 5000" min="0" value="0" required data-tooltip="Cantidad adicional que planeas ahorrar o invertir cada año, además de lo que ya tienes.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inversionesActuales">Valor Actual de Inversiones/Ahorros ($):</label>
+                            <input type="number" id="inversionesActuales" name="inversionesActuales" placeholder="Ej: 100000" min="0" value="0" required data-tooltip="El valor total de tu cartera de inversiones o ahorros actuales.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="deudasActuales">Total de Deudas Actuales ($):</label>
+                            <input type="number" id="deudasActuales" name="deudasActuales" placeholder="Ej: 20000" min="0" value="0" required data-tooltip="El monto total de tus deudas (hipotecas, préstamos, tarjetas de crédito, etc.).">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section projection-assumptions-section">
+                        <h2><i class="fas fa-chart-pie"></i> Supuestos y Perfil de Riesgo</h2>
+                        <div class="form-group">
+                            <label for="periodosProyeccion">Años a Proyectar:</label>
+                            <input type="number" id="periodosProyeccion" name="periodosProyeccion" placeholder="Ej: 20" min="1" max="40" value="1" required data-tooltip="Número de años futuros para los que se realizará la proyección financiera.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="perfilRiesgo">Tu Perfil de Riesgo:</label>
+                            <select id="perfilRiesgo" name="perfilRiesgo" required data-tooltip="Tu tolerancia al riesgo influirá en las proyecciones de retorno de inversión.">
+                                <option value="conservador">Conservador (2-4% retorno anual)</option>
+                                <option value="moderado">Moderado (5-7% retorno anual)</option>
+                                <option value="agresivo">Agresivo (8-12% retorno anual)</option>
+                            </select>
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inflacionAnual">Tasa de Inflación Anual Esperada (%):</label>
+                            <input type="number" id="inflacionAnual" name="inflacionAnual" placeholder="Ej: 3" min="0" max="10" step="0.1" value="0" required data-tooltip="La tasa de inflación esperada, que afectará el poder adquisitivo de tu dinero.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaCrecimientoIngresos">Crecimiento Anual de Ingresos (%):</label>
+                            <input type="number" id="tasaCrecimientoIngresos" name="tasaCrecimientoIngresos" placeholder="Ej: 2" min="0" max="10" step="0.1" value="0" required data-tooltip="Porcentaje de crecimiento esperado en tus ingresos anuales.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaCrecimientoGastos">Crecimiento Anual de Gastos (%):</label>
+                            <input type="number" id="tasaCrecimientoGastos" name="tasaCrecimientoGastos" placeholder="Ej: 2" min="0" max="10" step="0.1" value="0" required data-tooltip="Porcentaje de crecimiento esperado en tus gastos anuales.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section financial-goals-section">
+                        <h2><i class="fas fa-crosshairs"></i> Tus Metas Financieras</h2>
+                        <div id="goalsContainer">
+                            <div class="form-group goal-item" data-goal-id="1">
+                                <label for="goalName_1">Nombre de la Meta:</label>
+                                <input type="text" id="goalName_1" name="goalName[]" placeholder="Ej: Jubilación" value="">
+                                <label for="goalAmount_1">Monto Objetivo ($):</label>
+                                <input type="number" id="goalAmount_1" name="goalAmount[]" placeholder="Ej: 1000000" min="0" value="0">
+                                <label for="goalYear_1">Año Objetivo:</label>
+                                <input type="number" id="goalYear_1" name="goalYear[]" placeholder="Ej: <%= new Date().getFullYear() + 5 %>" min="<%= new Date().getFullYear() + 1 %>" value="<%= new Date().getFullYear() + 1 %>">
+                                <button type="button" class="remove-goal-button"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" id="addGoalButton" class="add-button"><i class="fas fa-plus-circle"></i> Añadir Meta</button>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-chart-line"></i> Generar Plan Financiero</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section" id="resultsSection" style="display: none;">
+                    <h2><i class="fas fa-chart-bar"></i> Resumen del Plan y Proyecciones</h2>
+                    <p class="description">Aquí se muestran los resultados clave de tu planificación financiera y el progreso hacia tus metas.</p>
+
+                    <div class="projection-table-container">
+                        <h3>Proyección de Patrimonio Neto</h3>
+                        <table id="netWorthTable">
+                            <thead>
+                                <tr>
+                                    <th>Año</th>
+                                    <th>Patrimonio Neto Proyectado ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Evolución del Patrimonio Neto y Metas</h3>
+                        <canvas id="netWorthGoalsChart"></canvas>
+                    </div>
+
+                    <div class="goals-summary-container">
+                        <h2><i class="fas fa-check-circle"></i> Probabilidad de Éxito de tus Metas</h2>
+                        <div id="goalsSummary" class="goals-summary-grid">
+                        </div>
+                    </div>
+
+                    <p id="projectionAdvice" class="advice-message"></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> Guía de Planificación Financiera Integral</h2>
+            <p>Esta herramienta te ayuda a visualizar tu futuro financiero, establecer metas claras y entender la probabilidad de alcanzarlas bajo diferentes escenarios. Utiliza una **Simulación Monte Carlo** para ofrecer proyecciones más realistas.</p>
+
+            <h3>Campos de Entrada y su Significado:</h3>
+            <ul>
+                <li>
+                    <strong>Ingresos Anuales Netos ($):</strong>
+                    <p>La suma de todos tus ingresos después de impuestos y deducciones, en un año (ej. salarios, rentas, dividendos).</p>
+                </li>
+                <li>
+                    <strong>Gastos Anuales Totales ($):</strong>
+                    <p>La suma de todos tus gastos anuales, incluyendo vivienda, transporte, alimentación, entretenimiento, etc.</p>
+                </li>
+                <li>
+                    <strong>Ahorro/Inversión Anual Adicional ($):</strong>
+                    <p>La cantidad de dinero que planeas añadir a tus ahorros o inversiones cada año, además de lo que ya posees.</p>
+                </li>
+                <li>
+                    <strong>Valor Actual de Inversiones/Ahorros ($):</strong>
+                    <p>El valor total de tu cartera de inversiones o ahorros actuales.</p>
+                </li>
+                <li>
+                    <strong>Total de Deudas Actuales ($):</strong>
+                    <p>El monto total de tus obligaciones financieras pendientes (ej. hipotecas, préstamos estudiantiles, deudas de tarjetas de crédito).</p>
+                </li>
+                <li>
+                    <strong>Años a Proyectar:</strong>
+                    <p>El horizonte temporal (en años) para el cual deseas generar tu plan financiero.</p>
+                </li>
+                <li>
+                    <strong>Tu Perfil de Riesgo:</strong>
+                    <p>Define tu tolerancia a la volatilidad del mercado. Esto ajusta la tasa de retorno de inversión esperada en las simulaciones:</p>
+                    <ul>
+                        <li>**Conservador:** Busca seguridad, acepta retornos bajos.</li>
+                        <li>**Moderado:** Dispuesto a un riesgo equilibrado por retornos medios.</li>
+                        <li>**Agresivo:** Busca altos retornos, acepta alta volatilidad.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Tasa de Inflación Anual Esperada (%):</strong>
+                    <p>El porcentaje anual en que se espera que aumenten los precios. La inflación reduce el poder adquisitivo de tu dinero y se considera en las proyecciones.</p>
+                </li>
+                <li>
+                    <strong>Crecimiento Anual de Ingresos (%):</strong>
+                    <p>El porcentaje de aumento esperado en tus ingresos anuales (ej. por aumentos salariales o crecimiento de negocio).</p>
+                </li>
+                <li>
+                    <strong>Crecimiento Anual de Gastos (%):</strong>
+                    <p>El porcentaje de aumento esperado en tus gastos anuales.</p>
+                </li>
+            </ul>
+
+            <h3>Tus Metas Financieras:</h3>
+            <ul>
+                <li>
+                    <strong>Nombre de la Meta:</strong> Un nombre descriptivo para tu objetivo (ej. "Jubilación", "Comprar Casa", "Educación Hijos").
+                </li>
+                <li>
+                    <strong>Monto Objetivo ($):</strong> La cantidad de dinero que necesitas para alcanzar esta meta (considera la inflación si es a largo plazo).
+                </li>
+                <li>
+                    <strong>Año Objetivo:</strong> El año en el que esperas haber alcanzado esta meta.
+                </li>
+            </ul>
+
+            <h3>Resultados Clave:</h3>
+            <ul>
+                <li>
+                    <strong>Proyección de Patrimonio Neto:</strong>
+                    <p>Muestra cómo podría evolucionar tu patrimonio neto (activos - pasivos) a lo largo de los años proyectados.</p>
+                </li>
+                <li>
+                    <strong>Gráfica de Evolución de Patrimonio y Metas:</strong>
+                    <p>Visualiza tu patrimonio neto proyectado y cómo se compara con los montos y años de tus metas.</p>
+                </li>
+                <li>
+                    <strong>Probabilidad de Éxito de tus Metas:</strong>
+                    <p>Para cada meta, se calcula un porcentaje que indica la probabilidad de alcanzarla, basado en miles de simulaciones (Monte Carlo). Un 80% o más se considera una buena probabilidad.</p>
+                </li>
+                <li>
+                    <strong>Consejos y Análisis:</strong>
+                    <p>Recomendaciones personalizadas para mejorar tus probabilidades de éxito, como aumentar el ahorro, ajustar los gastos o revisar los supuestos.</p>
+                </li>
+            </ul>
+            <p>Esta herramienta es un modelo de planificación simplificado. Para un asesoramiento financiero detallado y personalizado, se recomienda encarecidamente la consulta con un planificador financiero certificado.</p>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMessageModalButton">&times;</span>
+            <p id="messageModalText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('financialProjectionsForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+            const resultsSection = document.getElementById('resultsSection');
+            const projectionAdviceP = document.getElementById('projectionAdvice');
+
+            // Input fields
+            const ingresosAnualesInput = document.getElementById('ingresosAnuales');
+            const gastosAnualesInput = document.getElementById('gastosAnuales');
+            const ahorroAnualInput = document.getElementById('ahorroAnual');
+            const inversionesActualesInput = document.getElementById('inversionesActuales');
+            const deudasActualesInput = document.getElementById('deudasActuales');
+
+            const periodosProyeccionInput = document.getElementById('periodosProyeccion');
+            const perfilRiesgoSelect = document.getElementById('perfilRiesgo');
+            const inflacionAnualInput = document.getElementById('inflacionAnual');
+            const tasaCrecimientoIngresosInput = document.getElementById('tasaCrecimientoIngresos');
+            const tasaCrecimientoGastosInput = document.getElementById('tasaCrecimientoGastos');
+
+            // Goal elements
+            const goalsContainer = document.getElementById('goalsContainer');
+            const addGoalButton = document.getElementById('addGoalButton');
+            let goalIdCounter = 0; // Start at 0, first goal will be 1
+
+            // Table bodies
+            const netWorthTableBody = document.querySelector('#netWorthTable tbody');
+            const netWorthTableHeader = document.querySelector('#netWorthTable thead tr');
+
+            // Charts
+            const netWorthGoalsChartCanvas = document.getElementById('netWorthGoalsChart');
+            let netWorthGoalsChart;
+
+            // Goals Summary
+            const goalsSummaryDiv = document.getElementById('goalsSummary');
+
+            // Modal elements
+            const explanationModal = document.getElementById('explanationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const messageModal = document.getElementById('messageModal'); // Get message modal element
+
+            // Variables para almacenar los datos de la simulación y usarlos en el PDF
+            let netWorthProjections = [];
+            let averageProjectedData = [];
+            let goalsProbabilityData = []; // To store goal success probabilities for PDF
+
+            // Show explanation modal on page load
+            explanationModal.style.display = 'flex';
+            messageModal.style.display = 'none'; // Ensure message modal is hidden on initial load
+
+            // Close explanation modal event listeners
+            closeModalButton.addEventListener('click', () => {
+                explanationModal.style.display = 'none';
+                messageModal.style.display = 'none'; // Ensure message modal is hidden
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === explanationModal) {
+                    explanationModal.style.display = 'none';
+                    messageModal.style.display = 'none'; // Ensure message modal is hidden
+                }
+            });
+
+            // Function to show a generic message modal (replaces alert())
+            function showGenericMessage(message) {
+                explanationModal.style.display = 'none'; // Hide explanation modal when showing generic message
+                const messageModalText = document.getElementById('messageModalText');
+                messageModalText.textContent = message;
+                messageModal.style.display = 'flex';
+            }
+
+            // Close generic message modal
+            const closeMessageModalButton = document.getElementById('closeMessageModalButton');
+            closeMessageModalButton.addEventListener('click', () => {
+                messageModal.style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target === messageModal) { // Changed to messageModal
+                    messageModal.style.display = 'none';
+                }
+            });
+
+            // Tooltip management using event delegation
+            let activeTooltip = null; // Stores the currently active tooltip div
+
+            // Helper to hide all tooltips
+            function hideAllTooltips() {
+                document.querySelectorAll('.custom-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('show-tooltip');
+                });
+                activeTooltip = null; // Ensure activeTooltip is reset when all are hidden
+            }
+
+            document.body.addEventListener('mouseover', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips(); // Hide all first
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) { // Only clear activeTooltip if it was this one
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusin', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips(); // Hide all first
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) { // Only clear activeTooltip if it was this one
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            // Add/Remove Goal functionality
+            addGoalButton.addEventListener('click', addGoalInput);
+            goalsContainer.addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-goal-button') || event.target.closest('.remove-goal-button')) {
+                    const button = event.target.closest('.remove-goal-button');
+                    button.closest('.goal-item').remove();
+                    // If all goals are removed, add one back
+                    if (goalsContainer.children.length === 0) {
+                        addGoalInput();
+                    }
+                }
+            });
+
+            function addGoalInput() {
+                goalIdCounter++;
+                const newGoalItem = document.createElement('div');
+                newGoalItem.classList.add('form-group', 'goal-item');
+                newGoalItem.setAttribute('data-goal-id', goalIdCounter);
+                newGoalItem.innerHTML = `
+                    <label for="goalName_${goalIdCounter}">Nombre de la Meta:</label>
+                    <input type="text" id="goalName_${goalIdCounter}" name="goalName[]" placeholder="Ej: Viaje Familiar" value="">
+                    <label for="goalAmount_${goalIdCounter}">Monto Objetivo ($):</label>
+                    <input type="number" id="goalAmount_${goalIdCounter}" name="goalAmount[]" placeholder="Ej: 50000" min="0" value="0">
+                    <label for="goalYear_${goalIdCounter}">Año Objetivo:</label>
+                    <input type="number" id="goalYear_${goalIdCounter}" name="goalYear[]" placeholder="Ej: ${new Date().getFullYear() + 5}" min="${new Date().getFullYear() + 1}" value="${new Date().getFullYear() + 1}">
+                    <button type="button" class="remove-goal-button"><i class="fas fa-trash"></i></button>
+                `;
+                goalsContainer.appendChild(newGoalItem);
+            }
+
+            // Function to clear tables and charts
+            function clearTablesAndCharts() {
+                netWorthTableHeader.innerHTML = '<tr><th>Año</th><th>Patrimonio Neto Proyectado ($)</th></tr>';
+                netWorthTableBody.innerHTML = '';
+
+                if (netWorthGoalsChart) {
+                    netWorthGoalsChart.destroy();
+                }
+                projectionAdviceP.textContent = '';
+                projectionAdviceP.className = 'advice-message';
+                goalsSummaryDiv.innerHTML = ''; // Clear goals summary
+            }
+
+            // Main projection function
+            function generateProjections() {
+                const ingresosAnuales = parseFloat(ingresosAnualesInput.value) || 0;
+                const gastosAnuales = parseFloat(gastosAnualesInput.value) || 0;
+                const ahorroAnual = parseFloat(ahorroAnualInput.value) || 0;
+                const inversionesActuales = parseFloat(inversionesActualesInput.value) || 0;
+                const deudasActuales = parseFloat(deudasActualesInput.value) || 0;
+
+                const periodosProyeccion = parseInt(periodosProyeccionInput.value) || 0;
+                const perfilRiesgo = perfilRiesgoSelect.value;
+                const inflacionAnual = (parseFloat(inflacionAnualInput.value) / 100) || 0;
+                const tasaCrecimientoIngresos = (parseFloat(tasaCrecimientoIngresosInput.value) / 100) || 0;
+                const tasaCrecimientoGastos = (parseFloat(tasaCrecimientoGastosInput.value) / 100) || 0;
+
+                // Determine base investment return based on risk profile
+                let baseReturnMin, baseReturnMax;
+                switch (perfilRiesgo) {
+                    case 'conservador':
+                        baseReturnMin = 0.02; // 2%
+                        baseReturnMax = 0.04; // 4%
+                        break;
+                    case 'moderado':
+                        baseReturnMin = 0.05; // 5%
+                        baseReturnMax = 0.07; // 7%
+                        break;
+                    case 'agresivo':
+                        baseReturnMin = 0.08; // 8%
+                        baseReturnMax = 0.12; // 12%
+                        break;
+                    default:
+                        baseReturnMin = 0;
+                        baseReturnMax = 0;
+                }
+
+                // Get goals
+                const goals = [];
+                document.querySelectorAll('.goal-item').forEach(goalItem => {
+                    const name = goalItem.querySelector('input[name="goalName[]"]').value;
+                    const amount = parseFloat(goalItem.querySelector('input[name="goalAmount[]"]').value) || 0;
+                    const year = parseInt(goalItem.querySelector('input[name="goalYear[]"]').value) || 0;
+                    if (name && amount > 0 && year > new Date().getFullYear()) {
+                        goals.push({ name, amount, year });
+                    }
+                });
+
+                // Validate inputs
+                const inputs = [
+                    ingresosAnuales, gastosAnuales, ahorroAnual, inversionesActuales, deudasActuales,
+                    periodosProyeccion, inflacionAnual, tasaCrecimientoIngresos, tasaCrecimientoGastos
+                ];
+
+                if (inputs.some(val => isNaN(val) || val < 0) || periodosProyeccion < 1) {
+                    projectionAdviceP.textContent = 'Por favor, introduce valores válidos (positivos o cero) para todos los campos numéricos. Los años a proyectar deben ser al menos 1.';
+                    projectionAdviceP.className = 'advice-message negative-advice';
+                    clearTablesAndCharts();
+                    goalsSummaryDiv.innerHTML = ''; // Clear goals summary
+                    resultsSection.style.display = 'block'; // Show results section to display error
+                    return;
+                }
+
+                // --- Monte Carlo Simulation ---
+                const numSimulations = 500; // Number of Monte Carlo simulations
+                netWorthProjections = []; // Reset global variable
+                averageProjectedData = []; // Reset global variable
+
+                for (let s = 0; s < numSimulations; s++) {
+                    let currentNetWorth = inversionesActuales - deudasActuales;
+                    let currentIngresos = ingresosAnuales;
+                    let currentGastos = gastosAnuales;
+                    const simulationPath = [];
+
+                    // Add current year's net worth as the starting point
+                    simulationPath.push({
+                        year: 'Actual',
+                        netWorth: currentNetWorth
+                    });
+
+                    for (let i = 1; i <= periodosProyeccion; i++) {
+                        const currentYear = new Date().getFullYear() + i;
+
+                        // Adjust income and expenses for growth/inflation
+                        currentIngresos *= (1 + tasaCrecimientoIngresos);
+                        currentGastos *= (1 + tasaCrecimientoGastos);
+
+                        // Calculate net cash flow for the year
+                        const netCashFlow = currentIngresos - currentGastos + ahorroAnual;
+
+                        // Simulate investment return with randomness
+                        const randomReturn = baseReturnMin + (Math.random() * (baseReturnMax - baseReturnMin));
+                        currentNetWorth = currentNetWorth * (1 + randomReturn - inflacionAnual) + netCashFlow;
+
+                        simulationPath.push({
+                            year: currentYear,
+                            netWorth: currentNetWorth
+                        });
+                    }
+                    netWorthProjections.push(simulationPath);
+                }
+
+                // Calculate average net worth projections for tables and main charts
+                for (let i = 0; i < periodosProyeccion + 1; i++) {
+                    let totalNetWorthForYear = 0;
+                    for (let s = 0; s < numSimulations; s++) {
+                        totalNetWorthForYear += netWorthProjections[s][i].netWorth;
+                    }
+                    averageProjectedData.push({
+                        year: netWorthProjections[0][i].year,
+                        netWorth: totalNetWorthForYear / numSimulations
+                    });
+                }
+
+                updateNetWorthTable(averageProjectedData);
+                updateNetWorthChart(averageProjectedData, goals);
+                goalsProbabilityData = calculateGoalProbabilities(netWorthProjections, goals); // Store for PDF
+                provideProjectionAdvice(averageProjectedData, goals);
+
+                resultsSection.style.display = 'block'; // Show results section
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Function to update Net Worth table
+            function updateNetWorthTable(data) {
+                netWorthTableHeader.innerHTML = '<tr><th>Año</th><th>Patrimonio Neto Proyectado ($)</th></tr>';
+                netWorthTableBody.innerHTML = '';
+
+                data.forEach(d => {
+                    const row = netWorthTableBody.insertRow();
+                    row.insertCell().textContent = d.year;
+                    const netWorthCell = row.insertCell();
+                    netWorthCell.textContent = `$${d.netWorth.toFixed(2).toLocaleString('es-VE')}`;
+                    netWorthCell.classList.toggle('positive', d.netWorth >= 0);
+                    netWorthCell.classList.toggle('negative', d.netWorth < 0);
+                });
+            }
+
+            // Function to update Net Worth chart
+            function updateNetWorthChart(data, goals) {
+                if (netWorthGoalsChart) {
+                    netWorthGoalsChart.destroy();
+                }
+
+                const years = data.map(d => d.year);
+                const netWorthData = data.map(d => d.netWorth);
+
+                const datasets = [
+                    {
+                        label: 'Patrimonio Neto Proyectado ($)',
+                        data: netWorthData,
+                        borderColor: 'rgba(52, 152, 219, 1)', // Blue
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ];
+
+                // Add goal lines to the chart
+                goals.forEach((goal, index) => {
+                    const goalYearIndex = years.indexOf(goal.year);
+                    if (goalYearIndex !== -1) {
+                        // Create a dataset for each goal line
+                        const goalLineData = new Array(years.length).fill(null);
+                        // Start the goal line from the 'Actual' year or beginning of projection
+                        const startYearIndex = years.indexOf('Actual');
+                        for (let i = startYearIndex; i <= goalYearIndex; i++) {
+                            goalLineData[i] = goal.amount;
+                        }
+
+                        datasets.push({
+                            label: `${goal.name} Objetivo ($${goal.amount.toLocaleString('es-VE')})`,
+                            data: goalLineData,
+                            borderColor: `hsl(${index * 60}, 70%, 50%)`, // Different color for each goal
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            pointRadius: 3,
+                            pointBackgroundColor: `hsl(${index * 60}, 70%, 50%)`,
+                            fill: false,
+                            tension: 0
+                        });
+                    }
+                });
+
+                netWorthGoalsChart = new Chart(netWorthGoalsChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#333',
+                                    font: { size: 14 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += `$${context.parsed.y.toFixed(2).toLocaleString('es-VE')}`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Año',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                ticks: {
+                                    color: '#666'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Patrimonio Neto ($)',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                ticks: {
+                                    color: '#666',
+                                    callback: function(value) {
+                                        return `$${value.toFixed(0).toLocaleString('es-VE')}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function to calculate goal probabilities (Monte Carlo)
+            function calculateGoalProbabilities(simulations, goals) {
+                goalsSummaryDiv.innerHTML = ''; // Clear previous summary
+                const probabilities = [];
+
+                if (goals.length === 0) {
+                    goalsSummaryDiv.innerHTML = '<p class="neutral-advice">No se han definido metas para analizar.</p>';
+                    return probabilities; // Return empty array if no goals
+                }
+
+                goals.forEach(goal => {
+                    let successCount = 0;
+                    const targetYearIndex = simulations[0].findIndex(d => d.year === goal.year);
+
+                    if (targetYearIndex !== -1) {
+                        for (let s = 0; s < simulations.length; s++) {
+                            if (simulations[s][targetYearIndex].netWorth >= goal.amount) {
+                                successCount++;
+                            }
+                        }
+                        const probability = (successCount / simulations.length) * 100;
+                        probabilities.push({ name: goal.name, probability: probability, amount: goal.amount, year: goal.year }); // Store for PDF
+
+                        const goalCard = document.createElement('div');
+                        goalCard.classList.add('goal-summary-card');
+                        goalCard.innerHTML = `
+                            <h3>${goal.name}</h3>
+                            <p>Monto Objetivo: $${goal.amount.toLocaleString('es-VE')}</p>
+                            <p>Año Objetivo: ${goal.year}</p>
+                            <p class="probability ${probability >= 80 ? 'high-probability' : probability >= 50 ? 'medium-probability' : 'low-probability'}">
+                                Probabilidad de Éxito: ${probability.toFixed(1)}%
+                            </p>
+                        `;
+                        goalsSummaryDiv.appendChild(goalCard);
+                    } else {
+                        // Handle case where goal year is outside projection period
+                        const goalCard = document.createElement('div');
+                        goalCard.classList.add('goal-summary-card');
+                        goalCard.innerHTML = `
+                            <h3>${goal.name}</h3>
+                            <p>Monto Objetivo: $${goal.amount.toLocaleString('es-VE')}</p>
+                            <p>Año Objetivo: ${goal.year}</p>
+                            <p class="probability low-probability">
+                                Probabilidad de Éxito: No calculable (fuera del horizonte de proyección)
+                            </p>
+                        `;
+                        goalsSummaryDiv.appendChild(goalCard);
+                        probabilities.push({ name: goal.name, probability: 'N/A', amount: goal.amount, year: goal.year }); // Store for PDF
+                    }
+                });
+                return probabilities;
+            }
+
+            // Function to provide advice based on projections
+            function provideProjectionAdvice(data, goals) {
+                let advice = `Análisis completado para tu plan financiero.`;
+                let adviceClass = 'neutral-advice'; // Default to neutral
+
+                if (data.length > 0) { // Check if there's any projection data
+                    const finalNetWorth = data[data.length - 1].netWorth;
+
+                    if (finalNetWorth < 0) {
+                        advice += ` Tu patrimonio neto proyectado al final del período es negativo, lo que indica que podrías enfrentar desafíos financieros.`;
+                        adviceClass = 'negative-advice';
+                    } else {
+                        advice += ` Tu patrimonio neto proyectado al final del período es positivo, lo cual es una buena señal.`;
+                        adviceClass = 'positive-advice'; // Tentatively positive
+                    }
+                } else {
+                    advice += ` No se pudo generar una proyección de patrimonio neto. Por favor, revisa tus datos de entrada.`;
+                    adviceClass = 'negative-advice';
+                }
+
+
+                let hasNegativeGoalAdvice = false;
+                let hasModerateGoalAdvice = false;
+
+                if (goals.length > 0 && goalsProbabilityData.length > 0) { // Check if goals were processed
+                    goalsProbabilityData.forEach(goalProb => {
+                        if (typeof goalProb.probability === 'number') { // Only consider calculable probabilities
+                            if (goalProb.probability < 50) {
+                                hasNegativeGoalAdvice = true;
+                                advice += ` Para la meta "${goalProb.name}", la probabilidad de éxito es baja (${goalProb.probability.toFixed(0)}%). Considera aumentar tus ahorros anuales, extender el año objetivo, o revisar tus gastos.`;
+                                if (adviceClass === 'positive-advice' || adviceClass === 'neutral-advice') {
+                                    adviceClass = 'negative-advice';
+                                }
+                            } else if (goalProb.probability < 80) {
+                                hasModerateGoalAdvice = true;
+                                advice += ` Para la meta "${goalProb.name}", la probabilidad de éxito es moderada (${goalProb.probability.toFixed(0)}%). Pequeños ajustes en tus ahorros o una revisión de tus supuestos podrían mejorar las probabilidades.`;
+                                if (adviceClass === 'positive-advice') {
+                                    adviceClass = 'neutral-advice';
+                                }
+                            }
+                        }
+                    });
+
+                    if (!hasNegativeGoalAdvice && !hasModerateGoalAdvice && data.length > 0 && data[data.length - 1].netWorth >= 0) {
+                        advice += ` ¡Felicidades! Todas tus metas financieras tienen una alta probabilidad de ser alcanzadas bajo este plan. Mantén el rumbo y considera optimizar tus inversiones.`;
+                        if (adviceClass !== 'negative-advice') {
+                            adviceClass = 'positive-advice';
+                        }
+                    }
+                } else if (goals.length === 0) {
+                    advice += ` Define tus metas financieras para obtener un análisis de probabilidad de éxito detallado.`;
+                    if (adviceClass === 'positive-advice' || adviceClass === 'negative-advice') {
+                        // Keep current advice class if it's already determined by net worth
+                    } else {
+                        adviceClass = 'neutral-advice';
+                    }
+                } else { // Goals exist but probabilities couldn't be calculated (e.g., goal year outside projection)
+                    advice += ` No se pudieron calcular las probabilidades de algunas metas. Por favor, asegúrate de que los años objetivo de tus metas estén dentro del período de proyección.`;
+                    if (adviceClass === 'positive-advice') {
+                        adviceClass = 'neutral-advice';
+                    }
+                }
+
+                projectionAdviceP.innerHTML = advice;
+                projectionAdviceP.className = `advice-message ${adviceClass}`;
+            }
+
+            // Function to generate PDF report
+            function generatePdf() {
+                console.log("generatePdf: Función iniciada.");
+                
+                // Validate if projections have been generated
+                if (averageProjectedData.length === 0 || netWorthProjections.length === 0) {
+                    showGenericMessage("Por favor, genera el plan financiero primero haciendo clic en 'Generar Plan Financiero' antes de crear el PDF.");
+                    console.warn("generatePdf: Datos de proyección vacíos. No se puede generar el PDF.");
+                    return;
+                }
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    console.log("generatePdf: jsPDF inicializado.");
+
+                    // Get current values for input data summary
+                    const ingresosAnuales = parseFloat(ingresosAnualesInput.value) || 0;
+                    const gastosAnuales = parseFloat(gastosAnualesInput.value) || 0;
+                    const ahorroAnual = parseFloat(ahorroAnualInput.value) || 0;
+                    const inversionesActuales = parseFloat(inversionesActualesInput.value) || 0;
+                    const deudasActuales = parseFloat(deudasActualesInput.value) || 0;
+
+                    const periodosProyeccion = parseInt(periodosProyeccionInput.value) || 0;
+                    const perfilRiesgo = perfilRiesgoSelect.value;
+                    const inflacionAnual = (parseFloat(inflacionAnualInput.value)) || 0; // %
+                    const tasaCrecimientoIngresos = (parseFloat(tasaCrecimientoIngresosInput.value)) || 0; // %
+                    const tasaCrecimientoGastos = (parseFloat(tasaCrecimientoGastosInput.value)) || 0; // %
+                    const adviceText = projectionAdviceP.textContent;
+
+                    console.log("generatePdf: Datos de entrada recuperados.");
+
+                    // Determine base investment return based on risk profile for PDF text
+                    let baseReturnRange;
+                    switch (perfilRiesgo) {
+                        case 'conservador':
+                            baseReturnRange = '2-4%';
+                            break;
+                        case 'moderado':
+                            baseReturnRange = '5-7%';
+                            break;
+                        case 'agresivo':
+                            baseReturnRange = '8-12%';
+                            break;
+                        default:
+                            baseReturnRange = '0%';
+                    }
+
+                    // Get goals for PDF
+                    const goals = [];
+                    document.querySelectorAll('.goal-item').forEach(goalItem => {
+                        const name = goalItem.querySelector('input[name="goalName[]"]').value;
+                        const amount = parseFloat(goalItem.querySelector('input[name="goalAmount[]"]').value) || 0;
+                        const year = parseInt(goalItem.querySelector('input[name="goalYear[]"]').value) || 0;
+                        if (name && amount > 0 && year > new Date().getFullYear()) {
+                            goals.push({ name, amount, year });
+                        }
+                    });
+                    console.log("generatePdf: Metas recuperadas para el PDF:", goals);
+
+                    // Title
+                    doc.setFontSize(22);
+                    doc.text("Reporte de Planificación Financiera Integral", 105, 20, null, null, "center");
+
+                    // Date
+                    doc.setFontSize(10);
+                    doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                    let yOffset = 40; // Initial Y offset
+
+                    // --- Input Data and Assumptions Table ---
+                    doc.setFontSize(16);
+                    doc.text("Datos de Entrada y Supuestos", 20, yOffset);
+                    yOffset += 10;
+
+                    const inputData = [
+                        ['Ingresos Anuales Netos:', `$${ingresosAnuales.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Gastos Anuales Totales:', `$${gastosAnuales.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Ahorro/Inversión Anual Adicional:', `$${ahorroAnual.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Valor Actual de Inversiones/Ahorros:', `$${inversionesActuales.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Total de Deudas Actuales:', `$${deudasActuales.toFixed(2).toLocaleString('es-VE')}`],
+                        ['Años a Proyectar:', `${periodosProyeccion} años`],
+                        ['Perfil de Riesgo:', `${perfilRiesgo.charAt(0).toUpperCase() + perfilRiesgo.slice(1)} (Retorno esperado: ${baseReturnRange})`],
+                        ['Tasa de Inflación Anual Esperada:', `${inflacionAnual.toFixed(1)}%`],
+                        ['Crecimiento Anual de Ingresos:', `${tasaCrecimientoIngresos.toFixed(1)}%`],
+                        ['Crecimiento Anual de Gastos:', `${tasaCrecimientoGastos.toFixed(1)}%`]
+                    ];
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Concepto', 'Valor']],
+                        body: inputData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 90 }, // Concepto column
+                            1: { cellWidth: 'auto' } // Value column
+                        },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10; // Update yOffset after table
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15; // Update yOffset after table
+
+
+                    // --- Metas Financieras Definidas Table ---
+                    if (goals.length > 0) {
+                        doc.setFontSize(16);
+                        doc.text("Metas Financieras Definidas", 20, yOffset);
+                        yOffset += 10;
+
+                        const goalsTableData = goals.map(goal => [goal.name, `$${goal.amount.toFixed(2).toLocaleString('es-VE')}`, goal.year]);
+
+                        doc.autoTable({
+                            startY: yOffset,
+                            head: [['Nombre de la Meta', 'Monto Objetivo ($)', 'Año Objetivo']],
+                            body: goalsTableData,
+                            theme: 'grid',
+                            styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                            margin: { left: 20, right: 20 },
+                            didDrawPage: function (data) {
+                                yOffset = data.cursor.y + 10;
+                            }
+                        });
+                        yOffset = doc.autoTable.previous.finalY + 15;
+                    }
+
+                    // --- Proyección de Patrimonio Neto Table ---
+                    doc.setFontSize(16);
+                    doc.text("Proyección de Patrimonio Neto", 20, yOffset);
+                    yOffset += 10;
+
+                    const netWorthTableData = averageProjectedData.map(d => [d.year, `$${d.netWorth.toFixed(2).toLocaleString('es-VE')}`]);
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Año', 'Patrimonio Neto Proyectado ($)']],
+                        body: netWorthTableData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 70 }, // Concepto column
+                            1: { cellWidth: 'auto' } // Value column
+                        },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+
+                    // --- Probabilidad de Éxito de Metas Table ---
+                    if (goalsProbabilityData.length > 0) {
+                        doc.setFontSize(16);
+                        doc.text("Probabilidad de Éxito de Metas", 20, yOffset);
+                        yOffset += 10;
+
+                        const goalProbabilitiesData = goalsProbabilityData.map(g => [
+                            g.name,
+                            typeof g.amount === 'number' ? `$${g.amount.toFixed(2).toLocaleString('es-VE')}` : 'N/A', // Goal amount
+                            typeof g.year === 'number' ? g.year : 'N/A', // Goal year
+                            typeof g.probability === 'number' ? `${g.probability.toFixed(0)}%` : g.probability
+                        ]);
+
+                        doc.autoTable({
+                            startY: yOffset,
+                            head: [['Meta', 'Monto Objetivo ($)', 'Año Objetivo', 'Probabilidad de Éxito']],
+                            body: goalProbabilitiesData,
+                            theme: 'grid',
+                            styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                            margin: { left: 20, right: 20 },
+                            didDrawPage: function (data) {
+                                yOffset = data.cursor.y + 10;
+                            }
+                        });
+                        yOffset = doc.autoTable.previous.finalY + 15;
+                    }
+
+                    // --- Consejo General ---
+                    doc.setFontSize(16);
+                    doc.text("Consejo General", 20, yOffset);
+                    yOffset += 10;
+                    doc.setFontSize(12);
+                    doc.setTextColor(50, 50, 50); // Darker text for advice
+
+                    // Split advice text into lines to fit page width
+                    const splitAdviceText = doc.splitTextToSize(adviceText, doc.internal.pageSize.width - 40);
+                    doc.text(splitAdviceText, 20, yOffset);
+                    yOffset += (splitAdviceText.length * 7) + 10; // Adjust Y based on number of lines
+
+                    doc.save("reporte_planificacion_financiera_integral.pdf");
+                    console.log("generatePdf: PDF generado y guardado.");
+
+                } catch (error) {
+                    console.error("Error al generar el PDF:", error);
+                    showGenericMessage("Ocurrió un error al generar el PDF. Por favor, revisa la consola para más detalles.");
+                }
+            }
+
+            // Event Listeners
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                generateProjections();
+            });
+
+            resetButton.addEventListener('click', function() {
+                form.reset(); // Resets all form fields to their initial HTML values
+
+                // Explicitly set numerical inputs to 0, or min valid for years/periods
+                ingresosAnualesInput.value = "0";
+                gastosAnualesInput.value = "0";
+                ahorroAnualInput.value = "0";
+                inversionesActualesInput.value = "0";
+                deudasActualesInput.value = "0";
+                periodosProyeccionInput.value = "1"; // Set to min valid
+                inflacionAnualInput.value = "0";
+                tasaCrecimientoIngresosInput.value = "0";
+                tasaCrecimientoGastosInput.value = "0";
+
+                // Reset select to default option
+                perfilRiesgoSelect.value = "conservador";
+
+                // Clear results and chart
+                projectionAdviceP.textContent = '';
+                projectionAdviceP.className = 'advice-message';
+                clearTablesAndCharts();
+                goalsSummaryDiv.innerHTML = '';
+                resultsSection.style.display = 'none'; // Hide results section on reset
+
+                // Reset goal inputs
+                goalsContainer.innerHTML = ''; // Clear all existing goal items
+                goalIdCounter = 0; // Reset counter
+                addGoalInput(); // Add back one empty goal item
+
+                hideAllTooltips(); // Hide any active tooltips
+            });
+
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Initial setup on load:
+            // 1. Show explanation modal
+            // 2. Ensure all inputs are reset to 0 or their minimum valid state
+            // 3. Do NOT call generateProjections() to keep results section empty initially
+            explanationModal.style.display = 'flex'; // Keep this to show explanation on load
+            messageModal.style.display = 'none'; // Ensure message modal is hidden on initial load
+
+            // Reset all values to 0 initially for a clean slate
+            ingresosAnualesInput.value = "0";
+            gastosAnualesInput.value = "0";
+            ahorroAnualInput.value = "0";
+            inversionesActualesInput.value = "0";
+            deudasActualesInput.value = "0";
+            periodosProyeccionInput.value = "1"; // Set to min valid
+            inflacionAnualInput.value = "0";
+            tasaCrecimientoIngresosInput.value = "0";
+            tasaCrecimientoGastosInput.value = "0";
+
+            // Ensure only one goal exists on load and its values are reset
+            while (goalsContainer.children.length > 1) {
+                goalsContainer.lastElementChild.remove();
+            }
+            if (goalsContainer.children.length === 0) {
+                addGoalInput(); // This will set goalIdCounter to 1 and add the first empty goal
+            } else {
+                // If there's already one, ensure its values are reset
+                document.getElementById('goalName_1').value = "";
+                document.getElementById('goalAmount_1').value = "0";
+                document.getElementById('goalYear_1').value = "<%= new Date().getFullYear() + 1 %>";
+            }
+
+            hideAllTooltips(); // Ensure tooltips are hidden initially
+        });
+    </script>
+</body>
+</html>

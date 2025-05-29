@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Análisis de Inversiones</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/analisis_inversiones.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="investment-analysis-dashboard">
+            <h1><i class="fas fa-chart-area"></i> Análisis de Inversiones</h1>
+            <p class="description">Proyecta el crecimiento de una inversión a lo largo del tiempo, considerando la inversión inicial, la tasa de retorno anual y el período de inversión.</p>
+
+            <div class="analysis-card">
+                <form id="investmentForm">
+                    <section class="input-section">
+                        <h2><i class="fas fa-coins"></i> Datos de la Inversión para Proyección</h2>
+                        <div class="form-group">
+                            <label for="inversionInicial">Inversión Inicial ($):</label>
+                            <input type="number" id="inversionInicial" name="inversionInicial" placeholder="Ej: 10000" min="0" value="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="periodoInversion">Período de Proyección (años):</label>
+                            <input type="number" id="periodoInversion" name="periodoInversion" placeholder="Ej: 10" min="1" max="50" value="0" required>
+                        </div>
+                        <div class="form-group asset-type-group">
+                            <label for="tipoActivo">Tipo de Activo:</label>
+                            <select id="tipoActivo" name="tipoActivo">
+                                <option value="acciones">Acciones</option>
+                                <option value="bonos">Bonos</option>
+                                <option value="bienes_raices">Bienes Raíces</option>
+                                <option value="fondos_mutuos">Fondos Mutuos</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                            <div id="assetTypeComment" class="asset-type-comment"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="perfilRiesgo">Perfil de Riesgo:</label>
+                            <select id="perfilRiesgo" name="perfilRiesgo">
+                                <option value="conservador">Conservador</option>
+                                <option value="moderado">Moderado</option>
+                                <option value="agresivo">Agresivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaRetornoAnual">Tasa de Retorno Anual Sugerida (%): <span class="suggestion-note">(Se ajusta automáticamente según los factores anteriores. Puedes modificarla manualmente.)</span></label>
+                            <input type="number" id="tasaRetornoAnual" name="tasaRetornoAnual" placeholder="Ej: 7.5" min="0" step="0.1" value="0" required>
+                        </div>
+                    </section>
+
+                    <section class="factors-section input-section">
+                        <h2>
+                            <i class="fas fa-info-circle"></i> Factores que Influyen en la Tasa de Retorno Anual
+                            <button type="button" class="info-modal-button" id="openInfoModal">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                        </h2>
+                        <p>La tasa de retorno anual de una inversión puede variar significativamente según diversos factores. Considera lo siguiente al establecer la tasa:</p>
+                        <ul>
+                            <li>
+                                <strong>Tipo de Activo:</strong>
+                                <p>Las acciones suelen ofrecer mayores retornos potenciales a largo plazo, pero con mayor volatilidad. Los bonos son más estables, pero con retornos menores. Los bienes raíces pueden ofrecer retornos por alquiler y apreciación del capital.</p>
+                            </li>
+                            <li>
+                                <strong>Nivel de Riesgo:</strong>
+                                <p>Generalmente, a mayor riesgo asumido, mayor es el potencial de retorno (y de pérdida). Las inversiones de bajo riesgo (ej. depósitos a plazo) tienen retornos modestos, mientras que las de alto riesgo (ej. startups, criptomonedas) pueden tener retornos exponenciales o pérdidas totales.</p>
+                            </li>
+                            <li>
+                                <strong>Horizonte de Inversión:</strong>
+                                <p>Las inversiones a largo plazo suelen tener la capacidad de recuperarse de las fluctuaciones del mercado y pueden beneficiarse del interés compuesto de manera más significativa, lo que puede justificar una expectativa de retorno anual ligeramente mayor en algunos casos.</p>
+                            </li>
+                            <li>
+                                <strong>Monto de la Inversión Inicial:</strong>
+                                <p>El capital inicial puede influir en el acceso a ciertos tipos de inversiones, la diversificación posible y las comisiones aplicables, lo que puede afectar la tasa de retorno neta.</p>
+                            </li>
+                            <li>
+                                <strong>Condiciones del Mercado:</strong>
+                                <p>El entorno económico general, las tasas de interés, la inflación y los eventos geopolíticos pueden impactar drásticamente los retornos de las inversiones.</P>
+                            </li>
+                        </ul>
+                        <p class="note">Utiliza esta información para guiar a tus clientes sobre expectativas realistas de retorno según su perfil de riesgo y objetivos.</p>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-chart-line"></i> Proyectar Inversión</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section" id="resultsSection">
+                    <h2><i class="fas fa-money-bill-wave"></i> Proyección de Resultados</h2>
+                    <div class="result-item">
+                        <span>Valor Futuro Estimado:</span>
+                        <span id="valorFuturo" class="value">$0.00</span>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Crecimiento de la Inversión Anual</h3>
+                        <canvas id="investmentChart"></canvas>
+                    </div>
+                    <p id="investmentAdvice" class="advice-message"></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> Guía de Campos de la Calculadora de Inversiones</h2>
+            <p>A continuación, se explica el significado de cada campo en la calculadora de proyección de inversiones y cómo utilizarlos para obtener los resultados más precisos:</p>
+            
+            <h3>1. Inversión Inicial ($)</h3>
+            <ul>
+                <li><strong>Significado:</strong> Es la cantidad de dinero con la que comienzas tu inversión. Es el capital principal que se pondrá a trabajar.</li>
+                <li><strong>Cómo usar:</strong> Introduce el monto exacto de dinero que planeas invertir al inicio. Debe ser un valor numérico positivo.</li>
+                <li><strong>Ejemplo:</strong> Si tienes $10,000 para invertir, escribe `10000`.</li>
+            </ul>
+            
+            <h3>2. Período de Proyección (años)</h3>
+            <ul>
+                <li><strong>Significado:</strong> Es la cantidad de años durante los cuales esperas que tu inversión crezca.</li>
+                <li><strong>Cómo usar:</strong> Ingresa el número de años que deseas proyectar. Este valor debe ser un número entero positivo.</li>
+                <li><strong>Ejemplo:</strong> Si quieres ver cómo crece tu inversión en 5 años, escribe `5`.</li>
+            </ul>
+
+            <h3>3. Tipo de Activo</h3>
+            <ul>
+                <li><strong>Significado:</strong> Se refiere a la categoría general de inversión que estás considerando (ej. acciones, bonos, bienes raíces). Cada tipo tiene un perfil de riesgo y retorno histórico diferente.</li>
+                <li><strong>Cómo usar:</strong> Selecciona la opción que mejor describa el tipo de inversión que te interesa. Esto ayudará a la calculadora a sugerir una tasa de retorno más realista.</li>
+                <li><strong>Ejemplo:</strong> Si estás pensando en comprar acciones de una empresa, selecciona `Acciones`.</li>
+            </ul>
+
+            <h3>4. Perfil de Riesgo</h3>
+            <ul>
+                <li><strong>Significado:</strong> Indica tu tolerancia a las fluctuaciones del mercado y la posibilidad de perder parte de tu capital a cambio de mayores rendimientos.</li>
+                <li><strong>Cómo usar:</strong> Elige el perfil que mejor se adapte a tu actitud frente al riesgo:
+                    <ul>
+                        <li><strong>Conservador:</strong> Prefieres seguridad y estabilidad, aunque los retornos sean menores.</li>
+                        <li><strong>Moderado:</b> Estás dispuesto a asumir un riesgo equilibrado para obtener retornos razonables.</li>
+                        <li><strong>Agresivo:</strong> Buscas altos rendimientos y estás dispuesto a asumir riesgos significativos.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>5. Tasa de Retorno Anual Sugerida (%)</h3>
+            <ul>
+                <li><strong>Significado:</strong> Es el porcentaje de ganancia que esperas obtener de tu inversión cada año. La calculadora te ofrecerá una sugerencia basada en los campos anteriores.</li>
+                <li><strong>Cómo usar:</strong> La tasa se ajusta automáticamente según tu tipo de activo, perfil de riesgo y período de inversión. Puedes usar esta sugerencia o modificarla manualmente si tienes una expectativa diferente. Debe ser un valor numérico positivo.</li>
+                <li><strong>Ejemplo:</strong> Si esperas un 7.5% de retorno anual, asegúrate de que el campo muestre `7.5`.</li>
+            </ul>
+            
+            <p>Utiliza esta guía para asegurarte de que tus proyecciones sean lo más informadas y realistas posible. Recuerda que los resultados son estimaciones y el rendimiento real puede variar.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const investmentForm = document.getElementById('investmentForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+            const valorFuturoSpan = document.getElementById('valorFuturo');
+            const investmentAdviceP = document.getElementById('investmentAdvice');
+            const investmentChartCanvas = document.getElementById('investmentChart');
+            const resultsSection = document.getElementById('resultsSection');
+            let investmentChart;
+
+            // Global variables to store chart data for PDF generation
+            let chartYears = [];
+            let chartValues = [];
+
+            // Elementos del formulario principal
+            const inversionInicialInput = document.getElementById('inversionInicial');
+            const tasaRetornoAnualInput = document.getElementById('tasaRetornoAnual');
+            const periodoInversionInput = document.getElementById('periodoInversion');
+            const tipoActivoSelect = document.getElementById('tipoActivo');
+            const perfilRiesgoSelect = document.getElementById('perfilRiesgo');
+            const assetTypeComment = document.getElementById('assetTypeComment');
+
+            // Elementos del Modal
+            const infoModal = document.getElementById('infoModal');
+            const openInfoModalButton = document.getElementById('openInfoModal');
+            const closeButton = document.querySelector('.close-button');
+
+
+            // Mapeo de comentarios por tipo de activo
+            const assetComments = {
+                'acciones': 'Ejemplos: Empresas en crecimiento, tecnología, consumo masivo, energía renovable.',
+                'bonos': 'Ejemplos: Bonos del gobierno, bonos corporativos de alta calificación, bonos municipales.',
+                'bienes_raices': 'Ejemplos: Propiedades residenciales, comerciales, fondos de inversión inmobiliaria (REITs).',
+                'fondos_mutuos': 'Ejemplos: Fondos de renta fija, fondos de renta variable, fondos balanceados, fondos indexados.',
+                'otro': 'Ejemplos: Criptomonedas, materias primas, arte, coleccionables.'
+            };
+
+            // Función para actualizar el comentario del tipo de activo
+            function updateAssetTypeComment() {
+                const selectedAssetType = tipoActivoSelect.value;
+                assetTypeComment.textContent = assetComments[selectedAssetType] || '';
+                if (selectedAssetType === 'otro') {
+                    assetTypeComment.classList.add('show-comment');
+                } else {
+                    assetTypeComment.classList.add('show-comment'); // Siempre mostrar el comentario
+                }
+            }
+
+
+            // Función para calcular y actualizar la tasa de retorno sugerida
+            function calculateSuggestedRate() {
+                const inversionInicial = parseFloat(inversionInicialInput.value) || 0;
+                const periodoInversion = parseInt(periodoInversionInput.value) || 0;
+                const tipoActivo = tipoActivoSelect.value;
+                const perfilRiesgo = perfilRiesgoSelect.value;
+
+                let baseRate = 0;
+                // Tasa base según el tipo de activo
+                switch (tipoActivo) {
+                    case 'acciones': baseRate = 8.0; break;
+                    case 'bonos': baseRate = 4.0; break;
+                    case 'bienes_raices': baseRate = 6.0; break;
+                    case 'fondos_mutuos': baseRate = 7.0; break;
+                    case 'otro': baseRate = 5.0; break;
+                }
+
+                let riskAdjustment = 0;
+                // Ajuste según el perfil de riesgo
+                switch (perfilRiesgo) {
+                    case 'conservador': riskAdjustment = -1.5; break;
+                    case 'moderado': riskAdjustment = 0.0; break;
+                    case 'agresivo': riskAdjustment = 1.5; break;
+                }
+
+                let horizonAdjustment = 0;
+                // Ajuste según el horizonte de inversión
+                if (periodoInversion > 0) {
+                    if (periodoInversion <= 3) { // Corto plazo
+                        horizonAdjustment = -0.5;
+                    } else if (periodoInversion <= 10) { // Mediano plazo
+                        horizonAdjustment = 0.0;
+                    } else { // Largo plazo (> 10 años)
+                        horizonAdjustment = 0.5;
+                    }
+                }
+
+                let initialInvestmentAdjustment = 0;
+                // Ajuste según el monto de la inversión inicial
+                if (inversionInicial > 0) {
+                    if (inversionInicial < 5000) { // Inversión pequeña
+                        initialInvestmentAdjustment = -0.2; // Ligeramente menor por posibles mayores comisiones/menor diversificación
+                    } else if (inversionInicial >= 5000 && inversionInicial <= 50000) { // Inversión mediana
+                        initialInvestmentAdjustment = 0.0;
+                    } else { // Inversión grande (> $50,000)
+                        initialInvestmentAdjustment = 0.3; // Ligeramente mayor por posible acceso a mejores oportunidades/menores comisiones
+                    }
+                }
+
+                let suggestedRate = baseRate + riskAdjustment + horizonAdjustment + initialInvestmentAdjustment;
+
+                // Asegurarse de que la tasa no sea negativa y esté dentro de un rango razonable
+                if (suggestedRate < 0.1) suggestedRate = 0.1;
+                if (suggestedRate > 20.0) suggestedRate = 20.0;
+
+                tasaRetornoAnualInput.value = suggestedRate.toFixed(1); // Actualiza el campo principal
+            }
+
+            // Función principal para calcular la inversión
+            function calculateInvestment() {
+                const inversionInicial = parseFloat(inversionInicialInput.value) || 0;
+                const tasaRetornoAnual = parseFloat(tasaRetornoAnualInput.value) / 100 || 0;
+                const periodoInversion = parseInt(periodoInversionInput.value) || 0;
+
+                if (inversionInicial <= 0 || tasaRetornoAnual < 0 || periodoInversion <= 0) {
+                    valorFuturoSpan.textContent = '$0.00';
+                    investmentAdviceP.textContent = 'Por favor, introduce valores válidos para la inversión.';
+                    investmentAdviceP.className = 'advice-message negative-advice';
+                    updateChart([], []); // Limpiar la gráfica
+                    chartYears = []; // Clear global chart data
+                    chartValues = []; // Clear global chart data
+                    return;
+                }
+
+                // Calcular el valor futuro (interés compuesto)
+                const valorFuturo = inversionInicial * Math.pow((1 + tasaRetornoAnual), periodoInversion);
+                valorFuturoSpan.textContent = `$${valorFuturo.toFixed(2)}`;
+
+                // Generar datos para la gráfica y almacenar en variables globales
+                chartYears = [];
+                chartValues = [];
+                for (let i = 0; i <= periodoInversion; i++) {
+                    chartYears.push(`Año ${i}`);
+                    chartValues.push(inversionInicial * Math.pow((1 + tasaRetornoAnual), i));
+                }
+
+                // Actualizar la gráfica
+                updateChart(chartYears, chartValues);
+
+                // Consejos
+                const ganancia = valorFuturo - inversionInicial;
+                if (ganancia > 0) {
+                    investmentAdviceP.textContent = `¡Tu inversión podría crecer significativamente! Ganancia estimada: $${ganancia.toFixed(2)}.`;
+                    investmentAdviceP.className = 'advice-message positive-advice';
+                } else {
+                    investmentAdviceP.textContent = `Revisa tus parámetros. Con estos valores, la inversión no genera ganancias.`;
+                    investmentAdviceP.className = 'advice-message neutral-advice';
+                }
+
+                // Desplazarse a la sección de resultados
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Función para actualizar la gráfica
+            function updateChart(labels, data) {
+                if (investmentChart) {
+                    investmentChart.destroy(); // Destruir la instancia anterior si existe
+                }
+
+                investmentChart = new Chart(investmentChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor de la Inversión ($)',
+                            data: data,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: '#2c3e50',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#2c3e50',
+                            pointHoverBorderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Período (años)',
+                                    color: '#555',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    color: '#666'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Valor ($)',
+                                    color: '#555',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    color: '#666',
+                                    callback: function(value) {
+                                        return `$${value.toFixed(0)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para generar el PDF
+            function generatePdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Validar si se han calculado los datos de la inversión
+                if (chartYears.length === 0 || chartValues.length === 0) {
+                    alert("Por favor, proyecta la inversión primero haciendo clic en 'Proyectar Inversión' antes de generar el PDF.");
+                    return;
+                }
+
+                // Recopilar datos
+                const inversionInicial = parseFloat(inversionInicialInput.value) || 0;
+                const periodoInversion = parseInt(periodoInversionInput.value) || 0;
+                const tipoActivo = tipoActivoSelect.value;
+                const perfilRiesgo = perfilRiesgoSelect.value;
+                const tasaRetornoAnual = parseFloat(tasaRetornoAnualInput.value) || 0;
+                const valorFuturo = parseFloat(valorFuturoSpan.textContent.replace('$', '')) || 0;
+                const adviceMessage = investmentAdviceP.textContent;
+
+                // Título
+                doc.setFontSize(22);
+                doc.text("Reporte de Análisis de Inversiones", 105, 20, null, null, "center");
+
+                // Fecha de Generación
+                doc.setFontSize(10);
+                doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                let yOffset = 40; // Posición inicial Y para el contenido
+
+                // Sección de Datos de la Inversión
+                doc.setFontSize(16);
+                doc.text("Datos de la Inversión", 20, yOffset);
+                yOffset += 10;
+
+                const investmentData = [
+                    ['Inversión Inicial:', `$${inversionInicial.toFixed(2)}`],
+                    ['Período de Proyección:', `${periodoInversion} años`],
+                    ['Tipo de Activo:', `${tipoActivo.charAt(0).toUpperCase() + tipoActivo.slice(1).replace('_', ' ')}`],
+                    ['Perfil de Riesgo:', `${perfilRiesgo.charAt(0).toUpperCase() + perfilRiesgo.slice(1)}`],
+                    ['Tasa de Retorno Anual:', `${tasaRetornoAnual.toFixed(1)}%`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Valor']],
+                    body: investmentData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Resultados de la Proyección
+                doc.setFontSize(16);
+                doc.text("Resultados de la Proyección", 20, yOffset);
+                yOffset += 10;
+
+                const resultsData = [
+                    ['Valor Futuro Estimado:', `$${valorFuturo.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: resultsData,
+                    theme: 'grid',
+                    styles: { fontSize: 12, cellPadding: 3, overflow: 'linebreak', fontStyle: 'bold' },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Crecimiento de la Inversión Anual
+                if (chartYears.length > 0 && chartValues.length > 0) {
+                    doc.setFontSize(16);
+                    doc.text("Crecimiento de la Inversión Anual", 20, yOffset);
+                    yOffset += 10;
+
+                    const annualGrowthData = chartYears.map((year, index) => [year, `$${chartValues[index].toFixed(2)}`]);
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Año', 'Valor ($)']],
+                        body: annualGrowthData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        columnStyles: {
+                            0: { cellWidth: 70 },
+                            1: { cellWidth: 'auto' }
+                        },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+                }
+
+                // Consejo
+                doc.setFontSize(14);
+                doc.setTextColor(50, 50, 50); // Darker text for advice
+                doc.text("Consejo:", 20, yOffset);
+                yOffset += 7;
+                doc.setFontSize(12);
+                const splitAdviceText = doc.splitTextToSize(adviceMessage, doc.internal.pageSize.width - 40);
+                doc.text(splitAdviceText, 20, yOffset);
+                yOffset += (splitAdviceText.length * 7) + 10;
+
+                // Guardar el PDF
+                doc.save("reporte_analisis_inversiones.pdf");
+            }
+
+
+            // Event Listeners para actualizar la tasa sugerida automáticamente
+            inversionInicialInput.addEventListener('input', calculateSuggestedRate);
+            periodoInversionInput.addEventListener('input', calculateSuggestedRate);
+            tipoActivoSelect.addEventListener('change', function() {
+                calculateSuggestedRate();
+                updateAssetTypeComment(); // Actualizar el comentario al cambiar el tipo de activo
+            });
+            perfilRiesgoSelect.addEventListener('change', calculateSuggestedRate);
+
+            // Event Listener para el formulario principal
+            investmentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                calculateInvestment();
+            });
+
+            // Event Listener para el botón de limpiar
+            resetButton.addEventListener('click', function() {
+                investmentForm.reset();
+                valorFuturoSpan.textContent = '$0.00';
+                investmentAdviceP.textContent = '';
+                investmentAdviceP.className = 'advice-message';
+                // Restablecer los valores de los selectores a sus opciones por defecto
+                tipoActivoSelect.value = 'acciones';
+                perfilRiesgoSelect.value = 'conservador';
+                // Recalcular la tasa sugerida después de resetear
+                calculateSuggestedRate();
+                updateAssetTypeComment(); // Actualizar el comentario al resetear
+                updateChart([], []); // Limpiar la gráfica
+                chartYears = []; // Clear global chart data
+                chartValues = []; // Clear global chart data
+            });
+
+            // Event Listener para el nuevo botón de generar PDF
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Lógica para el Modal
+            openInfoModalButton.addEventListener('click', () => {
+                infoModal.style.display = 'flex'; // Usar flex para centrar
+            });
+
+            closeButton.addEventListener('click', () => {
+                infoModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === infoModal) {
+                    infoModal.style.display = 'none';
+                }
+            });
+
+            // Realizar un cálculo inicial al cargar la página
+            calculateSuggestedRate(); // Calcula la tasa sugerida al cargar
+            updateAssetTypeComment(); // Mostrar el comentario inicial
+            calculateInvestment(); // Calcula la inversión inicial con la tasa sugerida
+        });
+    </script>
+</body>
+</html>

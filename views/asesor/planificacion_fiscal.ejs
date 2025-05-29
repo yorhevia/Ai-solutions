@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Planificación Fiscal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/planificacion_fiscal.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="tax-planning-dashboard">
+            <h1><i class="fas fa-file-invoice-dollar"></i> Planificación Fiscal</h1>
+            <p class="description">Optimiza tu situación fiscal proyectando tus ingresos, deducciones y créditos para estimar tu obligación tributaria y encontrar posibles ahorros.</p>
+
+            <div class="tax-card">
+                <form id="taxPlanningForm">
+                    <section class="input-section income-deductions-section">
+                        <h2><i class="fas fa-money-bill-wave"></i> Datos de Ingresos y Deducciones</h2>
+                        <div class="form-group">
+                            <label for="ingresosBrutos">Ingresos Brutos Anuales ($):</label>
+                            <input type="number" id="ingresosBrutos" name="ingresosBrutos" placeholder="Ej: 50000" min="0" value="0" required data-tooltip="Total de ingresos antes de cualquier deducción o impuesto.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="deduccionesPermitidas">Deducciones Permitidas ($):</label>
+                            <input type="number" id="deduccionesPermitidas" name="deduccionesPermitidas" placeholder="Ej: 5000" min="0" value="0" data-tooltip="Gastos que puedes restar de tus ingresos brutos para reducir tu renta imponible.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="creditosFiscales">Créditos Fiscales ($):</label>
+                            <input type="number" id="creditosFiscales" name="creditosFiscales" placeholder="Ej: 1000" min="0" value="0" data-tooltip="Cantidades que se restan directamente de tu obligación tributaria.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section additional-info-section">
+                        <h2><i class="fas fa-info-circle"></i> Información Fiscal Adicional</h2>
+                        <div class="form-group">
+                            <label for="anoFiscal">Año Fiscal:</label>
+                            <select id="anoFiscal" name="anoFiscal" required data-tooltip="El año para el cual estás realizando la planificación fiscal.">
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                            </select>
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="estadoCivil">Estado Civil:</label>
+                            <select id="estadoCivil" name="estadoCivil" required data-tooltip="Tu estado civil afecta las tasas impositivas y las deducciones estándar.">
+                                <option value="soltero">Soltero</option>
+                                <option value="casado_conjunto">Casado (Declaración Conjunta)</option>
+                                <option value="casado_separado">Casado (Declaración Separada)</option>
+                                <option value="cabeza_familia">Cabeza de Familia</option>
+                            </select>
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaImpositivaMarginal">Tasa Impositiva Marginal Sugerida (%):</label>
+                            <input type="number" id="tasaImpositivaMarginal" name="tasaImpositivaMarginal" placeholder="Ej: 25" min="0" max="100" step="0.1" value="0" required data-tooltip="La tasa de impuesto aplicable a tu último dólar de ingreso. Se ajusta según los datos, pero puedes modificarla.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-calculator"></i> Calcular Impuestos</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section" id="resultsSection">
+                    <h2><i class="fas fa-chart-pie"></i> Resumen Fiscal</h2>
+                    <div class="result-item">
+                        <span>Ingresos Netos Imponibles:</span>
+                        <span id="ingresosNetosImponibles" class="value">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Impuesto Estimado (antes de créditos):</span>
+                        <span id="impuestoEstimadoBruto" class="value negative">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Impuesto Final Estimado:</span>
+                        <span id="impuestoFinalEstimado" class="value negative">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Ahorro Fiscal Potencial:</span>
+                        <span id="ahorroFiscalPotencial" class="value positive">$0.00</span>
+                    </div>
+                    <p id="taxAdvice" class="advice-message"></p>
+                    <div class="chart-container">
+                        <h3>Desglose Fiscal Estimado</h3>
+                        <canvas id="taxChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> Guía de Planificación Fiscal</h2>
+            <p>Esta herramienta te ayuda a estimar tu obligación tributaria y a identificar oportunidades de ahorro fiscal, basándose en tus ingresos, deducciones y créditos.</p>
+
+            <h3>Campos de Entrada y su Significado:</h3>
+            <ul>
+                <li>
+                    <strong>Ingresos Brutos Anuales ($):</strong>
+                    <p>Es la suma total de todos tus ingresos (salario, rentas, ganancias de capital, etc.) antes de aplicar cualquier deducción o crédito. Introduce aquí el monto total.</p>
+                </li>
+                <li>
+                    <strong>Deducciones Permitidas ($):</strong>
+                    <p>Son gastos específicos que puedes restar de tus ingresos brutos para reducir la cantidad de ingresos sobre la cual se calculan los impuestos (tu "renta imponible"). Ejemplos: intereses hipotecarios, donaciones caritativas, gastos médicos (si superan un umbral), aportaciones a ciertos planes de jubilación.</p>
+                </li>
+                <li>
+                    <strong>Créditos Fiscales ($):</strong>
+                    <p>A diferencia de las deducciones, los créditos fiscales se restan directamente del monto total de impuestos que debes. Un crédito de $1000 reduce tus impuestos en $1000. Ejemplos: créditos por hijos, créditos por educación, créditos por eficiencia energética.</p>
+                </li>
+                <li>
+                    <strong>Año Fiscal:</strong>
+                    <p>El período contable de 12 meses para el cual se calculan los impuestos. Las leyes fiscales y las tasas pueden variar de un año a otro.</p>
+                </li>
+                <li>
+                    <strong>Estado Civil:</strong>
+                    <p>Tu situación civil (soltero, casado, etc.) influye en las tablas de impuestos aplicables, las deducciones estándar y los límites de ingresos para ciertos beneficios fiscales.</p>
+                </li>
+                <li>
+                    <strong>Tasa Impositiva Marginal Sugerida (%):</strong>
+                    <p>Es el porcentaje de impuesto que pagas sobre cada dólar adicional de ingreso. Esta herramienta te sugerirá una tasa basada en tus ingresos y estado civil, pero puedes ajustarla si conoces tu situación específica o las tablas de impuestos.</p>
+                </li>
+            </ul>
+
+            <h3>Resultados que obtendrás:</h3>
+            <ul>
+                <li>
+                    <strong>Ingresos Netos Imponibles:</strong> Tus ingresos brutos menos tus deducciones permitidas. Esta es la cantidad sobre la que se calcula tu impuesto.
+                </li>
+                <li>
+                    <strong>Impuesto Estimado (antes de créditos):</strong> El cálculo inicial de tu impuesto basado en tus ingresos imponibles y la tasa marginal.
+                </li>
+                <li>
+                    <strong>Impuesto Final Estimado:</strong> El impuesto estimado después de restar los créditos fiscales. Esta es tu obligación tributaria final proyectada.
+                </li>
+                <li>
+                    <strong>Ahorro Fiscal Potencial:</strong> La diferencia entre el impuesto estimado antes y después de aplicar deducciones y créditos. Destaca cuánto podrías ahorrar.
+                </li>
+                <li>
+                    <strong>Gráfica de Desglose Fiscal:</strong> Una representación visual de cómo tus ingresos se distribuyen entre impuestos, deducciones y el monto restante.
+                </li>
+            </ul>
+            <p>Esta herramienta ofrece una estimación. Para una planificación fiscal precisa, consulta a un profesional.</p>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeMessageModalButton">&times;</span>
+            <p id="messageModalText"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taxPlanningForm = document.getElementById('taxPlanningForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+
+            const ingresosBrutosInput = document.getElementById('ingresosBrutos');
+            const deduccionesPermitidasInput = document.getElementById('deduccionesPermitidas');
+            const creditosFiscalesInput = document.getElementById('creditosFiscales');
+            const anoFiscalSelect = document.getElementById('anoFiscal');
+            const estadoCivilSelect = document.getElementById('estadoCivil');
+            const tasaImpositivaMarginalInput = document.getElementById('tasaImpositivaMarginal');
+
+            const ingresosNetosImponiblesSpan = document.getElementById('ingresosNetosImponibles');
+            const impuestoEstimadoBrutoSpan = document.getElementById('impuestoEstimadoBruto');
+            const impuestoFinalEstimadoSpan = document.getElementById('impuestoFinalEstimado');
+            const ahorroFiscalPotencialSpan = document.getElementById('ahorroFiscalPotencial');
+            const taxAdviceP = document.getElementById('taxAdvice');
+            const taxChartCanvas = document.getElementById('taxChart');
+            const resultsSection = document.getElementById('resultsSection');
+            let taxChart;
+
+            // Global variables to store chart data for PDF generation
+            let currentChartLabels = [];
+            let currentChartData = [];
+
+            const explanationModal = document.getElementById('explanationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+
+            // Mostrar el modal al cargar la página
+            explanationModal.style.display = 'flex'; // Usar flex para centrar
+
+            // Cerrar el modal al hacer clic en el botón de cerrar
+            closeModalButton.addEventListener('click', () => {
+                explanationModal.style.display = 'none';
+            });
+
+            // Cerrar el modal al hacer clic fuera del contenido del modal
+            window.addEventListener('click', (event) => {
+                if (event.target == explanationModal) {
+                    explanationModal.style.display = 'none';
+                }
+            });
+
+            // Function to show a generic message modal
+            function showGenericMessage(message) {
+                const messageModal = document.getElementById('messageModal');
+                const messageModalText = document.getElementById('messageModalText');
+                messageModalText.textContent = message;
+                messageModal.style.display = 'flex';
+            }
+
+            // Close generic message modal
+            const closeMessageModalButton = document.getElementById('closeMessageModalButton');
+            closeMessageModalButton.addEventListener('click', () => {
+                document.getElementById('messageModal').style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target == document.getElementById('messageModal')) {
+                    document.getElementById('messageModal').style.display = 'none';
+                }
+            });
+
+            // Tooltip management using event delegation
+            let activeTooltip = null;
+
+            function hideAllTooltips() {
+                document.querySelectorAll('.custom-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('show-tooltip');
+                });
+                activeTooltip = null;
+            }
+
+            document.body.addEventListener('mouseover', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusin', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            // Función para sugerir tasa impositiva marginal (simplificada)
+            function suggestMarginalTaxRate() {
+                const ingresosBrutos = parseFloat(ingresosBrutosInput.value) || 0;
+                const estadoCivil = estadoCivilSelect.value;
+                let suggestedRate = 0;
+
+                // Esto es una simplificación extrema y no reemplaza tablas fiscales reales.
+                // Es solo para dar una sugerencia dinámica.
+                if (ingresosBrutos <= 10000) {
+                    suggestedRate = 10;
+                } else if (ingresosBrutos <= 30000) {
+                    suggestedRate = 15;
+                } else if (ingresosBrutos <= 70000) {
+                    suggestedRate = 20;
+                } else if (ingresosBrutos <= 150000) {
+                    suggestedRate = 25;
+                } else {
+                    suggestedRate = 30;
+                }
+
+                // Ajuste por estado civil (ejemplo simplificado)
+                if (estadoCivil === 'casado_conjunto') {
+                    suggestedRate = Math.max(5, suggestedRate - 2); // Ligeramente menor para casados conjuntos
+                } else if (estadoCivil === 'cabeza_familia') {
+                    suggestedRate = Math.max(5, suggestedRate - 1);
+                }
+
+                tasaImpositivaMarginalInput.value = suggestedRate.toFixed(1);
+            }
+
+            // Función principal para calcular la planificación fiscal
+            function calculateTaxPlanning() {
+                const ingresosBrutos = parseFloat(ingresosBrutosInput.value) || 0;
+                const deduccionesPermitidas = parseFloat(deduccionesPermitidasInput.value) || 0;
+                const creditosFiscales = parseFloat(creditosFiscalesInput.value) || 0;
+                const tasaImpositivaMarginal = parseFloat(tasaImpositivaMarginalInput.value) / 100 || 0;
+
+                if (ingresosBrutos < 0 || deduccionesPermitidas < 0 || creditosFiscales < 0 || tasaImpositivaMarginal < 0) {
+                    taxAdviceP.textContent = 'Por favor, introduce valores válidos y positivos para todos los campos.';
+                    taxAdviceP.className = 'advice-message negative-advice';
+                    updateResults(0, 0, 0, 0);
+                    updateChart(0, 0, 0, 0);
+                    currentChartLabels = []; // Clear global chart data
+                    currentChartData = []; // Clear global chart data
+                    return;
+                }
+
+                // Calcular ingresos netos imponibles
+                const ingresosNetos = Math.max(0, ingresosBrutos - deduccionesPermitidas);
+
+                // Calcular impuesto estimado antes de créditos
+                const impuestoBruto = ingresosNetos * tasaImpositivaMarginal;
+
+                // Calcular impuesto final estimado
+                const impuestoFinal = Math.max(0, impuestoBruto - creditosFiscales);
+
+                // Calcular ahorro fiscal potencial
+                const ahorroPotencial = (ingresosBrutos * tasaImpositivaMarginal) - impuestoFinal; // This is a simplified calculation, might need adjustment based on specific tax laws
+
+                updateResults(ingresosNetos, impuestoBruto, impuestoFinal, ahorroPotencial);
+                updateChart(ingresosBrutos, deduccionesPermitidas, creditosFiscales, impuestoFinal);
+
+                if (ahorroPotencial > 0) {
+                    taxAdviceP.textContent = `¡Excelente! Has identificado un ahorro fiscal potencial de $${ahorroPotencial.toFixed(2)}. Considera maximizar tus deducciones y créditos.`;
+                    taxAdviceP.className = 'advice-message positive-advice';
+                } else if (impuestoFinal > 0) {
+                    taxAdviceP.textContent = `Tu impuesto estimado es de $${impuestoFinal.toFixed(2)}. Revisa si hay más deducciones o créditos que puedas aplicar.`;
+                    taxAdviceP.className = 'advice-message neutral-advice';
+                } else {
+                    taxAdviceP.textContent = `Con estos datos, tu obligación fiscal es cero. ¡Bien hecho!`;
+                    taxAdviceP.className = 'advice-message positive-advice';
+                }
+
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Función para actualizar los spans de resultados
+            function updateResults(ingresosNetos, impuestoBruto, impuestoFinal, ahorroPotencial) {
+                ingresosNetosImponiblesSpan.textContent = `$${ingresosNetos.toFixed(2)}`;
+                impuestoEstimadoBrutoSpan.textContent = `$${impuestoBruto.toFixed(2)}`;
+                impuestoFinalEstimadoSpan.textContent = `$${impuestoFinal.toFixed(2)}`;
+                ahorroFiscalPotencialSpan.textContent = `$${ahorroPotencial.toFixed(2)}`;
+
+                // Ajustar clases de color para los valores
+                impuestoEstimadoBrutoSpan.classList.toggle('negative', impuestoBruto > 0);
+                impuestoEstimadoBrutoSpan.classList.toggle('positive', impuestoBruto <= 0); // Si es 0 o negativo, es "positivo" en este contexto
+                
+                impuestoFinalEstimadoSpan.classList.toggle('negative', impuestoFinal > 0);
+                impuestoFinalEstimadoSpan.classList.toggle('positive', impuestoFinal <= 0);
+
+                ahorroFiscalPotencialSpan.classList.toggle('positive', ahorroPotencial > 0);
+                ahorroFiscalPotencialSpan.classList.toggle('negative', ahorroPotencial <= 0);
+            }
+
+            // Función para actualizar la gráfica
+            function updateChart(ingresosBrutos, deduccionesPermitidas, creditosFiscales, impuestoFinal) {
+                if (taxChart) {
+                    taxChart.destroy();
+                }
+
+                currentChartLabels = ['Ingresos Brutos', 'Deducciones', 'Créditos Fiscales', 'Impuesto Final'];
+                currentChartData = [ingresosBrutos, deduccionesPermitidas, creditosFiscales, impuestoFinal];
+
+                const data = {
+                    labels: currentChartLabels,
+                    datasets: [{
+                        label: 'Monto ($)',
+                        data: currentChartData,
+                        backgroundColor: [
+                            'rgba(46, 204, 113, 0.7)', // Ingresos Brutos (verde)
+                            'rgba(52, 152, 219, 0.7)', // Deducciones (azul)
+                            'rgba(155, 89, 182, 0.7)', // Créditos Fiscales (púrpura)
+                            'rgba(231, 76, 60, 0.7)'  // Impuesto Final (rojo)
+                        ],
+                        borderColor: [
+                            'rgba(46, 204, 113, 1)',
+                            'rgba(52, 152, 219, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(231, 76, 60, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+
+                taxChart = new Chart(taxChartCanvas, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // No necesitamos leyenda para una sola serie de barras
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: $${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Monto ($)',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return `$${value.toFixed(0)}`;
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Concepto',
+                                    color: '#555',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para generar el PDF
+            function generatePdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Validar si se han calculado los datos de la planificación fiscal
+                if (ingresosNetosImponiblesSpan.textContent === '$0.00' && impuestoFinalEstimadoSpan.textContent === '$0.00' && ahorroFiscalPotencialSpan.textContent === '$0.00') {
+                    showGenericMessage("Por favor, calcula la planificación fiscal primero haciendo clic en 'Calcular Impuestos' y asegúrate de que los valores sean válidos antes de generar el PDF.");
+                    return;
+                }
+
+                // Recopilar datos
+                const ingresosBrutos = parseFloat(ingresosBrutosInput.value) || 0;
+                const deduccionesPermitidas = parseFloat(deduccionesPermitidasInput.value) || 0;
+                const creditosFiscales = parseFloat(creditosFiscalesInput.value) || 0;
+                const anoFiscal = anoFiscalSelect.value;
+                const estadoCivil = estadoCivilSelect.options[estadoCivilSelect.selectedIndex].text;
+                const tasaImpositivaMarginal = parseFloat(tasaImpositivaMarginalInput.value) || 0;
+
+                const ingresosNetosImponibles = parseFloat(ingresosNetosImponiblesSpan.textContent.replace('$', '')) || 0;
+                const impuestoEstimadoBruto = parseFloat(impuestoEstimadoBrutoSpan.textContent.replace('$', '')) || 0;
+                const impuestoFinalEstimado = parseFloat(impuestoFinalEstimadoSpan.textContent.replace('$', '')) || 0;
+                const ahorroFiscalPotencial = parseFloat(ahorroFiscalPotencialSpan.textContent.replace('$', '')) || 0;
+                const taxAdvice = taxAdviceP.textContent;
+
+                // Título
+                doc.setFontSize(22);
+                doc.text("Reporte de Planificación Fiscal", 105, 20, null, null, "center");
+
+                // Fecha de Generación
+                doc.setFontSize(10);
+                doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                let yOffset = 40; // Posición inicial Y para el contenido
+
+                // Sección de Datos de Entrada
+                doc.setFontSize(16);
+                doc.text("Datos de Entrada", 20, yOffset);
+                yOffset += 10;
+
+                const inputData = [
+                    ['Ingresos Brutos Anuales:', `$${ingresosBrutos.toFixed(2)}`],
+                    ['Deducciones Permitidas:', `$${deduccionesPermitidas.toFixed(2)}`],
+                    ['Créditos Fiscales:', `$${creditosFiscales.toFixed(2)}`],
+                    ['Año Fiscal:', `${anoFiscal}`],
+                    ['Estado Civil:', `${estadoCivil}`],
+                    ['Tasa Impositiva Marginal Sugerida:', `${tasaImpositivaMarginal.toFixed(1)}%`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Parámetro', 'Valor']],
+                    body: inputData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 90 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Resumen Fiscal
+                doc.setFontSize(16);
+                doc.text("Resumen Fiscal", 20, yOffset);
+                yOffset += 10;
+
+                const resultsData = [
+                    ['Ingresos Netos Imponibles:', `$${ingresosNetosImponibles.toFixed(2)}`],
+                    ['Impuesto Estimado (antes de créditos):', `$${impuestoEstimadoBruto.toFixed(2)}`],
+                    ['Impuesto Final Estimado:', `$${impuestoFinalEstimado.toFixed(2)}`],
+                    ['Ahorro Fiscal Potencial:', `$${ahorroFiscalPotencial.toFixed(2)}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: resultsData,
+                    theme: 'grid',
+                    styles: { fontSize: 12, cellPadding: 3, overflow: 'linebreak', fontStyle: 'bold' },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 90 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Desglose Fiscal Estimado (de la gráfica)
+                if (currentChartLabels.length > 0 && currentChartData.length > 0) {
+                    doc.setFontSize(16);
+                    doc.text("Desglose Fiscal Estimado", 20, yOffset);
+                    yOffset += 10;
+
+                    const breakdownData = currentChartLabels.map((label, index) => [
+                        label,
+                        `$${currentChartData[index].toFixed(2)}`
+                    ]);
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Concepto', 'Monto ($)']],
+                        body: breakdownData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+                }
+
+                // Consejo
+                doc.setFontSize(14);
+                doc.setTextColor(50, 50, 50); // Darker text for advice
+                doc.text("Consejo:", 20, yOffset);
+                yOffset += 7;
+                doc.setFontSize(12);
+                const splitAdviceText = doc.splitTextToSize(taxAdvice, doc.internal.pageSize.width - 40);
+                doc.text(splitAdviceText, 20, yOffset);
+                yOffset += (splitAdviceText.length * 7) + 10;
+
+                // Guardar el PDF
+                doc.save("reporte_planificacion_fiscal.pdf");
+            }
+
+            // Event Listeners
+            ingresosBrutosInput.addEventListener('input', suggestMarginalTaxRate);
+            estadoCivilSelect.addEventListener('change', suggestMarginalTaxRate);
+
+            taxPlanningForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                calculateTaxPlanning();
+            });
+
+            resetButton.addEventListener('click', function() {
+                taxPlanningForm.reset();
+                ingresosBrutosInput.value = "0";
+                deduccionesPermitidasInput.value = "0";
+                creditosFiscalesInput.value = "0";
+                anoFiscalSelect.value = "2025"; // O el año actual por defecto
+                estadoCivilSelect.value = "soltero";
+                tasaImpositivaMarginalInput.value = "0"; // Se recalculará con suggestMarginalTaxRate
+                updateResults(0, 0, 0, 0);
+                taxAdviceP.textContent = '';
+                taxAdviceP.className = 'advice-message';
+                updateChart(0, 0, 0, 0); // Limpiar la gráfica
+                currentChartLabels = []; // Clear global chart data
+                currentChartData = []; // Clear global chart data
+                hideAllTooltips();
+                suggestMarginalTaxRate(); // Recalcular tasa sugerida al resetear
+            });
+
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Inicializar al cargar la página
+            suggestMarginalTaxRate(); // Sugerir tasa inicial
+            calculateTaxPlanning(); // Realizar un cálculo inicial
+            hideAllTooltips(); // Ensure tooltips are hidden initially
+        });
+    </script>
+</body>
+</html>

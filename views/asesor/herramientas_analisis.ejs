@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Herramientas de Análisis Financiero</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/herramientas_analisis.css">
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <button class="back-button" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Volver
+        </button>
+        <main class="analysis-tools-dashboard">
+            <h1><i class="fas fa-chart-line"></i> Herramientas de Análisis Financiero</h1>
+            <p class="description">Aquí puedes acceder a diversas herramientas para realizar análisis financieros detallados y ofrecer el mejor asesoramiento a tus clientes.</p>
+
+            <section class="tools-list">
+                <h2>Herramientas Disponibles</h2>
+                <div class="tool-grid">
+                    <a href="/herramientas-analisis/calculadora-presupuesto" class="tool-card">
+                        <i class="fas fa-calculator tool-icon"></i>
+                        <h3>Calculadora de Presupuesto</h3>
+                        <p>Ayuda a tus clientes a organizar sus ingresos y gastos.</p>
+                    </a>
+                    <a href="/herramientas-analisis/analisis-inversiones" class="tool-card">
+                        <i class="fas fa-chart-area tool-icon"></i>
+                        <h3>Análisis de Inversiones</h3>
+                        <p>Evalúa el rendimiento y riesgo de diferentes opciones de inversión.</p>
+                    </a>
+                    <a href="/herramientas-analisis/valoracion-empresas" class="tool-card">
+                        <i class="fas fa-building tool-icon"></i>
+                        <h3>Valoración de Empresas</h3>
+                        <p>Determina el valor intrínseco de un negocio para decisiones estratégicas.</p>
+                    </a>
+                    <a href="/herramientas-analisis/riesgos-mercado" class="tool-card">
+                        <i class="fas fa-shield-alt tool-icon"></i>
+                        <h3>Riesgos de Mercado (VaR)</h3>
+                        <p>Cuantifica la pérdida potencial de mercado (VaR) en tus inversiones.</p>
+                    </a>
+                    <a href="/herramientas-analisis/planificacion-fiscal" class="tool-card">
+                        <i class="fas fa-file-invoice-dollar tool-icon"></i>
+                        <h3>Planificación Fiscal</h3>
+                        <p>Optimiza la carga tributaria y asegura el cumplimiento normativo.</p>
+                    </a>
+                    <a href="/herramientas-analisis/proyecciones-financieras" class="tool-card">
+                        <i class="fas fa-hand-holding-usd tool-icon"></i>
+                        <h3>Planificación Financiera Integral y Metas</h3>
+                        <p>Define tus metas, proyecta escenarios futuros y evalúa la probabilidad de éxito.</p>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+</body>
+</html>

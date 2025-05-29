@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Programar y Registrar Consulta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/programar_consulta.css"> </head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <button class="back-button" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Volver al Panel
+        </button>
+
+        <main class="consultation-scheduling-dashboard">
+            <h1><i class="fas fa-calendar-check"></i> Programar y Registrar Consultas</h1>
+            <p class="description">Agenda nuevas citas y lleva un registro detallado de todas las interacciones con tus clientes.</p>
+
+            <section class="selection-and-form-section">
+                <div class="client-selection-card">
+                    <h2><i class="fas fa-user-circle"></i> Seleccionar Cliente</h2>
+                    <div class="form-group">
+                        <label for="selectClient">Cliente:</label>
+                        <select id="selectClient">
+                            <option value="">-- Seleccione un Cliente --</option>
+                            <option value="C001">Juan Pérez (ID: C001)</option>
+                            <option value="C002">María García (ID: C002)</option>
+                            <option value="C003">Carlos Ruiz (ID: C003)</option>
+                            </select>
+                    </div>
+                    <div class="client-summary" id="clientSummary">
+                        <p>Seleccione un cliente para ver su historial y programar una consulta.</p>
+                    </div>
+                </div>
+
+                <div class="schedule-form-card" id="scheduleFormCard" style="display:none;">
+                    <h2><i class="fas fa-calendar-plus"></i> Programar Nueva Consulta</h2>
+                    <form id="scheduleConsultationForm" class="schedule-form">
+                        <div class="form-group">
+                            <label for="consultationDateTime">Fecha y Hora:</label>
+                            <input type="datetime-local" id="consultationDateTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="consultationType">Tipo de Consulta:</label>
+                            <select id="consultationType" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Presencial">Presencial</option>
+                                <option value="Llamada Telefónica">Llamada Telefónica</option>
+                                <option value="Videollamada">Videollamada</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="consultationTopic">Tema:</label>
+                            <input type="text" id="consultationTopic" placeholder="Ej. Revisión de portafolio, Planificación de retiro" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="consultationNotes">Notas:</label>
+                            <textarea id="consultationNotes" rows="4" placeholder="Detalles o resumen de la consulta..."></textarea>
+                        </div>
+                        <button type="submit"><i class="fas fa-save"></i> Guardar Consulta</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="consultations-history-section" id="consultationsHistorySection" style="display:none;">
+                <h2><i class="fas fa-history"></i> Historial de Consultas del Cliente</h2>
+                <div class="consultation-list" id="consultationList">
+                    <div class="no-consultations-message" id="noConsultationsMessage">
+                        <p>No hay consultas registradas para este cliente.</p>
+                    </div>
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectClient = document.getElementById('selectClient');
+            const clientSummaryDiv = document.getElementById('clientSummary');
+            const scheduleFormCard = document.getElementById('scheduleFormCard');
+            const scheduleConsultationForm = document.getElementById('scheduleConsultationForm');
+            const consultationsHistorySection = document.getElementById('consultationsHistorySection');
+            const consultationList = document.getElementById('consultationList');
+            const noConsultationsMessage = document.getElementById('noConsultationsMessage');
+
+            // --- Datos de Clientes y Consultas de Ejemplo ---
+            // En una aplicación real, esto vendría del servidor/base de datos.
+            // Las consultas estarían asociadas a cada cliente.
+            const allClientsData = [
+                {
+                    id: 'C001',
+                    name: 'Juan Pérez',
+                    email: 'juan.perez@example.com',
+                    phone: '+1 (555) 123-4567',
+                    consultations: [
+                        { date: '2024-03-10T10:00', type: 'Llamada Telefónica', topic: 'Revisión de Portafolio', notes: 'Se discutieron opciones de inversión en fondos mutuos y rebalanceo. Cliente mostró interés en renta fija.' },
+                        { date: '2024-01-20T14:30', type: 'Presencial', topic: 'Planificación Inicial', notes: 'Primera reunión. Se recopiló información financiera, se estableció perfil de riesgo (moderado).' }
+                    ]
+                },
+                {
+                    id: 'C002',
+                    name: 'María García',
+                    email: 'maria.garcia@example.com',
+                    phone: '+1 (555) 987-6543',
+                    consultations: [
+                        { date: '2024-04-05T11:00', type: 'Videollamada', topic: 'Opciones Hipotecarias', notes: 'Se presentaron diferentes bancos y tipos de hipotecas. Cliente pidió simular con tasas actuales.' }
+                    ]
+                },
+                {
+                    id: 'C003',
+                    name: 'Carlos Ruiz',
+                    email: 'carlos.ruiz@example.com',
+                    phone: '+1 (555) 222-3333',
+                    consultations: [] // Este cliente no tiene consultas aún
+                },
+                {
+                    id: 'C004',
+                    name: 'Ana López',
+                    email: 'ana.lopez@example.com',
+                    phone: '+1 (555) 444-5555',
+                    consultations: [
+                        { date: '2024-02-15T09:00', type: 'Email', topic: 'Seguimiento de Inversiones', notes: 'Envío de resumen de rendimiento trimestral. Cliente respondió con dudas sobre mercado bajista.' }
+                    ]
+                }
+            ];
+
+            // Rellenar el dropdown de clientes dinámicamente
+            function populateClientSelect() {
+                allClientsData.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.name} (ID: ${client.id})`;
+                    selectClient.appendChild(option);
+                });
+            }
+
+            // Función para cargar y mostrar el historial de consultas
+            function loadConsultations(consultations) {
+                consultationList.innerHTML = ''; // Limpiar lista existente
+                if (consultations && consultations.length > 0) {
+                    noConsultationsMessage.style.display = 'none';
+                    // Ordenar por fecha, más reciente primero
+                    consultations.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    consultations.forEach(consultation => {
+                        const dateTime = new Date(consultation.date);
+                        const formattedDate = dateTime.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+                        const formattedTime = dateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                        const consultationItem = document.createElement('div');
+                        consultationItem.classList.add('consultation-item');
+                        consultationItem.innerHTML = `
+                            <strong>${consultation.topic} (${formattedDate} ${formattedTime})</strong>
+                            <span>Tipo: ${consultation.type}</span>
+                            <p>${consultation.notes || 'Sin notas adicionales.'}</p>
+                        `;
+                        consultationList.appendChild(consultationItem);
+                    });
+                } else {
+                    noConsultationsMessage.style.display = 'block';
+                }
+            }
+
+            // Event listener para cuando se selecciona un cliente
+            selectClient.addEventListener('change', function() {
+                const selectedClientId = this.value;
+                const client = allClientsData.find(c => c.id === selectedClientId);
+
+                if (client) {
+                    clientSummaryDiv.innerHTML = `
+                        <p><strong>${client.name}</strong></p>
+                        <p><i class="fas fa-envelope"></i> ${client.email}</p>
+                        <p><i class="fas fa-phone-alt"></i> ${client.phone}</p>
+                    `;
+                    scheduleFormCard.style.display = 'block'; // Mostrar el formulario de agendar
+                    consultationsHistorySection.style.display = 'block'; // Mostrar la sección de historial
+                    loadConsultations(client.consultations); // Cargar las consultas de ese cliente
+                } else {
+                    clientSummaryDiv.innerHTML = '<p>Seleccione un cliente para ver su historial y programar una consulta.</p>';
+                    scheduleFormCard.style.display = 'none'; // Ocultar el formulario
+                    consultationsHistorySection.style.display = 'none'; // Ocultar el historial
+                    consultationList.innerHTML = ''; // Limpiar historial
+                    noConsultationsMessage.style.display = 'block'; // Mostrar mensaje sin consultas
+                }
+            });
+
+            // Manejar el envío del formulario de nueva consulta
+            scheduleConsultationForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const selectedClientId = selectClient.value;
+                if (!selectedClientId) {
+                    alert('Por favor, selecciona un cliente primero.');
+                    return;
+                }
+
+                const dateTime = document.getElementById('consultationDateTime').value;
+                const type = document.getElementById('consultationType').value;
+                const topic = document.getElementById('consultationTopic').value;
+                const notes = document.getElementById('consultationNotes').value;
+
+                if (!dateTime || !type || !topic) {
+                    alert('Por favor, completa la fecha, hora, tipo y tema de la consulta.');
+                    return;
+                }
+
+                const newConsultation = {
+                    date: dateTime,
+                    type: type,
+                    topic: topic,
+                    notes: notes
+                };
+
+                // En una aplicación real, enviarías esto al backend para guardar en la BD.
+                // Aquí, lo añadimos directamente a los datos de ejemplo.
+                const client = allClientsData.find(c => c.id === selectedClientId);
+                if (client) {
+                    client.consultations.push(newConsultation);
+                    alert(`Consulta agendada/registrada exitosamente para ${client.name}!`);
+                    loadConsultations(client.consultations); // Recargar la lista de consultas para el cliente
+                    scheduleConsultationForm.reset(); // Limpiar el formulario
+                    consultationList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                } else {
+                    alert('Error: Cliente no encontrado en los datos de ejemplo.');
+                }
+            });
+
+            // Inicializar el dropdown de clientes
+            populateClientSelect();
+        });
+    </script>
+</body>
+</html>

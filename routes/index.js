@@ -309,8 +309,8 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
             console.error('Error al subir a Imgur:', imgurData);
             const errorMessage = imgurData.data && typeof imgurData.data === 'object' && imgurData.data.error
-                                    ? imgurData.data.error
-                                    : 'Error desconocido al subir la imagen a Imgur.';
+                                        ? imgurData.data.error
+                                        : 'Error desconocido al subir la imagen a Imgur.';
             return res.status(imgurResponse.status || 500).json({
                 success: false,
                 message: errorMessage
@@ -374,6 +374,108 @@ router.get('/formulariocliente', (req, res) => {
 router.get('/asesor/verificar_identidad', requireAuth, asesorController.getVerificationPageAsesor);
 router.post('/asesor/verificar_identidad', requireAuth, asesorController.postVerifyIdentityAsesor);
 
+// Ruta para las herramientas de análisis financiero (página principal)
+router.get('/herramientas-analisis', requireAuth, (req, res) => {
+    return res.render('asesor/herramientas_analisis');
+});
+
+// Ruta para la calculadora de presupuesto
+router.get('/herramientas-analisis/calculadora-presupuesto', requireAuth, (req, res) => {
+    return res.render('asesor/calculadora_presupuesto');
+});
+
+// Nueva ruta para el análisis de inversiones
+router.get('/herramientas-analisis/analisis-inversiones', requireAuth, (req, res) => {
+    return res.render('asesor/analisis_inversiones');
+});
+
+// Nueva ruta para la gestión de riesgos (VaR)
+router.get('/herramientas-analisis/riesgos-mercado', requireAuth, (req, res) => {
+    return res.render('asesor/riesgos_mercado');
+});
+
+// Nueva ruta para la planificación fiscal
+router.get('/herramientas-analisis/planificacion-fiscal', requireAuth, (req, res) => {
+    return res.render('asesor/planificacion_fiscal');
+});
+
+
+// ADDED: Nueva ruta para el análisis de proyecciones financieras y modelado
+router.get('/herramientas-analisis/proyecciones-financieras', requireAuth, (req, res) => {
+    return res.render('asesor/proyecciones_financieras');
+});
+
+// Nueva ruta para el análisis de proyecciones financieras y modelado
+router.get('/herramientas-analisis/valoracion-empresas', requireAuth, (req, res) => {
+    return res.render('asesor/valoracion_empresas');
+});
+
+// Nueva ruta para el análisis de proyecciones financieras y modelado
+router.get('/clientes-asignados', requireAuth, (req, res) => {
+    return res.render('asesor/lista_clientes');
+});
+
+
+
+// Para mostrar el perfil de un cliente específico
+router.get('/clientes/:id_cliente/perfil',  (req, res) => {
+    const idCliente = req.params.id_cliente;
+    // Aquí, en una app real, buscarías el cliente en tu BD usando idCliente
+    // y pasarías los datos a la vista.
+    // Por ahora, el JavaScript en el HTML simula la carga de datos.
+    res.render('asesor/perfil_cliente', { clientId: idCliente });
+});
+
+// Asegúrate de que los enlaces de la lista de clientes apunten a esta ruta
+// Por ejemplo, en lista_clientes.html:
+// <a href="/clientes/C001/perfil" class="action-button view-profile">
+
+// En tu archivo de rutas (ej. routes/asesor.js)
+// ... otras rutas ...
+
+// Ruta para la página de programar y registrar consultas
+router.get('/programar-consulta', (req, res) => {
+    // En una aplicación real, aquí podrías cargar la lista de todos los clientes
+    // desde tu base de datos y pasarlos a la vista EJS para el dropdown.
+    // Por ahora, el JavaScript en el HTML lo simula.
+    res.render('asesor/programar_consulta');
+});
+
+router.get('/chat-personal', requireAuth, async (req, res) => { // <<< Añade requireAuth
+    const userId = req.session.userId; // Obtener userId de la sesión
+    let userName = req.userEmail; // Puedes inicializarlo con el email
+
+    try {
+        // Opcional: Buscar el displayName en Firestore (si lo guardas ahí)
+        // Podrías tener un nombre en `clientes` o `asesores`
+        const clienteDoc = await db.collection('clientes').doc(userId).get();
+        const asesorDoc = await db.collection('asesores').doc(userId).get();
+
+        if (clienteDoc.exists) {
+            userName = clienteDoc.data().nombre || userName; // Usa el nombre si existe
+            // También puedes pasar todo el objeto clienteData si lo necesitas en el chat
+            // res.render('asesor/chat_personal', { userId: userId, userName: userName, userRole: 'cliente', userData: clienteDoc.data() });
+        } else if (asesorDoc.exists) {
+            userName = asesorDoc.data().nombre || userName; // Usa el nombre si existe
+            // res.render('asesor/chat_personal', { userId: userId, userName: userName, userRole: 'asesor', userData: asesorDoc.data() });
+        } else {
+            // Si el usuario no tiene perfil de cliente/asesor, usa el email como nombre
+            console.warn(`Usuario ${userId} sin perfil en clientes/asesores, usando email como nombre.`);
+        }
+
+    } catch (error) {
+        console.error('Error al obtener el nombre del usuario para el chat:', error);
+        // Continuar de todos modos, usando el email como nombre de respaldo
+    }
+
+    // Renderiza la vista chat_personal.ejs, pasando userId y userName
+    res.render('asesor/chat_personal', { 
+        userId: userId, 
+        userName: userName 
+    });
+});
+
+// ... el resto de tus rutas ...
 
 // Ruta para mostrar la página de verificaciones pendientes (solo para admin)
 router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req, res) => {

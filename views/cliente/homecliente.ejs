@@ -6,26 +6,10 @@
     <title>AI Finance Solutions - Inicio Cliente</title>
     <link rel="stylesheet" href="/stylesheets/home_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css"> 
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-left">
-            <h2>Panel de Cliente</h2>
-        </div>
-        <div class="header-right">
-            <button onclick="window.location.href='/homecliente'">
-                <i class="fas fa-home"></i> Inicio
-            </button>
-            <button class="logout-button-header" onclick="window.location.href='/logout'">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
-                    <a href="/perfilcliente" class="profile-logo-link">
-                <div class="profile-logo-container">
-                    <i class="fas fa-user-circle profile-logo"></i>
-                </div>
-            </a>
-        </div>
-    </header>
+    <%- include('../partials/client_navbar') %>
 
     <div class="container">
         <main class="client-dashboard">

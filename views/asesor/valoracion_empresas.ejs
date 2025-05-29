@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Valoración de Empresas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/valoracion_empresas.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="container">
+        <main class="company-valuation-dashboard">
+            <h1><i class="fas fa-building"></i> Valoración de Empresas</h1>
+            <p class="description">Determina el valor intrínseco de una empresa proyectando sus flujos de caja futuros y descontándolos al presente. Esta herramienta es esencial para fusiones, adquisiciones, inversiones y análisis estratégico.</p>
+
+            <div class="valuation-card">
+                <form id="valuationForm">
+                    <section class="input-section cash-flow-projection-section">
+                        <h2><i class="fas fa-chart-line"></i> Proyección de Flujos de Caja</h2>
+                        <div class="form-group">
+                            <label for="flujoEfectivoActual">Flujo de Efectivo Libre Actual (FCF) ($):</label>
+                            <input type="number" id="flujoEfectivoActual" name="flujoEfectivoActual" placeholder="Ej: 100000" min="0" value="0" data-tooltip="El Flujo de Efectivo Libre (FCF) actual de la empresa.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaCrecimiento">Tasa de Crecimiento del FCF (%, período explícito):</label>
+                            <input type="number" id="tasaCrecimiento" name="tasaCrecimiento" placeholder="Ej: 5" min="0" max="100" step="0.1" value="0" data-tooltip="Tasa de crecimiento anual esperada del FCF durante el período de proyección explícito.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="periodoProyeccion">Período de Proyección Explícita (años):</label>
+                            <input type="number" id="periodoProyeccion" name="periodoProyeccion" placeholder="Ej: 5" min="1" max="20" value="0" data-tooltip="Número de años para proyectar el FCF explícitamente.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <section class="input-section discount-rate-section">
+                        <h2><i class="fas fa-percentage"></i> Tasas de Descuento y Crecimiento Terminal</h2>
+                        <div class="form-group">
+                            <label for="tasaDescuento">Tasa de Descuento (WACC, %):</label>
+                            <input type="number" id="tasaDescuento" name="tasaDescuento" placeholder="Ej: 10" min="0.1" max="50" step="0.1" value="0" data-tooltip="Costo Promedio Ponderado de Capital (WACC) de la empresa. Debe ser mayor que la Tasa de Crecimiento Terminal.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tasaCrecimientoTerminal">Tasa de Crecimiento Terminal (%, perpetuidad):</label>
+                            <input type="number" id="tasaCrecimientoTerminal" name="tasaCrecimientoTerminal" placeholder="Ej: 2" min="0" max="10" step="0.1" value="0" data-tooltip="Tasa de crecimiento del FCF esperada a perpetuidad después del período explícito. Debe ser menor que la Tasa de Descuento.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="numAcciones">Número de Acciones en Circulación (opcional):</label>
+                            <input type="number" id="numAcciones" name="numAcciones" placeholder="Ej: 1000000" min="0" value="0" data-tooltip="Número total de acciones en circulación para calcular el valor por acción.">
+                            <div class="custom-tooltip"></div>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="calculate-button"><i class="fas fa-calculator"></i> Calcular Valoración</button>
+                        <button type="button" class="reset-button" id="resetButton"><i class="fas fa-redo-alt"></i> Limpiar</button>
+                        <button type="button" class="pdf-button" id="generatePdfButton"><i class="fas fa-file-pdf"></i> Generar PDF</button>
+                    </div>
+                </form>
+
+                <section class="results-section" id="resultsSection">
+                    <h2><i class="fas fa-chart-pie"></i> Resultados de la Valoración</h2>
+                    <div class="result-item">
+                        <span>Valor Presente de Flujos de Caja Explícitos:</span>
+                        <span id="valorPresenteFlujos" class="value">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Valor Terminal (al final del período):</span>
+                        <span id="valorTerminal" class="value">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Valor Presente del Valor Terminal:</span>
+                        <span id="valorPresenteValorTerminal" class="value">$0.00</span>
+                    </div>
+                    <div class="result-item net-valuation">
+                        <span>Valor Total de la Empresa:</span>
+                        <span id="valorTotalEmpresa" class="value positive">$0.00</span>
+                    </div>
+                    <div class="result-item net-valuation" id="valorPorAccionContainer" style="display: none;">
+                        <span>Valor por Acción:</span>
+                        <span id="valorPorAccion" class="value positive">$0.00</span>
+                    </div>
+                    <p id="valuationAdvice" class="advice-message"></p>
+                    <div class="chart-container">
+                        <h3>Proyección de Flujos de Caja Libres (FCF)</h3>
+                        <canvas id="fcfChart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2><i class="fas fa-info-circle"></i> ¿Cómo usar esta herramienta?</h2>
+            <p>Esta herramienta calcula el **valor intrínseco de una empresa** mediante el método de **Flujo de Caja Descontado (DCF)**, una técnica clave para estimar el valor real de un negocio basándose en sus flujos de efectivo futuros.</p>
+
+            <h3>Campos de Entrada y lo que explican:</h3>
+            <ul>
+                <li>
+                    <strong>Flujo de Efectivo Libre Actual (FCF) ($):</strong>
+                    <p>El FCF representa el efectivo que la empresa genera después de cubrir sus costos operativos y las inversiones necesarias. Es el dinero disponible para los inversores. Ingresa aquí el FCF del último período conocido (ej. el último año).</p>
+                </li>
+                <li>
+                    <strong>Tasa de Crecimiento del FCF (%, período explícito):</strong>
+                    <p>Es el porcentaje anual al que esperas que el FCF crezca durante los primeros años (el "período de proyección explícita"). Por ejemplo, si esperas un crecimiento del 5%, ingresa `5`.</p>
+                </li>
+                <li>
+                    <strong>Período de Proyección Explícita (años):</strong>
+                    <p>El número de años durante los cuales proyectarás el FCF con la tasa de crecimiento específica. Después de este período, se asume un crecimiento más estable a perpetuidad (generalmente entre 5 y 10 años).</p>
+                </li>
+                <li>
+                    <strong>Tasa de Descuento (WACC, %):</strong>
+                    <p>El **Costo Promedio Ponderado de Capital (WACC)** de la empresa. Se usa para traer los flujos de caja futuros a su valor presente. **Importante:** Esta tasa debe ser mayor que la Tasa de Crecimiento Terminal para que el cálculo sea válido.</p>
+                </li>
+                <li>
+                    <strong>Tasa de Crecimiento Terminal (%, perpetuidad):</strong>
+                    <p>La tasa de crecimiento constante y sostenible a la que se espera que el FCF crezca indefinidamente después del período de proyección explícita (ej. tasa de inflación a largo plazo). **Importante:** Debe ser menor que la Tasa de Descuento (WACC).</p>
+                </li>
+                <li>
+                    <strong>Número de Acciones en Circulación (opcional):</strong>
+                    <p>El total de acciones emitidas por la empresa. Si lo proporcionas, la herramienta calculará el valor de la empresa por acción.</p>
+                </li>
+            </ul>
+
+            <h3>Resultados que obtendrás:</h3>
+            <ul>
+                <li>
+                    <strong>Valor Presente de Flujos de Caja Explícitos:</strong> La suma de los FCF proyectados para el período inicial, ajustados a su valor actual.
+                </li>
+                <li>
+                    <strong>Valor Terminal (al final del período):</strong> El valor de la empresa más allá del período de proyección explícita, asumiendo el crecimiento a perpetuidad.
+                </li>
+                <li>
+                    <strong>Valor Presente del Valor Terminal:</strong> El Valor Terminal, pero descontado a su valor actual.
+                </li>
+                <li>
+                    <strong>Valor Total de la Empresa:</strong> La suma de todos los valores presentes de los flujos de caja (explícitos y terminales). Este es el valor intrínseco estimado.
+                </li>
+                <li>
+                    <strong>Valor por Acción:</strong> El Valor Total de la Empresa dividido por el número de acciones en circulación (si se proporcionó).
+                </li>
+                <li>
+                    <strong>Gráfica de Proyección de FCF:</strong> Una visualización de cómo crecen los flujos de caja y cómo su valor disminuye al descontarse.
+                </li>
+            </ul>
+            <p>Utiliza esta información para tus análisis estratégicos, decisiones de inversión o recomendaciones a clientes.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const valuationForm = document.getElementById('valuationForm');
+            const resetButton = document.getElementById('resetButton');
+            const generatePdfButton = document.getElementById('generatePdfButton');
+            const flujoEfectivoActualInput = document.getElementById('flujoEfectivoActual');
+            const tasaCrecimientoInput = document.getElementById('tasaCrecimiento');
+            const periodoProyeccionInput = document.getElementById('periodoProyeccion');
+            const tasaDescuentoInput = document.getElementById('tasaDescuento');
+            const tasaCrecimientoTerminalInput = document.getElementById('tasaCrecimientoTerminal');
+            const numAccionesInput = document.getElementById('numAcciones');
+
+            const valorPresenteFlujosSpan = document.getElementById('valorPresenteFlujos');
+            const valorTerminalSpan = document.getElementById('valorTerminal');
+            const valorPresenteValorTerminalSpan = document.getElementById('valorPresenteValorTerminal');
+            const valorTotalEmpresaSpan = document.getElementById('valorTotalEmpresa');
+            const valorPorAccionContainer = document.getElementById('valorPorAccionContainer');
+            const valorPorAccionSpan = document.getElementById('valorPorAccion');
+            const valuationAdviceP = document.getElementById('valuationAdvice');
+            const fcfChartCanvas = document.getElementById('fcfChart');
+            let fcfChart;
+
+            // Global variables to store chart data for PDF generation
+            let chartYears = [];
+            let fcfValuesForChart = [];
+            let pvFcfValuesForChart = [];
+
+            const explanationModal = document.getElementById('explanationModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const resultsSection = document.getElementById('resultsSection'); // Obtener la sección de resultados
+
+            // Mostrar el modal al cargar la página
+            explanationModal.style.display = 'flex'; // Usar flex para centrado CSS
+
+            // Cerrar el modal al hacer clic en el botón de cerrar
+            closeModalButton.addEventListener('click', () => {
+                explanationModal.style.display = 'none';
+            });
+
+            // Cerrar el modal al hacer clic fuera del contenido del modal
+            window.addEventListener('click', (event) => {
+                if (event.target == explanationModal) {
+                    explanationModal.style.display = 'none';
+                }
+            });
+
+            // Tooltip management using event delegation
+            let activeTooltip = null;
+
+            function hideAllTooltips() {
+                document.querySelectorAll('.custom-tooltip').forEach(tooltip => {
+                    tooltip.classList.remove('show-tooltip');
+                });
+                activeTooltip = null;
+            }
+
+            document.body.addEventListener('mouseover', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('mouseout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusin', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        hideAllTooltips();
+                        const tooltipText = target.getAttribute('data-tooltip');
+                        tooltipDiv.textContent = tooltipText;
+                        tooltipDiv.classList.add('show-tooltip');
+                        activeTooltip = tooltipDiv;
+                    }
+                }
+            });
+
+            document.body.addEventListener('focusout', function(event) {
+                const target = event.target;
+                if (target.matches('[data-tooltip]')) {
+                    const tooltipDiv = target.nextElementSibling;
+                    if (tooltipDiv && tooltipDiv.classList.contains('custom-tooltip')) {
+                        tooltipDiv.classList.remove('show-tooltip');
+                        if (activeTooltip === tooltipDiv) {
+                            activeTooltip = null;
+                        }
+                    }
+                }
+            });
+
+            // Función principal para calcular la valoración
+            function calculateValuation() {
+                const currentFCF = parseFloat(flujoEfectivoActualInput.value) || 0;
+                const growthRate = parseFloat(tasaCrecimientoInput.value) / 100 || 0;
+                const projectionPeriod = parseInt(periodoProyeccionInput.value) || 0;
+                const discountRate = parseFloat(tasaDescuentoInput.value) / 100 || 0;
+                const terminalGrowthRate = parseFloat(tasaCrecimientoTerminalInput.value) / 100 || 0;
+                const numAcciones = parseFloat(numAccionesInput.value) || 0;
+
+                // Validación básica de inputs
+                if (currentFCF < 0 || projectionPeriod <= 0 || discountRate <= 0) {
+                    valuationAdviceP.textContent = 'Por favor, introduce valores válidos para Flujo de Efectivo Actual, Período de Proyección y Tasa de Descuento.';
+                    valuationAdviceP.className = 'advice-message negative-advice';
+                    updateResults(0, 0, 0, 0, 0);
+                    updateChart([], [], []);
+                    chartYears = []; // Clear global chart data
+                    fcfValuesForChart = []; // Clear global chart data
+                    pvFcfValuesForChart = []; // Clear global chart data
+                    return;
+                }
+
+                if (discountRate <= terminalGrowthRate) {
+                    valuationAdviceP.textContent = 'Error: La Tasa de Descuento (WACC) debe ser mayor que la Tasa de Crecimiento Terminal para un cálculo válido del Valor Terminal.';
+                    valuationAdviceP.className = 'advice-message negative-advice';
+                    updateResults(0, 0, 0, 0, 0);
+                    updateChart([], [], []);
+                    chartYears = []; // Clear global chart data
+                    fcfValuesForChart = []; // Clear global chart data
+                    pvFcfValuesForChart = []; // Clear global chart data
+                    return;
+                }
+
+                // Reset global chart data arrays
+                chartYears = [];
+                fcfValuesForChart = [];
+                pvFcfValuesForChart = [];
+
+                let pvExplicitFCFs = 0;
+                let lastProjectedFCF = currentFCF; // Initialize with current FCF
+
+                // Calcular Flujos de Caja Proyectados y su Valor Presente
+                for (let i = 1; i <= projectionPeriod; i++) {
+                    const fcf = currentFCF * Math.pow((1 + growthRate), i);
+                    lastProjectedFCF = fcf; // Keep track of the last FCF for terminal value calculation
+                    const pvFcf = fcf / Math.pow((1 + discountRate), i);
+                    pvExplicitFCFs += pvFcf;
+
+                    chartYears.push(`Año ${i}`);
+                    fcfValuesForChart.push(fcf);
+                    pvFcfValuesForChart.push(pvFcf);
+                }
+
+                // Calcular Valor Terminal
+                const terminalValue = (lastProjectedFCF * (1 + terminalGrowthRate)) / (discountRate - terminalGrowthRate);
+
+                // Calcular Valor Presente del Valor Terminal
+                const pvTerminalValue = terminalValue / Math.pow((1 + discountRate), projectionPeriod);
+
+                // Calcular Valor Total de la Empresa
+                const totalCompanyValue = pvExplicitFCFs + pvTerminalValue;
+
+                let valuePerShare = 0;
+                if (numAcciones > 0) {
+                    valuePerShare = totalCompanyValue / numAcciones;
+                    valorPorAccionContainer.style.display = 'flex';
+                } else {
+                    valorPorAccionContainer.style.display = 'none';
+                }
+
+                // Actualizar resultados en la UI
+                updateResults(pvExplicitFCFs, terminalValue, pvTerminalValue, totalCompanyValue, valuePerShare);
+
+                // Actualizar gráfica
+                updateChart(chartYears, fcfValuesForChart, pvFcfValuesForChart);
+
+                // Consejos
+                if (totalCompanyValue > 0) {
+                    valuationAdviceP.textContent = `La valoración de la empresa es positiva. Este es un buen punto de partida para análisis más detallados.`;
+                    valuationAdviceP.className = 'advice-message positive-advice';
+                } else {
+                    valuationAdviceP.textContent = `La valoración de la empresa es cero o negativa. Revisa tus proyecciones y supuestos.`;
+                    valuationAdviceP.className = 'advice-message negative-advice';
+                }
+
+                // Desplazamiento suave a la sección de resultados
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Función para actualizar los spans de resultados
+            function updateResults(pvExplicitFCFs, terminalValue, pvTerminalValue, totalCompanyValue, valuePerShare) {
+                valorPresenteFlujosSpan.textContent = `$${pvExplicitFCFs.toFixed(2)}`;
+                valorTerminalSpan.textContent = `$${terminalValue.toFixed(2)}`;
+                valorPresenteValorTerminalSpan.textContent = `$${pvTerminalValue.toFixed(2)}`;
+                valorTotalEmpresaSpan.textContent = `$${totalCompanyValue.toFixed(2)}`;
+                valorPorAccionSpan.textContent = `$${valuePerShare.toFixed(2)}`;
+
+                if (totalCompanyValue > 0) {
+                    valorTotalEmpresaSpan.classList.remove('negative');
+                    valorTotalEmpresaSpan.classList.add('positive');
+                    valorPorAccionSpan.classList.remove('negative');
+                    valorPorAccionSpan.classList.add('positive');
+                } else {
+                    valorTotalEmpresaSpan.classList.remove('positive');
+                    valorTotalEmpresaSpan.classList.add('negative');
+                    valorPorAccionSpan.classList.remove('positive');
+                    valorPorAccionSpan.classList.add('negative');
+                }
+            }
+
+            // Función para actualizar la gráfica
+            function updateChart(labels, fcfData, pvFcfData) {
+                if (fcfChart) {
+                    fcfChart.destroy(); // Destruir la instancia anterior si existe
+                }
+
+                fcfChart = new Chart(fcfChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Flujo de Efectivo Libre Proyectado ($)',
+                                data: fcfData,
+                                borderColor: '#2ecc71',
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: '#27ae60',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#27ae60',
+                                pointHoverBorderColor: '#fff'
+                            },
+                            {
+                                label: 'Valor Presente del FCF ($)',
+                                data: pvFcfData,
+                                borderColor: '#3498db',
+                                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: '#2c3e50',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#2c3e50',
+                                pointHoverBorderColor: '#fff'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Período (años)',
+                                    color: '#555',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    color: '#666'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Valor ($)',
+                                    color: '#555',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    color: '#666',
+                                    callback: function(value) {
+                                        return `$${value.toFixed(0)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para generar el PDF
+            function generatePdf() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Validar si se han calculado los datos de la valoración
+                if (fcfValuesForChart.length === 0) {
+                    alert("Por favor, calcula la valoración primero haciendo clic en 'Calcular Valoración' antes de generar el PDF.");
+                    return;
+                }
+
+                // Recopilar datos
+                const currentFCF = parseFloat(flujoEfectivoActualInput.value) || 0;
+                const growthRate = parseFloat(tasaCrecimientoInput.value) || 0;
+                const projectionPeriod = parseInt(periodoProyeccionInput.value) || 0;
+                const discountRate = parseFloat(tasaDescuentoInput.value) || 0;
+                const terminalGrowthRate = parseFloat(tasaCrecimientoTerminalInput.value) || 0;
+                const numAcciones = parseFloat(numAccionesInput.value) || 0;
+
+                const valorPresenteFlujos = parseFloat(valorPresenteFlujosSpan.textContent.replace('$', '')) || 0;
+                const valorTerminal = parseFloat(valorTerminalSpan.textContent.replace('$', '')) || 0;
+                const valorPresenteValorTerminal = parseFloat(valorPresenteValorTerminalSpan.textContent.replace('$', '')) || 0;
+                const valorTotalEmpresa = parseFloat(valorTotalEmpresaSpan.textContent.replace('$', '')) || 0;
+                const valorPorAccion = parseFloat(valorPorAccionSpan.textContent.replace('$', '')) || 0;
+                const valuationAdvice = valuationAdviceP.textContent;
+
+                // Título
+                doc.setFontSize(22);
+                doc.text("Reporte de Valoración de Empresas", 105, 20, null, null, "center");
+
+                // Fecha de Generación
+                doc.setFontSize(10);
+                doc.text(`Fecha de Generación: ${new Date().toLocaleDateString()}`, 105, 28, null, null, "center");
+
+                let yOffset = 40; // Posición inicial Y para el contenido
+
+                // Sección de Datos de Entrada
+                doc.setFontSize(16);
+                doc.text("Datos de Entrada", 20, yOffset);
+                yOffset += 10;
+
+                const inputData = [
+                    ['Flujo de Efectivo Libre Actual (FCF):', `$${currentFCF.toFixed(2)}`],
+                    ['Tasa de Crecimiento del FCF (período explícito):', `${growthRate.toFixed(1)}%`],
+                    ['Período de Proyección Explícita:', `${projectionPeriod} años`],
+                    ['Tasa de Descuento (WACC):', `${discountRate.toFixed(1)}%`],
+                    ['Tasa de Crecimiento Terminal:', `${terminalGrowthRate.toFixed(1)}%`],
+                    ['Número de Acciones en Circulación:', `${numAcciones > 0 ? numAcciones.toLocaleString() : 'N/A'}`]
+                ];
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Valor']],
+                    body: inputData,
+                    theme: 'grid',
+                    styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 90 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Resultados de la Valoración
+                doc.setFontSize(16);
+                doc.text("Resultados de la Valoración", 20, yOffset);
+                yOffset += 10;
+
+                const resultsData = [
+                    ['Valor Presente de Flujos de Caja Explícitos:', `$${valorPresenteFlujos.toFixed(2)}`],
+                    ['Valor Terminal (al final del período):', `$${valorTerminal.toFixed(2)}`],
+                    ['Valor Presente del Valor Terminal:', `$${valorPresenteValorTerminal.toFixed(2)}`],
+                    ['Valor Total de la Empresa:', `$${valorTotalEmpresa.toFixed(2)}`]
+                ];
+
+                if (numAcciones > 0) {
+                    resultsData.push(['Valor por Acción:', `$${valorPorAccion.toFixed(2)}`]);
+                }
+
+                doc.autoTable({
+                    startY: yOffset,
+                    head: [['Concepto', 'Monto ($)']],
+                    body: resultsData,
+                    theme: 'grid',
+                    styles: { fontSize: 12, cellPadding: 3, overflow: 'linebreak', fontStyle: 'bold' },
+                    headStyles: { fillColor: [200, 200, 200], textColor: [0, 0, 0], fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 90 },
+                        1: { cellWidth: 'auto' }
+                    },
+                    margin: { left: 20, right: 20 },
+                    didDrawPage: function (data) {
+                        yOffset = data.cursor.y + 10;
+                    }
+                });
+                yOffset = doc.autoTable.previous.finalY + 15;
+
+                // Sección de Proyección de Flujos de Caja Libres (FCF)
+                if (chartYears.length > 0) {
+                    doc.setFontSize(16);
+                    doc.text("Proyección de Flujos de Caja Libres (FCF)", 20, yOffset);
+                    yOffset += 10;
+
+                    const fcfProjectionData = chartYears.map((year, index) => [
+                        year,
+                        `$${fcfValuesForChart[index].toFixed(2)}`,
+                        `$${pvFcfValuesForChart[index].toFixed(2)}`
+                    ]);
+
+                    doc.autoTable({
+                        startY: yOffset,
+                        head: [['Año', 'FCF Proyectado ($)', 'Valor Presente del FCF ($)']],
+                        body: fcfProjectionData,
+                        theme: 'grid',
+                        styles: { fontSize: 10, cellPadding: 2, overflow: 'linebreak' },
+                        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+                        margin: { left: 20, right: 20 },
+                        didDrawPage: function (data) {
+                            yOffset = data.cursor.y + 10;
+                        }
+                    });
+                    yOffset = doc.autoTable.previous.finalY + 15;
+                }
+
+                // Consejo
+                doc.setFontSize(14);
+                doc.setTextColor(50, 50, 50); // Darker text for advice
+                doc.text("Consejo:", 20, yOffset);
+                yOffset += 7;
+                doc.setFontSize(12);
+                const splitAdviceText = doc.splitTextToSize(valuationAdvice, doc.internal.pageSize.width - 40);
+                doc.text(splitAdviceText, 20, yOffset);
+                yOffset += (splitAdviceText.length * 7) + 10;
+
+                // Guardar el PDF
+                doc.save("reporte_valoracion_empresas.pdf");
+            }
+
+
+            // Event Listener para el formulario
+            valuationForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevenir el envío del formulario
+                calculateValuation();
+            });
+
+            // Event Listener para el botón de limpiar
+            resetButton.addEventListener('click', function() {
+                valuationForm.reset(); // Reinicia todos los campos del formulario
+                // Restablecer valores por defecto a 0
+                flujoEfectivoActualInput.value = "0";
+                tasaCrecimientoInput.value = "0";
+                periodoProyeccionInput.value = "0";
+                tasaDescuentoInput.value = "0";
+                tasaCrecimientoTerminalInput.value = "0";
+                numAccionesInput.value = "0";
+
+                updateResults(0, 0, 0, 0, 0);
+                valuationAdviceP.textContent = '';
+                valuationAdviceP.className = 'advice-message';
+                valorPorAccionContainer.style.display = 'none';
+                updateChart([], [], []); // Limpiar la gráfica
+                chartYears = []; // Clear global chart data
+                fcfValuesForChart = []; // Clear global chart data
+                pvFcfValuesForChart = []; // Clear global chart data
+                // Ocultar todos los tooltips al resetear
+                hideAllTooltips();
+            });
+
+            // Event Listener para el nuevo botón de generar PDF
+            generatePdfButton.addEventListener('click', generatePdf);
+
+            // Calcular la valoración inicial al cargar la página
+            calculateValuation();
+        });
+    </script>
+</body>
+</html>
