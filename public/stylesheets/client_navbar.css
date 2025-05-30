@@ -1,15 +1,23 @@
 /* Estilos generales de la cabecera */
 .main-header {
-    background-color: #007bff; /* Color de fondo azul */
+    background-color: #007bff; /* Fondo azul de la imagen */
     color: white;
-    padding: 15px 20px;
+    padding: 15px 20px; /* <--- Este es el padding que debe evitar que se pegue */
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Espacia el título, nav y botones */
     align-items: center;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-    border-radius: 8px; /* Bordes redondeados */
-    margin-bottom: 20px; /* Margen inferior para separar del contenido */
+    position: sticky; /* Para que se mantenga arriba al hacer scroll */
+    top: 0;
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    width: 100%; /* Asegura que ocupe todo el ancho */
+    box-sizing: border-box; /* <--- ¡Aseguramos que el padding se incluya en el ancho! */
+}
+
+/* Estilos del lado izquierdo (Título) */
+.header-left {
+    flex-shrink: 0; /* No se encoge */
 }
 
 .header-left .header-title-link {
@@ -19,22 +27,31 @@
 
 .main-header h2 {
     margin: 0;
-    font-size: 1.8em;
-    font-weight: 600;
+    font-size: 1.8em; /* Tamaño del título "Panel de Cliente" */
+    font-weight: 700; /* Más negrita como en la imagen */
+    white-space: nowrap; /* Evita que el texto se rompa */
 }
 
-/* Estilos de la navegación principal */
+/* Estilos de la navegación principal (enlaces con iconos) */
+.main-nav {
+    flex-grow: 1; /* Permite que la navegación ocupe el espacio central */
+    display: flex;
+    justify-content: center; /* Centra los enlaces horizontalmente */
+    margin: 0 20px; /* Margen a los lados para no pegarse al título/botones */
+}
+
 .main-nav ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: wrap; /* Para que los enlaces se envuelvan */
+    flex-wrap: wrap; /* Para que los enlaces se envuelvan si hay poco espacio */
     justify-content: center; /* Centra los enlaces en la barra de navegación */
+    gap: 20px; /* Espacio entre los elementos de la lista */
 }
 
 .main-nav li {
-    margin: 0 15px;
+    margin: 0; /* Resetea el margen individual, ahora lo controla el 'gap' del ul */
 }
 
 .main-nav .nav-link {
@@ -44,9 +61,14 @@
     padding: 8px 12px;
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px; /* Espacio entre el icono y el texto */
+    display: flex; /* Para alinear el icono y el texto */
+    align-items: center; /* Centra verticalmente icono y texto */
+    gap: 8px; /* Espacio entre el icono y el texto */
+    white-space: nowrap; /* Evita que los enlaces se rompan en varias líneas */
+}
+
+.main-nav .nav-link i {
+    font-size: 1.1em; /* Ajusta el tamaño del icono */
 }
 
 .main-nav .nav-link:hover,
@@ -55,11 +77,12 @@
     transform: translateY(-2px);
 }
 
-/* Estilos del lado derecho de la cabecera */
+/* Estilos del lado derecho (Perfil y Cerrar Sesión) */
 .header-right {
     display: flex;
     align-items: center;
-    gap: 15px; /* Espacio entre los elementos del lado derecho */
+    gap: 15px; /* Espacio entre el icono de perfil y el botón */
+    flex-shrink: 0; /* No se encoge */
 }
 
 .profile-logo-link {
@@ -68,8 +91,8 @@
 }
 
 .profile-logo-container {
-    width: 40px;
-    height: 40px;
+    width: 45px; /* Tamaño del círculo de perfil */
+    height: 45px;
     border-radius: 50%;
     background-color: white;
     display: flex;
@@ -85,15 +108,15 @@
 }
 
 .profile-logo {
-    font-size: 24px;
+    font-size: 26px; /* Tamaño del icono de perfil */
     color: #007bff; /* Color del icono de perfil */
 }
 
 .logout-button-header {
-    background-color: #dc3545; /* Rojo para cerrar sesión */
+    background-color: #dc3545; /* Rojo vivo como en la imagen */
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 18px; /* Más padding para que se vea más grande */
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
@@ -102,6 +125,8 @@
     gap: 8px;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 600; /* Más negrita */
+    white-space: nowrap; /* Evita que el texto se rompa */
 }
 
 .logout-button-header:hover {
@@ -111,57 +136,61 @@
 }
 
 /* Media Queries para responsividad */
+@media (max-width: 1024px) { /* Para pantallas de tabletas grandes y menores */
+    .main-nav {
+        margin: 0 10px;
+        flex-basis: auto; /* Permite que la nav se ajuste si el espacio es limitado */
+        justify-content: flex-start; /* Ajusta la justificación */
+    }
+    .main-nav ul {
+        gap: 15px;
+    }
+}
+
 @media (max-width: 768px) {
     .main-header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px;
+        flex-direction: column; /* Apila los elementos verticalmente */
+        align-items: flex-start; /* Alinea a la izquierda al apilar */
+        padding: 10px; /* Reducimos el padding en pantallas pequeñas */
+    }
+
+    .header-left, .header-right, .main-nav {
+        width: 100%; /* Ocupan todo el ancho disponible */
+        margin: 0; /* Resetea márgenes para el apilado */
     }
 
     .main-header h2 {
         font-size: 1.5em;
-        margin-bottom: 10px;
+        margin-bottom: 10px; /* Espacio debajo del título */
     }
 
     .main-nav {
-        width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 10px; /* Espacio debajo de la navegación */
     }
 
     .main-nav ul {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-    }
-
-    .main-nav li {
-        margin: 5px 0;
-        width: 100%;
+        flex-direction: column; /* Apila los enlaces */
+        align-items: flex-start; /* Alinea enlaces a la izquierda */
+        gap: 5px; /* Menos espacio entre enlaces apilados */
     }
 
     .main-nav .nav-link {
         padding: 10px;
-        width: 100%;
-        justify-content: flex-start;
+        width: 100%; /* Ocupa todo el ancho */
+        justify-content: flex-start; /* Alinea el contenido del enlace a la izquierda */
     }
 
     .header-right {
-        width: 100%;
-        justify-content: space-around; /* Distribuye los botones en el centro */
+        flex-direction: row; /* Mantén el perfil y cerrar sesión en fila */
+        justify-content: space-around; /* Distribuye uniformemente */
         margin-top: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-header {
-        padding: 10px;
-    }
-
-    .main-header h2 {
-        font-size: 1.3em;
+        /* Asegurarse que tiene el padding adecuado si no está justificado a los extremos */
+        padding: 0 10px; /* Añadir padding aquí también para asegurar espacio en móvil */
+        box-sizing: border-box; /* Asegurar box-sizing también aquí */
     }
 
     .logout-button-header {
+        width: auto; /* Permite que el botón se ajuste */
         padding: 8px 12px;
         font-size: 0.9em;
     }
@@ -173,5 +202,18 @@
 
     .profile-logo {
         font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header h2 {
+        font-size: 1.3em;
+    }
+    .header-right {
+        flex-direction: column; /* Apila también los botones si la pantalla es muy pequeña */
+        gap: 8px;
+    }
+    .logout-button-header {
+        width: 100%; /* El botón ocupa todo el ancho disponible */
     }
 }

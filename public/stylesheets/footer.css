@@ -1,0 +1,28 @@
+/* Estilos para el pie de página */
+.main-footer {
+    background-color: #2d3748; /* Mismo color que la navbar para consistencia */
+    color: #a0aec0;
+    padding: 2rem 1rem;
+    text-align: center;
+    margin-top: 2rem; /* Espacio superior antes del footer */
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-footer p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.main-footer a {
+    color: #a0aec0;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+.main-footer a:hover {
+    color: #4299e1;
+}

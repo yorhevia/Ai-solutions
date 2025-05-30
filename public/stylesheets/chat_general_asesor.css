@@ -10,24 +10,22 @@
         }
         .main-container {
             flex-grow: 1;
-            max-width: 800px; /* Un ancho razonable para el chat del cliente */
+            display: flex; /* Usamos flexbox para la barra lateral y el contenido principal */
+            max-width: 1200px; /* Un poco más ancho para acomodar la sidebar */
             margin: 20px auto;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 80vh; /* Ajusta la altura del contenedor principal del chat */
+            overflow: hidden; /* Para contener los elementos flotantes o flex */
         }
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 25px;
-            padding-top: 15px;
+            padding-top: 15px; /* Para que no se pegue al borde superior */
         }
 
-        /* Estilos para mensajes de alerta */
+        /* Estilos para mensajes de alerta (success/error) */
         .alert {
             padding: 15px;
             margin-bottom: 20px;
@@ -35,7 +33,7 @@
             border-radius: 4px;
             position: relative;
             word-wrap: break-word;
-            margin-left: 20px;
+            margin-left: 20px; /* Ajuste para el padding general */
             margin-right: 20px;
         }
         .alert-success {
@@ -65,25 +63,114 @@
             line-height: 1;
             cursor: pointer;
         }
+        .alert-link {
+            font-weight: bold;
+            color: inherit;
+            text-decoration: underline;
+        }
 
-        /* Estilos del área de chat */
+        /* Estilos de la barra lateral */
+        .sidebar {
+            width: 300px; /* Ancho fijo para la barra lateral */
+            background-color: #f0f2f5; /* Un color ligeramente diferente */
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Espacio entre los clientes en la sidebar */
+        }
+        .sidebar-header {
+            font-weight: bold;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #333;
+        }
+        .client-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+            position: relative; /* Para el badge de no leídos */
+        }
+        .client-item:hover {
+            background-color: #e0e0e0;
+        }
+        .client-item.active {
+            background-color: #d0e0ff; /* Resaltar cliente activo */
+            font-weight: bold;
+        }
+        .client-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+        .client-info {
+            flex-grow: 1; /* Permite que la info del cliente ocupe el espacio */
+            display: flex;
+            flex-direction: column;
+        }
+        .client-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .last-message {
+            font-size: 0.8em;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Para puntos suspensivos */
+            max-width: calc(100% - 30px); /* Ajustar para el badge */
+        }
+        .unread-badge {
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 0.7em;
+            min-width: 20px;
+            text-align: center;
+            position: absolute; /* Posiciona el badge */
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+
+        /* Estilos del área de chat principal */
+        .chat-area {
+            flex-grow: 1; /* Ocupa el resto del espacio */
+            display: flex;
+            flex-direction: column;
+            height: 70vh; /* Ajusta la altura del contenedor del chat */
+            border-left: 1px solid #eee; /* Separador visual */
+            background-color: #f9f9f9;
+        }
+
         .chat-header {
-            background-color: #007bff; /* Un azul para el cliente */
+            background-color: #28a745; /* Un verde para el asesor */
             color: white;
             padding: 15px;
             text-align: center;
-            border-bottom: 1px solid #0056b3;
+            border-bottom: 1px solid #1e7e34;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
-        .chat-header .asesor-info-header {
+        .chat-header .cliente-info-header {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .chat-header .asesor-info-header img {
+        .chat-header .cliente-info-header img {
             width: 45px;
             height: 45px;
             border-radius: 50%;
@@ -114,13 +201,13 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.08);
             font-size: 0.95em;
         }
-        .message-sent-cliente {
-            background-color: #cfe2ff; /* Un azul claro para mensajes enviados por cliente */
+        .message-sent-asesor {
+            background-color: #d4edda; /* Un verde claro para mensajes enviados por asesor */
             align-self: flex-end;
             margin-left: auto;
             text-align: right;
         }
-        .message-received-asesor {
+        .message-received-cliente {
             background-color: #ffffff;
             align-self: flex-start;
             margin-right: auto;
@@ -132,10 +219,10 @@
             color: #666;
             margin-top: 5px;
         }
-        .message-sent-cliente .message-timestamp {
+        .message-sent-asesor .message-timestamp {
             text-align: right;
         }
-        .message-received-asesor .message-timestamp {
+        .message-received-cliente .message-timestamp {
             text-align: left;
         }
 
@@ -160,7 +247,7 @@
         }
         .chat-input button {
             padding: 10px 20px;
-            background-color: #007bff; /* Azul para el botón del cliente */
+            background-color: #28a745; /* Verde para el botón del asesor */
             color: white;
             border: none;
             border-radius: 5px;
@@ -169,14 +256,14 @@
             transition: background-color 0.3s ease;
         }
         .chat-input button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
         .chat-input button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
         }
 
-        .no-asesor-assigned {
+        .no-client-selected {
             text-align: center;
             padding: 50px;
             color: #666;
@@ -186,7 +273,7 @@
         .back-to-home-btn-container {
             padding: 20px;
             text-align: center;
-            margin-top: auto;
+            margin-top: auto; /* Empuja el botón hacia abajo si el main-container no ocupa toda la altura */
         }
         .back-to-home-btn {
             display: inline-block;

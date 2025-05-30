@@ -3,15 +3,17 @@ const admin = require('firebase-admin');
 const db = admin.firestore();
 const auth = admin.auth();
 
-// Importa node-fetch para hacer solicitudes HTTP (necesario para la API de Firebase Auth REST)
+// Importa node-fetch para hacer solicitudes HTTP (necesario para la API de Firebase Auth REST y Imgur)
 const fetch = require('node-fetch');
 
 // Importa moment para formatear fechas (asegúrate de tenerlo instalado: npm install moment)
 const moment = require('moment');
-const { default: Stripe } = require('stripe');
 
 // Importa uuid para generar IDs únicos para las notificaciones
 const { v4: uuidv4 } = require('uuid');
+
+// Importa Stripe (aunque no se usa en las funciones presentadas, lo mantengo ya que estaba)
+const { default: Stripe } = require('stripe');
 
 // Función auxiliar para añadir notificaciones.
 async function addNotificationToUser(userId, message, link = '#') {
@@ -357,10 +359,10 @@ exports.postVerifyIdentityAsesor = async (req, res) => {
             asesorData.verification.photos.selfie = selfiePhotoUrl;
             asesorData.verification.notes = notes; // Las notas pueden ser siempre editables si así se desea
         } else {
-             // Si el KYC está verificado, asegurarnos de que la nota muestre el valor original de la BD
-             // pero que si el usuario la modificó en el frontend (por no tener readonly) se muestre la actual.
-             // Esto es para la re-renderización del formulario.
-             asesorData.verification.notes = notes || asesorData.verification.notes;
+            // Si el KYC está verificado, asegurarnos de que la nota muestre el valor original de la BD
+            // pero que si el usuario la modificó en el frontend (por no tener readonly) se muestre la actual.
+            // Esto es para la re-renderización del formulario.
+            asesorData.verification.notes = notes || asesorData.verification.notes;
         }
 
         if (currentTitulo.estado !== 'verificado') {
@@ -400,7 +402,7 @@ exports.postVerifyIdentityAsesor = async (req, res) => {
                 (backPhotoUrl || '') !== (newKycData.photos?.back || '') ||
                 selfiePhotoUrl !== (newKycData.photos?.selfie || '') ||
                 notes !== (newKycData.notes || '')) { // Comparar con los datos actuales
-                
+
                 newKycData.status = 'pendiente';
                 newKycData.documentType = documentType;
                 newKycData.documentNumber = documentNumber;
@@ -411,7 +413,7 @@ exports.postVerifyIdentityAsesor = async (req, res) => {
                 };
                 newKycData.notes = notes || null;
                 newKycData.submittedAt = admin.firestore.FieldValue.serverTimestamp();
-                
+
                 updateObject.verification = newKycData;
                 await addNotificationToUser(asesorUid, 'Tu verificación de Identidad (KYC) ha sido enviada para revisión.', '/perfilasesor');
                 notificationSent = true;
@@ -501,10 +503,11 @@ exports.postVerifyIdentityAsesor = async (req, res) => {
     }
 };
 
-
-
-
-// Muestra el perfil del cliente
+// --- MUESTRA EL PERFIL DEL CLIENTE (MANTIENE LA ORIGINAL DE TU CÓDIGO) ---
+// Notar que esta función está en asesorController pero es para 'clientes'.
+// Sugiero moverla a clienteController si su propósito es servir al cliente para ver su propio perfil.
+// Si es para que un ASESOR vea el perfil de un CLIENTE, entonces se debería llamar
+// mostrarPerfilClienteParaAsesor y debería recibir el ID del cliente como parámetro.
 exports.mostrarPerfilCliente = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -532,7 +535,8 @@ exports.mostrarPerfilCliente = async (req, res) => {
     }
 };
 
-// Editar información personal del cliente
+// --- EDITAR INFORMACIÓN PERSONAL DEL CLIENTE (MANTIENE LA ORIGINAL DE TU CÓDIGO) ---
+// Sugiero moverla a clienteController.
 exports.editarInfoPersonalCliente = async (req, res) => {
     const userId = req.session.userId;
     const { nombre, apellido, email, telefono, direccion } = req.body;
@@ -558,7 +562,8 @@ exports.editarInfoPersonalCliente = async (req, res) => {
     }
 };
 
-// Editar información financiera del cliente
+// --- EDITAR INFORMACIÓN FINANCIERA DEL CLIENTE (MANTIENE LA ORIGINAL DE TU CÓDIGO) ---
+// Sugiero moverla a clienteController.
 exports.editarInfoFinancieraCliente = async (req, res) => {
     const userId = req.session.userId;
     const { ingresosMensuales, gastosMensuales, ahorrosActuales, objetivosFinancieros } = req.body;
@@ -583,7 +588,8 @@ exports.editarInfoFinancieraCliente = async (req, res) => {
     }
 };
 
-// Subir foto de perfil del cliente
+// --- SUBIR FOTO DE PERFIL DEL CLIENTE (MANTIENE LA ORIGINAL DE TU CÓDIGO) ---
+// Sugiero moverla a clienteController.
 exports.uploadProfilePhotoCliente = async (req, res) => {
     try {
         if (!req.file) {
@@ -634,7 +640,8 @@ exports.uploadProfilePhotoCliente = async (req, res) => {
     }
 };
 
-// Rutas para cambiar contraseña del cliente
+// --- RUTAS PARA CAMBIAR CONTRASEÑA DEL CLIENTE (MANTIENE LA ORIGINAL DE TU CÓDIGO) ---
+// Sugiero moverla a clienteController.
 exports.getChangePasswordPageCliente = (req, res) => {
     return res.render('cliente/cambiar_password_cliente', { error: req.flash('error_msg'), success: req.flash('success_msg') });
 };
@@ -706,5 +713,374 @@ exports.changePasswordCliente = async (req, res) => {
         console.error('Error en el proceso de cambio de contraseña del cliente:', error);
         req.flash('error_msg', 'Error interno del servidor al cambiar la contraseña.');
         return res.redirect('/cliente/cambiar_password');
+    }
+};
+
+// -------------------------------------------------------------
+// --- NUEVAS FUNCIONES PARA CLIENTE (VISIÓN DE ASESORES) ---
+//       Añadidas aquí según tu solicitud.
+// -------------------------------------------------------------
+
+exports.mostrarAsesoresDisponibles = async (req, res) => {
+    try {
+        // Asegúrate de que el usuario sea un cliente autenticado antes de mostrar asesores
+        // req.session.userId debe ser el ID del cliente
+        if (!req.session.userId) {
+            req.flash('error_msg', 'Debes iniciar sesión para ver los asesores disponibles.');
+            return res.redirect('/login');
+        }
+
+        // Obtener solo asesores que estén verificados y activos desde la colección 'asesores' en Firestore
+        // Asume que tienes un campo 'verificado' y 'activo' en tus documentos de asesor
+        const asesoresSnapshot = await db.collection('asesores')
+                                         .where('verification.status', '==', 'verificado') // Asegura que la verificación KYC está completa
+                                         .where('verificacion.titulo.estado', '==', 'verificado') // Asegura que el título está verificado
+                                         .where('activo', '==', true)     // Asume un campo 'activo' para asesores que pueden ser asignados
+                                         .get();
+
+        const asesoresParaVista = asesoresSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                _id: doc.id, // El ID del documento de Firestore
+                nombre: data.nombre,
+                apellido: data.apellido,
+                especialidad: data.especialidad || 'General', // Campo de especialidad
+                descripcion: data.descripcion || 'Asesor financiero experimentado listo para ayudarte a alcanzar tus metas.',
+                fotoPerfilUrl: data.fotoPerfilUrl || '/images/default-profile.png' // Usa una imagen por defecto si no tienen una
+            };
+        });
+
+        res.render('cliente/asesores-disponibles', { // Asegúrate de que esta vista exista en views/cliente/
+            asesores: asesoresParaVista,
+            user: req.user, // Pasa req.user para la cabecera, etc.
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+    } catch (error) {
+        console.error('Error al obtener asesores disponibles para el cliente desde Firestore (asesorController):', error);
+        req.flash('error_msg', 'Hubo un problema al cargar los asesores. Inténtalo de nuevo más tarde.');
+        res.redirect('/homecliente'); // O a una página de error adecuada
+    }
+};
+
+// controllers/clienteController.js (o dondequiera que esté esta función)
+
+exports.asignarAsesorCliente = async (req, res) => {
+    try {
+        const clienteUid = req.session.userId; // ID del cliente que solicita la asignación
+        const { asesorId } = req.body; // ID del asesor a asignar
+
+        if (!clienteUid) {
+            return res.status(401).json({
+                success: false,
+                message: 'No autenticado. Inicia sesión como cliente.',
+                redirectTo: '/login'
+            });
+        }
+        if (!asesorId) {
+            return res.status(400).json({ success: false, message: 'ID de asesor no proporcionado.' });
+        }
+
+        // 1. Verificar si el asesor existe y está verificado/activo en Firestore
+        const asesorDoc = await db.collection('asesores').doc(asesorId).get();
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
+        }
+        const asesorData = asesorDoc.data();
+        // Asegúrate de que el asesor tenga el estado de verificación correcto y esté activo para ser asignado
+        if (asesorData.verification?.status !== 'verificado' || asesorData.verificacion?.titulo?.estado !== 'verificado' || !asesorData.activo) {
+            return res.status(400).json({ success: false, message: 'Asesor no disponible para asignación en este momento.' });
+        }
+
+        // 2. Actualizar el documento del cliente en Firestore para asignarle el asesor
+        const clienteRef = db.collection('clientes').doc(clienteUid);
+        await clienteRef.update({
+            // --- CAMBIO CLAVE AQUÍ ---
+            // Guardar directamente el ID del asesor como una cadena de texto
+            asesorAsignado: asesorId,
+            // --- FIN DEL CAMBIO ---
+            fechaAsignacionAsesor: admin.firestore.FieldValue.serverTimestamp() // Opcional: fecha de asignación
+        });
+
+        // 3. Actualizar el documento del asesor para añadir este cliente a su lista de clientes asignados
+        const asesorRef = db.collection('asesores').doc(asesorId);
+        await asesorRef.update({
+            clientesAsignados: admin.firestore.FieldValue.arrayUnion(clienteUid) // Añade el UID del cliente al array de clientesAsignados del asesor
+        });
+
+        // 4. Añadir notificación al asesor
+        // Ojo: Si 'clienteDoc' ya se usó, declara una nueva variable para no reusarla accidentalmente
+        const clienteActualizadoDoc = await db.collection('clientes').doc(clienteUid).get(); // Necesitamos los datos del cliente para la notificación
+        const clienteActualizadoData = clienteActualizadoDoc.data();
+        const notificationMessage = `¡Tienes un nuevo cliente! ${clienteActualizadoData.nombre} ${clienteActualizadoData.apellido} te ha seleccionado como su asesor.`;
+
+        await addNotificationToUser(asesorId, notificationMessage, `/asesor/clientes/${clienteUid}/perfil`);
+
+        // Si todo va bien, enviar la respuesta de éxito con redirectTo
+        return res.json({
+            success: true,
+            message: `¡Has sido asignado a ${asesorData.nombre} ${asesorData.apellido}! Redirigiendo al chat personal...`,
+            redirectTo: '/chat-personal' // Redirigir al chat personal después de la asignación
+        });
+
+    } catch (error) {
+        console.error('Error al asignar asesor al cliente (asignarAsesorCliente):', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Hubo un problema al asignar el asesor. Inténtalo de nuevo.',
+            redirectTo: '/cliente/asesores-disponibles' // Redirigir de vuelta a la lista de asesores si hay un error
+        });
+    }
+};
+
+exports.getAsesorByIdAPI = async (req, res) => {
+    try {
+        const asesorId = req.params.id; // Obtiene el ID del asesor desde los parámetros de la URL
+
+        const asesorDoc = await db.collection('asesores').doc(asesorId).get();
+
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ message: 'Asesor no encontrado.' });
+        }
+
+        const asesorData = asesorDoc.data();
+
+        // Devuelve solo los datos públicos o necesarios para el cliente
+        // Considera qué campos son realmente necesarios y seguros de exponer públicamente.
+        res.json({
+            _id: asesorDoc.id, // El ID del documento de Firestore
+            nombre: asesorData.nombre,
+            apellido: asesorData.apellido,
+            email: asesorData.email || 'No proporcionado', // Cuidado con exponer emails públicamente
+            telefono: asesorData.telefono || 'No proporcionado', // Cuidado con exponer teléfonos públicamente
+            especialidad: asesorData.especialidad || 'General',
+            descripcion: asesorData.descripcion || 'Sin descripción disponible.',
+            fotoPerfilUrl: asesorData.fotoPerfilUrl || '/images/default-profile.png'
+            // No incluir datos sensibles como contraseñas, documentos de verificación, etc.
+        });
+    } catch (error) {
+        console.error('Error al obtener detalles del asesor por ID (API - Firestore - asesorController):', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
+// Función para formatear timestamps de Firestore a hora legible
+const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    // Si es un objeto Timestamp de Firestore, convertir a Date
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+};
+
+// Función para obtener una sala de chat de forma consistente
+const getChatRoomId = (uid1, uid2) => {
+    const chatMembers = [uid1, uid2].sort();
+    return `chat_${chatMembers[0]}_${chatMembers[1]}`;
+};
+
+
+
+exports.mostrarChatGeneralAsesor = async (req, res) => {
+    try {
+        const asesorUid = req.session.userId;
+
+        if (!asesorUid) {
+            req.flash('error_msg', 'No has iniciado sesión o tu sesión ha expirado.');
+            return res.redirect('/login');
+        }
+
+        const asesorDoc = await db.collection('asesores').doc(asesorUid).get();
+        if (!asesorDoc.exists) {
+            req.flash('error_msg', 'Perfil de asesor no encontrado.');
+            return res.redirect('/homeasesor');
+        }
+        const asesorData = asesorDoc.data();
+
+        // Obtener los clientes asignados al asesor
+        const clientesAsignadosIds = asesorData.clientesAsignados || []; // Suponiendo que es un array de IDs de clientes
+
+        let clientesParaSidebar = [];
+        let clientesDataMap = new Map(); // Para almacenar datos de clientes por ID para fácil acceso
+
+        // Recorrer los clientes asignados para obtener sus datos y el último mensaje/no leídos
+        for (const clienteId of clientesAsignadosIds) {
+            const clienteDoc = await db.collection('clientes').doc(clienteId).get();
+            if (clienteDoc.exists) {
+                const clienteData = clienteDoc.data();
+                clientesDataMap.set(clienteId, clienteData); // Guarda los datos del cliente
+
+                const roomId = getChatRoomId(asesorUid, clienteId);
+                const chatDoc = await db.collection('chats').doc(roomId).get();
+
+                let lastMessage = '';
+                let unreadCount = 0;
+
+                if (chatDoc.exists) {
+                    const chatData = chatDoc.data();
+                    lastMessage = chatData.lastMessageText || '';
+                    unreadCount = chatData.asesorUnreadCount || 0; // Mensajes no leídos para el asesor
+                }
+
+                clientesParaSidebar.push({
+                    id: clienteId,
+                    nombre: clienteData.nombre,
+                    apellido: clienteData.apellido,
+                    fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png',
+                    lastMessage: lastMessage,
+                    unreadCount: unreadCount
+                });
+            }
+        }
+
+        // Si hay clientes, selecciona el primero por defecto para cargar su chat
+        let initialChatCliente = null;
+        let initialChatMessages = [];
+
+        if (clientesParaSidebar.length > 0) {
+            const firstClientId = clientesParaSidebar[0].id;
+            initialChatCliente = clientesDataMap.get(firstClientId); // Obtén los datos completos del primer cliente
+
+            const roomId = getChatRoomId(asesorUid, firstClientId);
+            const chatDoc = await db.collection('chats').doc(roomId).get();
+
+            if (chatDoc.exists) {
+                const chatData = chatDoc.data();
+                initialChatMessages = chatData.messages.map(msg => ({
+                    ...msg,
+                    timestamp: msg.timestamp ? msg.timestamp.toDate() : new Date()
+                }));
+                // Marcar como leídos al cargar el chat inicial
+                await db.collection('chats').doc(roomId).update({ asesorUnreadCount: 0 });
+            }
+        }
+
+        res.render('asesor/chat_general_asesor', {
+            // --- ¡AQUÍ ESTÁ LA MODIFICACIÓN CLAVE! ---
+            asesor: {
+                id: asesorUid, // Aseguramos que 'id' contenga el UID del asesor
+                nombre: asesorData.nombre,
+                // Puedes añadir otras propiedades de asesorData aquí si las necesitas en el EJS
+                // ejemplo: fotoPerfilUrl: asesorData.fotoPerfilUrl
+            },
+            // ------------------------------------------
+            clientesParaSidebar: clientesParaSidebar,
+            initialChatCliente: initialChatCliente ? {
+                id: initialChatCliente.id,
+                nombre: initialChatCliente.nombre,
+                apellido: initialChatCliente.apellido,
+                fotoPerfilUrl: initialChatCliente.fotoPerfilUrl || '/images/default-profile.png',
+            } : null,
+            initialChatMessages: initialChatMessages,
+            user: req.user, // O req.user.nombre si solo necesitas el nombre para la navbar
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg'),
+            info_msg: req.flash('info_msg')
+        });
+
+    } catch (error) {
+        console.error('Error al cargar la página general de chat del asesor:', error);
+        req.flash('error_msg', 'Ocurrió un error al cargar el chat. Por favor, inténtalo de nuevo.');
+        return res.status(500).redirect('/homeasesor');
+    }
+};
+
+// NUEVO: API para obtener mensajes de un chat específico (para peticiones AJAX/fetch)
+exports.getClienteChatMessages = async (req, res) => {
+    try {
+        const asesorUid = req.session.userId;
+        const clienteId = req.params.clienteId;
+
+        if (!asesorUid || !clienteId) {
+            return res.status(400).json({ success: false, message: 'Datos incompletos.' });
+        }
+
+        // Opcional: Verificar si el cliente está asignado a este asesor
+        // const asesorDoc = await db.collection('asesores').doc(asesorUid).get();
+        // if (!asesorDoc.exists || !(asesorDoc.data().clientesAsignados || []).includes(clienteId)) {
+        //     return res.status(403).json({ success: false, message: 'Acceso denegado a este chat.' });
+        // }
+
+        const roomId = getChatRoomId(asesorUid, clienteId);
+        const chatDoc = await db.collection('chats').doc(roomId).get();
+
+        let messages = [];
+        if (chatDoc.exists) {
+            const chatData = chatDoc.data();
+            messages = chatData.messages.map(msg => ({
+                ...msg,
+                // Si el timestamp es un objeto Timestamp de Firebase, lo convertimos
+                timestamp: msg.timestamp ? (msg.timestamp.toDate ? msg.timestamp.toDate() : new Date(msg.timestamp)) : new Date()
+            }));
+
+            // Marcar mensajes como leídos
+            await db.collection('chats').doc(roomId).update({ asesorUnreadCount: 0 });
+        }
+
+        res.json({ success: true, messages: messages });
+
+    } catch (error) {
+        console.error('Error al obtener mensajes del chat:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener mensajes.' });
+    }
+};
+
+// NUEVO: API para enviar un mensaje desde el asesor (para peticiones AJAX/fetch)
+// API para enviar un mensaje desde el asesor (para peticiones AJAX/fetch)
+exports.asesorSendMessage = async (req, res) => {
+    try {
+        const asesorUid = req.session.userId;
+        // ¡CAMBIO CLAVE AQUÍ! Ahora también esperamos 'timestamp' del frontend
+        const { clienteId, messageText, timestamp } = req.body; 
+
+        if (!asesorUid || !clienteId || !messageText || !timestamp) { // Validar timestamp
+            return res.status(400).json({ success: false, message: 'Datos incompletos para enviar mensaje.' });
+        }
+
+        const roomId = getChatRoomId(asesorUid, clienteId);
+        const chatRef = db.collection('chats').doc(roomId);
+        const chatDoc = await chatRef.get();
+
+        // Convertir el timestamp ISO string de vuelta a un objeto Date
+        const messageTimestamp = new Date(timestamp); 
+        
+        let newMessage = {
+            senderId: asesorUid,
+            senderType: 'asesor',
+            text: messageText,
+            timestamp: messageTimestamp // ¡Usamos el timestamp del frontend!
+        };
+
+        if (!chatDoc.exists) {
+            await chatRef.set({
+                clientId: clienteId,
+                asesorId: asesorUid,
+                messages: [newMessage],
+                lastMessageText: messageText,
+                lastMessageTimestamp: messageTimestamp, // También para el lastMessageTimestamp
+                clientUnreadCount: 1,
+                asesorUnreadCount: 0
+            });
+        } else {
+            await chatRef.update({
+                messages: admin.firestore.FieldValue.arrayUnion(newMessage),
+                lastMessageText: messageText,
+                lastMessageTimestamp: messageTimestamp, // También para el lastMessageTimestamp
+                clientUnreadCount: admin.firestore.FieldValue.increment(1)
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Mensaje enviado.',
+            sentMessage: {
+                ...newMessage,
+                // Aseguramos que el timestamp se envía como ISO string
+                timestamp: newMessage.timestamp.toISOString() 
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al enviar mensaje del asesor:', error);
+        res.status(500).json({ success: false, message: 'Error al enviar mensaje.', details: error.message });
     }
 };

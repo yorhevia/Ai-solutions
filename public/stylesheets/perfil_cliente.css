@@ -1,93 +1,31 @@
+html, body { /* Aseguramos que tanto html como body ocupen el 100% y no desborden */
+    width: 100%;
+    overflow-x: hidden; /* ¡IMPORTANTE! Oculta el scroll horizontal */
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
     background-color: #f4f6f8; /* Un gris muy claro de fondo */
     color: #333;
+    display: flex; /* Mantenemos flex en body para que sus hijos (navbar, wrapper, footer) se apilen correctamente */
+    flex-direction: column;
+    min-height: 100vh; /* Asegura que la página ocupe al menos toda la altura de la ventana */
+}
+
+/* NUEVO ESTILO PARA EL WRAPPER DEL CONTENIDO */
+.page-content-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+    align-items: center; /* Centra el contenido horizontalmente (profile-container) */
+    width: 100%; /* Ocupa todo el ancho disponible del body */
+    flex-grow: 1; /* Permite que este contenedor crezca y ocupe el espacio restante entre navbar y footer */
+    box-sizing: border-box; /* Asegura que padding y border se incluyan en el ancho */
+    /* Posible padding si necesitas espaciado lateral para el wrapper mismo */
+    /* padding: 0 15px; */
 }
 
-/* Header */
-.main-header {
-    background-color: #fff;
-    color: #007bff;
-    padding: 15px 20px;
-    border-bottom: 1px solid #d9edf7;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.back-button {
-    color: #007bff;
-    text-decoration: none;
-    margin-right: 15px;
-    font-size: 1.2em;
-}
-
-.back-button:hover {
-    opacity: 0.8;
-}
-
-.main-header h2 {
-    font-size: 1.8em;
-    font-weight: 600;
-    margin: 0;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-}
-
-.header-right button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
-}
-
-.header-right button i {
-    margin-right: 5px;
-}
-
-.header-right button:hover {
-    background-color: #0056b3;
-}
-
-.header-right .logout-button-header {
-    background-color: #dc3545;
-}
-
-.header-right .logout-button-header:hover {
-    background-color: #c82333;
-}
-
-.header-right .profile-logo-container {
-    margin-left: 15px;
-}
-
-.header-right .profile-logo {
-    font-size: 2em;
-    color: #555;
-}
 
 /* Contenedor principal del perfil */
 .profile-container {
@@ -95,10 +33,11 @@ body {
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    width: 90%;
+    width: 90%; /* Esto es 90% del .page-content-wrapper, que es 100% del body */
     max-width: 700px;
     margin-top: 30px;
     margin-bottom: 30px;
+    box-sizing: border-box; /* ¡IMPORTANTE! Asegura que padding se incluya en el width */
 }
 
 .profile-container h2 {
@@ -165,11 +104,11 @@ body {
 .main-footer {
     text-align: center;
     padding: 25px 0;
-    margin-top: 30px;
     background-color: #1e1e1e;
     color: #f0f0f0;
     width: 100%;
-    box-sizing: border-box;
+    box-sizing: border-box; /* ¡IMPORTANTE! Para incluir el padding */
+    flex-shrink: 0; /* Evita que el footer se encoja */
 }
 
 .main-footer .footer-content {
@@ -260,6 +199,7 @@ body {
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
     display: none; /* Oculto por defecto, se muestra con JavaScript */
     animation: fadeIn 0.3s ease-out;
+    box-sizing: border-box; /* Asegura que padding y border se incluyan en el ancho */
 }
 
 .edit-card h3 {
@@ -396,10 +336,6 @@ body {
 
     .info-item span {
         width: 120px;
-    }
-
-    .main-header h2 {
-        font-size: 1.5em;
     }
 
     .main-footer {

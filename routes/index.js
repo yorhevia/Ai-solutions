@@ -6,14 +6,14 @@ const cors = require('cors');
 const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 
-const requireAuth = require('../config/middleware');
-const isAdmin = require('../config/middlewareisadmin');
+
+const requireAuth = require('../config/middleware'); // Importa el objeto completo
+const isAdmin = require('../config/middlewareisadmin'); 
 
 const { admin, db, auth } = require('./firebase');
 const clienteController = require('./controllers/clienteController');
 const asesorController = require('./controllers/asesorController');
 const editProfileController = require('./controllers/editProfileController');
-
 
 var router = express.Router();
 
@@ -42,15 +42,15 @@ router.use(cors());
 // Función auxiliar para añadir notificación
 async function addNotificationToUser(userId, message, link = '#') {
     try {
-        const asesorRef = db.collection('asesores').doc(userId);
+        const userRef = db.collection('asesores').doc(userId); // Por defecto a asesores, puede ser dinámico
         const notification = {
             id: uuidv4(),
-            timestamp: new Date(), // Fecha actual del servidor de Node.js
+            timestamp: admin.firestore.FieldValue.serverTimestamp(), // Usar serverTimestamp para consistencia
             message: message,
             read: false,
             link: link
         };
-        await asesorRef.update({
+        await userRef.update({
             notifications: admin.firestore.FieldValue.arrayUnion(notification)
         });
         console.log(`Notificación añadida a ${userId}: ${message}`);
@@ -62,26 +62,28 @@ async function addNotificationToUser(userId, message, link = '#') {
 
 //Rutas de Acceso y Autenticación Login, Registro, Logout
 
-// Ruta de bienvenida
+/// Ruta de bienvenida
 router.get('/', (req, res) => {
     return res.render('welcome');
 });
 
 // Rutas de Login
 router.get('/login', (req, res) => {
-    return res.render('ingreso/login');
+    return res.render('ingreso/login', { error: req.flash('error_msg') });
 });
 
 router.post('/login', async (req, res) => {
     const { email, contrasena } = req.body;
     if (!email || !contrasena) {
-        return res.render('ingreso/login', { error: 'Por favor, introduce correo electrónico y contraseña.' });
+        req.flash('error_msg', 'Por favor, introduce correo electrónico y contraseña.');
+        return res.redirect('/login');
     }
     try {
         const apiKey = process.env.FIREBASE_API_KEY;
         if (!apiKey) {
             console.error('ERROR: FIREBASE_API_KEY no está configurado en las variables de entorno.');
-            return res.status(500).render('ingreso/login', { error: 'Error de configuración del servidor. Contacta al administrador.' });
+            req.flash('error_msg', 'Error de configuración del servidor. Contacta al administrador.');
+            return res.status(500).redirect('/login');
         }
         const signInUrl = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
         const response = await fetch(signInUrl, {
@@ -113,29 +115,48 @@ router.post('/login', async (req, res) => {
                         errorMessage = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
                 }
             }
-            return res.render('ingreso/login', { error: errorMessage });
+            req.flash('error_msg', errorMessage);
+            return res.redirect('/login');
         }
-        const idToken = firebaseResponse.idToken;
         const uid = firebaseResponse.localId;
         console.log('Usuario autenticado con éxito en Firebase (REST API). UID:', uid);
         req.session.userId = uid;
-        req.userEmail = email;
+        req.userEmail = email; // Mantener esto para isAdmin
+
+        // AÑADIDO: Determinar el tipo de usuario y guardarlo en la sesión
+        const clienteDoc = await db.collection('clientes').doc(uid).get();
+        const asesorDoc = await db.collection('asesores').doc(uid).get();
+
+        if (clienteDoc.exists) {
+            req.session.userType = 'client';
+            req.session.userName = clienteDoc.data().nombre || email;
+        } else if (asesorDoc.exists) {
+            req.session.userType = 'asesor';
+            req.session.userName = asesorDoc.data().nombre || email;
+        } else {
+            req.session.userType = 'unregistered'; // Usuario autenticado pero sin perfil completado
+            req.session.userName = email;
+        }
+
+        req.flash('success_msg', '¡Has iniciado sesión con éxito!');
         return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error general en la ruta /login:', error);
-        return res.status(500).render('ingreso/login', { error: 'Error interno del servidor. Inténtalo más tarde.' });
+        req.flash('error_msg', 'Error interno del servidor. Inténtalo más tarde.');
+        return res.status(500).redirect('/login');
     }
 });
 
 // Rutas de Registro de Cuenta (Firebase Auth)
 router.get('/registro', (req, res) => {
-    return res.render('ingreso/registro');
+    return res.render('ingreso/registro', { error: req.flash('error_msg'), formData: {} });
 });
 
 router.post('/registro', async (req, res) => {
     const { nombre, apellido, email, contrasena, confirmar_contrasena } = req.body;
     if (contrasena !== confirmar_contrasena) {
-        return res.render('ingreso/registro', { error: 'Las contraseñas no coinciden.', formData: req.body });
+        req.flash('error_msg', 'Las contraseñas no coinciden.');
+        return res.render('ingreso/registro', { error: req.flash('error_msg'), formData: req.body });
     }
     try {
         const userRecord = await auth.createUser({
@@ -147,6 +168,10 @@ router.post('/registro', async (req, res) => {
         req.session.userId = userRecord.uid;
         req.session.userCreationTime = userRecord.metadata.creationTime;
         req.userEmail = email;
+        req.session.userName = nombre; // Para el nombre de usuario inicial
+        req.session.userType = 'unregistered'; // Tipo de usuario aún no definido por perfil
+
+        req.flash('success_msg', '¡Registro exitoso! Por favor, completa tu perfil.');
         return res.redirect('/dashboard');
     } catch (error) {
         console.error('Error al registrar usuario:', error);
@@ -155,10 +180,11 @@ router.post('/registro', async (req, res) => {
             errorMessage = 'Este correo electrónico ya está en uso.';
         } else if (error?.errorInfo?.code === 'auth/invalid-email') {
             errorMessage = 'El correo electrónico no es válido.';
-        } else if (error?.errorInfo?.code === 'auth/invalid-password') {
+        } else if (error?.errorInfo?.code === 'auth/weak-password') {
             errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
         }
-        return res.render('ingreso/registro', { error: errorMessage, formData: req.body });
+        req.flash('error_msg', errorMessage);
+        return res.render('ingreso/registro', { error: req.flash('error_msg'), formData: req.body });
     }
 });
 
@@ -167,22 +193,23 @@ router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Error al destruir la sesión:', err);
-            return res.status(500).send('Error al cerrar sesión.');
+            req.flash('error_msg', 'Error al cerrar sesión.');
+            return res.status(500).redirect('/login');
         }
+        req.flash('success_msg', 'Has cerrado sesión.');
         return res.redirect('/login');
     });
 });
 
 
-
 //Rutas de Registro de Perfil Información Adicional
 
 router.get('/registro-perfil/cliente', requireAuth, (req, res) => {
-    return res.render('ingreso/registrocliente');
+    return res.render('ingreso/registrocliente', { error: req.flash('error_msg') });
 });
 
 router.get('/registro-perfil/asesor', requireAuth, (req, res) => {
-    return res.render('ingreso/registroasesor');
+    return res.render('ingreso/registroasesor', { error: req.flash('error_msg') });
 });
 
 router.post('/registro-perfil', requireAuth, async (req, res) => {
@@ -191,7 +218,8 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
     const userCreationTime = req.session.userCreationTime;
     if (!userId || !userCreationTime) {
         console.error('ID de usuario o fecha de creación no encontrada en la sesión durante registro-perfil.');
-        return res.status(401).send('Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.');
+        req.flash('error_msg', 'Sesión inválida o datos de registro incompletos. Por favor, regístrate de nuevo.');
+        return res.status(401).redirect('/registro');
     }
     try {
         const datosAGuardar = {
@@ -202,19 +230,48 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
             await db.collection('clientes').doc(userId).set(datosAGuardar);
             console.log(`Perfil de cliente registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
+            req.session.userType = 'client'; // Actualizar el tipo de usuario en la sesión
+            req.session.userName = formData.nombre; // Actualizar el nombre en la sesión
+            req.flash('success_msg', 'Tu perfil de cliente ha sido registrado.');
             return res.redirect('/homecliente');
         } else if (tipo_usuario === 'asesor') {
-            await db.collection('asesores').doc(userId).set(datosAGuardar);
+            // Inicializar las verificaciones para un asesor nuevo
+            const asesorDataConVerificaciones = {
+                ...datosAGuardar,
+                verification: {
+                    status: 'pendiente', // Estado inicial de la verificación de identidad (KYC)
+                    documentUrl: null,
+                    notes: null
+                },
+                verificacion: { // Estructura para títulos y certificaciones
+                    titulo: {
+                        estado: 'pendiente',
+                        url: null,
+                        observaciones: null
+                    },
+                    certificacion: {
+                        estado: 'pendiente',
+                        url: null,
+                        observaciones: null
+                    }
+                }
+            };
+            await db.collection('asesores').doc(userId).set(asesorDataConVerificaciones);
             console.log(`Perfil de asesor registrado para el usuario: ${userId}`, datosAGuardar);
             delete req.session.userCreationTime;
+            req.session.userType = 'asesor'; // Actualizar el tipo de usuario en la sesión
+            req.session.userName = formData.nombre; // Actualizar el nombre en la sesión
+            req.flash('success_msg', 'Tu perfil de asesor ha sido registrado. Espera la verificación.');
             return res.redirect('/homeasesor');
         } else {
             console.error('Tipo de usuario no válido:', tipo_usuario);
-            return res.status(400).send('Tipo de usuario no válido.');
+            req.flash('error_msg', 'Tipo de usuario no válido.');
+            return res.status(400).redirect('/registro');
         }
     } catch (error) {
         console.error('Error al registrar el perfil:', error);
-        return res.status(500).send('Error al registrar el perfil.');
+        req.flash('error_msg', 'Error al registrar el perfil.');
+        return res.status(500).redirect('/registro');
     }
 });
 
@@ -223,58 +280,149 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
 router.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
     const userEmail = req.userEmail;
+    const userType = req.session.userType; // Usar el tipo de usuario de la sesión
 
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
 
     try {
+        // Redirección para administradores (basado en email)
         if (adminEmails.includes(userEmail)) {
             return res.redirect('/admin/verificaciones_pendientes');
         }
 
-        const clienteDoc = await db.collection('clientes').doc(userId).get();
-        const asesorDoc = await db.collection('asesores').doc(userId).get();
-
-        if (!clienteDoc.exists && !asesorDoc.exists) {
-            return res.render('ingreso/seleccionar_tipo_usuario');
-        } else if (clienteDoc.exists) {
+        // Redirecciones basadas en el tipo de usuario de la sesión
+        if (userType === 'client') {
             return res.redirect('/homecliente');
-        } else if (asesorDoc.exists) {
+        } else if (userType === 'asesor') {
             return res.redirect('/homeasesor');
+        } else if (userType === 'unregistered') {
+            // Si el usuario está autenticado pero no tiene perfil completado
+            // Comprobar si ya existe un documento para evitar redirigir de nuevo a la selección
+            const clienteDoc = await db.collection('clientes').doc(userId).get();
+            const asesorDoc = await db.collection('asesores').doc(userId).get();
+
+            if (!clienteDoc.exists && !asesorDoc.exists) {
+                return res.render('ingreso/seleccionar_tipo_usuario');
+            } else {
+                // Esto debería ser manejado por la lógica anterior, pero como fallback
+                console.warn(`Usuario ${userId} con userType 'unregistered' pero con perfil existente.`);
+                if (clienteDoc.exists) { req.session.userType = 'client'; return res.redirect('/homecliente'); }
+                if (asesorDoc.exists) { req.session.userType = 'asesor'; return res.redirect('/homeasesor'); }
+            }
         } else {
             console.error('Estado de perfil inconsistente para el usuario:', userId);
-            return res.status(500).send('Error en el estado del perfil del usuario.');
+            req.flash('error_msg', 'Error en el estado del perfil del usuario.');
+            return res.status(500).redirect('/login');
         }
     } catch (error) {
         console.error('Error al verificar el perfil del usuario en /dashboard:', error);
-        return res.status(500).send('Error al verificar el perfil del usuario.');
+        req.flash('error_msg', 'Error al verificar el perfil del usuario.');
+        return res.status(500).redirect('/login');
     }
 });
 
 // Rutas Home
-router.get('/homecliente', requireAuth, (req, res) => {
-    return res.render('cliente/homecliente');
+router.get('/homecliente', requireAuth, async (req, res) => {
+    // Verifica si el userType en sesión es 'client'.
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
+    const userId = req.session.userId;
+    try {
+        const userDoc = await db.collection('clientes').doc(userId).get();
+        if (!userDoc.exists) {
+            req.flash('error_msg', 'Tu perfil de cliente no se encontró. Por favor, completa tu registro.');
+            return res.redirect('/login');
+        }
+        res.render('cliente/homecliente', {
+            user: userDoc.data(),
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+    } catch (error) {
+        console.error('Error al cargar homeclient:', error);
+        req.flash('error_msg', 'Error al cargar tu página de inicio.');
+        res.redirect('/login');
+    }
 });
 
 router.get('/homeasesor', requireAuth, async (req, res) => {
+    // Verifica si el userType en sesión es 'asesor'.
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
-    const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor';
+    const userRole = adminEmails.includes(req.userEmail) ? 'admin' : 'asesor'; // Esto asigna 'admin' si el email coincide
+    const userId = req.session.userId; // Obtén el ID del usuario de la sesión
 
-    return res.render('asesor/homeasesor', { userRole: userRole, currentPage: 'home' });
+    try {
+        const userDoc = await db.collection('asesores').doc(userId).get();
+        if (!userDoc.exists) {
+            req.flash('error_msg', 'Tu perfil de asesor no se encontró. Por favor, completa tu registro.');
+            return res.redirect('/login');
+        }
+        const asesorData = userDoc.data();
+        const unreadNotifications = (asesorData.notifications || []).filter(n => !n.read).length;
+
+        res.render('asesor/homeasesor', {
+            user: asesorData, // Pasa los datos del asesor
+            userRole: userRole, // Pasa el rol (admin/asesor)
+            currentPage: 'home',
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg'),
+            unreadNotifications: unreadNotifications
+        });
+    } catch (error) {
+        console.error('Error al cargar homeasesor:', error);
+        req.flash('error_msg', 'Error al cargar tu página de inicio.');
+        res.redirect('/login');
+    }
 });
 
 
 // Rutas de Perfil
-router.get('/perfilcliente', requireAuth, clienteController.mostrarPerfilCliente);
-router.get('/perfilasesor', requireAuth, asesorController.mostrarPerfilAsesor);
+router.get('/perfilcliente', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
+    clienteController.mostrarPerfilCliente(req, res); // Llama al controlador
+});
+
+router.get('/perfilasesor', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    asesorController.mostrarPerfilAsesor(req, res); // Llama al controlador
+});
 
 // Rutas de Edición de Perfil
-router.post('/perfil/editar-info-personal', requireAuth, editProfileController.postEditPersonalAndContactInfo);
+router.post('/perfil/editar-info-personal', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') { // Asumiendo que esta ruta es solo para clientes
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para clientes.' });
+    }
+    editProfileController.postEditPersonalAndContactInfo(req, res); // Llama al controlador
+});
+
 
 // Editar información personal del cliente
-router.post('/cliente/editar-info-personal', requireAuth, clienteController.editarInfoPersonalCliente);
+router.post('/cliente/editar-info-personal', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para clientes.' });
+    }
+    clienteController.editarInfoPersonalCliente(req, res);
+});
 
 // Editar información financiera del cliente
-router.post('/cliente/editar-info-financiera', requireAuth, clienteController.editarInfoFinancieraCliente);
+router.post('/cliente/editar-info-financiera', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para clientes.' });
+    }
+    clienteController.editarInfoFinancieraCliente(req, res);
+});
 
 // Subir foto de perfil (general, usada por ambos roles)
 router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'), async (req, res) => {
@@ -299,7 +447,7 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
             body: JSON.stringify({
                 image: imageBase64,
                 type: 'base64',
-                title: `Foto de perfil de asesor ${req.session.userId || 'desconocido'}`,
+                title: `Foto de perfil de usuario ${req.session.userId || 'desconocido'}`,
                 description: `Subida desde AI Finance Solutions el ${new Date().toISOString()}`
             })
         });
@@ -309,8 +457,8 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
             console.error('Error al subir a Imgur:', imgurData);
             const errorMessage = imgurData.data && typeof imgurData.data === 'object' && imgurData.data.error
-                                        ? imgurData.data.error
-                                        : 'Error desconocido al subir la imagen a Imgur.';
+                                            ? imgurData.data.error
+                                            : 'Error desconocido al subir la imagen a Imgur.';
             return res.status(imgurResponse.status || 500).json({
                 success: false,
                 message: errorMessage
@@ -321,15 +469,26 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
         console.log('Imagen subida a Imgur:', imageUrl);
 
         const userId = req.session.userId;
+        const userType = req.session.userType; // Obtener el tipo de usuario de la sesión
 
         if (!userId) {
             return res.status(401).json({ success: false, message: 'Usuario no autenticado o ID de sesión no disponible.' });
         }
 
-        await db.collection('asesores').doc(userId).update({
+        // Determinar en qué colección guardar la URL de la foto
+        let collectionRef;
+        if (userType === 'asesor') {
+            collectionRef = db.collection('asesores').doc(userId);
+        } else if (userType === 'client') { // Esto es para clientes
+            collectionRef = db.collection('clientes').doc(userId);
+        } else {
+            return res.status(400).json({ success: false, message: 'Tipo de usuario no reconocido para la subida de foto.' });
+        }
+
+        await collectionRef.update({
             fotoPerfilUrl: imageUrl
         });
-        console.log(`URL de foto de perfil actualizada en Firestore para el asesor ${userId}: ${imageUrl}`);
+        console.log(`URL de foto de perfil actualizada en Firestore para el ${userType} ${userId}: ${imageUrl}`);
 
         return res.json({
             success: true,
@@ -346,139 +505,360 @@ router.post('/upload-profile-photo', requireAuth, upload.single('profilePhoto'),
     }
 });
 
-// Subir foto de perfil del cliente (usando el mismo multer 'upload')
-router.post('/cliente/upload-profile-photo', requireAuth, upload.single('profilePhoto'), clienteController.uploadProfilePhotoCliente);
 
 // Rutas de cambio de contraseña para Asesor
-router.get('/cambiar-password', requireAuth, asesorController.getChangePasswordPage);
-router.post('/cambiar-password', requireAuth, asesorController.changePassword);
+router.get('/cambiar-password', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    asesorController.getChangePasswordPage(req, res);
+});
+router.post('/cambiar-password', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para asesores.' });
+    }
+    asesorController.changePassword(req, res);
+});
 
 // Rutas para cambiar contraseña del cliente
-router.get('/cliente/cambiar_password', requireAuth, clienteController.getChangePasswordPageCliente);
-router.post('/cliente/cambiar_password', requireAuth, clienteController.changePasswordCliente);
+router.get('/cliente/cambiar_password', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
+    clienteController.getChangePasswordPageCliente(req, res);
+});
+router.post('/cliente/cambiar_password', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para clientes.' });
+    }
+    clienteController.changePasswordCliente(req, res);
+});
 
 
-router.get('/consulta', (req, res) => {
+router.get('/consulta', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/consulta');
 });
 
-router.get('/consultacliente', (req, res) => {
+router.get('/consultacliente', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
     return res.render('cliente/consultacliente');
 });
 
-router.get('/formulariocliente', (req, res) => {
+router.get('/formulariocliente', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
     return res.render('cliente/formulariocliente');
 });
 
 
-router.get('/asesor/verificar_identidad', requireAuth, asesorController.getVerificationPageAsesor);
-router.post('/asesor/verificar_identidad', requireAuth, asesorController.postVerifyIdentityAsesor);
+router.get('/asesor/verificar_identidad', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    asesorController.getVerificationPageAsesor(req, res);
+});
+router.post('/asesor/verificar_identidad', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para asesores.' });
+    }
+    asesorController.postVerifyIdentityAsesor(req, res);
+});
 
-// Ruta para las herramientas de análisis financiero (página principal)
-router.get('/herramientas-analisis', requireAuth, (req, res) => {
+// Rutas para las herramientas de análisis financiero (solo asesores)
+router.get('/herramientas-analisis', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/herramientas_analisis');
 });
 
-// Ruta para la calculadora de presupuesto
-router.get('/herramientas-analisis/calculadora-presupuesto', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/calculadora-presupuesto', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/calculadora_presupuesto');
 });
 
-// Nueva ruta para el análisis de inversiones
-router.get('/herramientas-analisis/analisis-inversiones', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/analisis-inversiones', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/analisis_inversiones');
 });
 
-// Nueva ruta para la gestión de riesgos (VaR)
-router.get('/herramientas-analisis/riesgos-mercado', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/riesgos-mercado', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/riesgos_mercado');
 });
 
-// Nueva ruta para la planificación fiscal
-router.get('/herramientas-analisis/planificacion-fiscal', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/planificacion-fiscal', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/planificacion_fiscal');
 });
 
-
-// ADDED: Nueva ruta para el análisis de proyecciones financieras y modelado
-router.get('/herramientas-analisis/proyecciones-financieras', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/proyecciones-financieras', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/proyecciones_financieras');
 });
 
-// Nueva ruta para el análisis de proyecciones financieras y modelado
-router.get('/herramientas-analisis/valoracion-empresas', requireAuth, (req, res) => {
+router.get('/herramientas-analisis/valoracion-empresas', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     return res.render('asesor/valoracion_empresas');
 });
 
-// Nueva ruta para el análisis de proyecciones financieras y modelado
-router.get('/clientes-asignados', requireAuth, (req, res) => {
-    return res.render('asesor/lista_clientes');
+router.get('/clientes-asignados', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    asesorController.mostrarClientesAsignados(req, res);
 });
 
-
-
-// Para mostrar el perfil de un cliente específico
-router.get('/clientes/:id_cliente/perfil',  (req, res) => {
-    const idCliente = req.params.id_cliente;
-    // Aquí, en una app real, buscarías el cliente en tu BD usando idCliente
-    // y pasarías los datos a la vista.
-    // Por ahora, el JavaScript en el HTML simula la carga de datos.
-    res.render('asesor/perfil_cliente', { clientId: idCliente });
+router.get('/clientes/:id_cliente/perfil', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    clienteController.mostrarPerfilClienteAsesor(req, res);
 });
 
-// Asegúrate de que los enlaces de la lista de clientes apunten a esta ruta
-// Por ejemplo, en lista_clientes.html:
-// <a href="/clientes/C001/perfil" class="action-button view-profile">
-
-// En tu archivo de rutas (ej. routes/asesor.js)
-// ... otras rutas ...
-
-// Ruta para la página de programar y registrar consultas
-router.get('/programar-consulta', (req, res) => {
-    // En una aplicación real, aquí podrías cargar la lista de todos los clientes
-    // desde tu base de datos y pasarlos a la vista EJS para el dropdown.
-    // Por ahora, el JavaScript en el HTML lo simula.
-    res.render('asesor/programar_consulta');
+router.get('/programar-consulta', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
+    asesorController.getProgramarConsultaPage(req, res);
 });
 
-router.get('/chat-personal', requireAuth, async (req, res) => { // <<< Añade requireAuth
-    const userId = req.session.userId; // Obtener userId de la sesión
-    let userName = req.userEmail; // Puedes inicializarlo con el email
+router.get('/chat-personal', requireAuth, clienteController.mostrarChatPersonalCliente);
 
-    try {
-        // Opcional: Buscar el displayName en Firestore (si lo guardas ahí)
-        // Podrías tener un nombre en `clientes` o `asesores`
-        const clienteDoc = await db.collection('clientes').doc(userId).get();
-        const asesorDoc = await db.collection('asesores').doc(userId).get();
 
-        if (clienteDoc.exists) {
-            userName = clienteDoc.data().nombre || userName; // Usa el nombre si existe
-            // También puedes pasar todo el objeto clienteData si lo necesitas en el chat
-            // res.render('asesor/chat_personal', { userId: userId, userName: userName, userRole: 'cliente', userData: clienteDoc.data() });
-        } else if (asesorDoc.exists) {
-            userName = asesorDoc.data().nombre || userName; // Usa el nombre si existe
-            // res.render('asesor/chat_personal', { userId: userId, userName: userName, userRole: 'asesor', userData: asesorDoc.data() });
-        } else {
-            // Si el usuario no tiene perfil de cliente/asesor, usa el email como nombre
-            console.warn(`Usuario ${userId} sin perfil en clientes/asesores, usando email como nombre.`);
-        }
-
-    } catch (error) {
-        console.error('Error al obtener el nombre del usuario para el chat:', error);
-        // Continuar de todos modos, usando el email como nombre de respaldo
+router.get('/chat_personal', requireAuth, async (req, res) => {
+    // Si el usuario no es ni cliente ni asesor, redirigir
+    if (req.session.userType !== 'client' && req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes o asesores.');
+        return res.redirect('/dashboard'); // O a otra página adecuada
     }
 
-    // Renderiza la vista chat_personal.ejs, pasando userId y userName
-    res.render('asesor/chat_personal', { 
-        userId: userId, 
-        userName: userName 
+    const userId = req.session.userId;
+    let userName = req.session.userName || req.userEmail;
+    let userType = req.session.userType;
+
+    // Aunque ya se intentó en login, asegurar que el nombre y tipo estén actualizados si no lo están
+    if (!userName || !userType || userType === 'unregistered') {
+        try {
+            const clienteDoc = await db.collection('clientes').doc(userId).get();
+            const asesorDoc = await db.collection('asesores').doc(userId).get();
+
+            if (clienteDoc.exists) {
+                userName = clienteDoc.data().nombre || userName;
+                userType = 'client';
+                req.session.userName = userName;
+                req.session.userType = userType;
+            } else if (asesorDoc.exists) {
+                userName = asesorDoc.data().nombre || userName;
+                userType = 'asesor';
+                req.session.userName = userName;
+                req.session.userType = userType;
+            }
+        } catch (error) {
+            console.error('Error al obtener el nombre/tipo de usuario para el chat:', error);
+            // Continúa con los datos disponibles, pero con un log de error.
+        }
+    }
+
+    res.render('asesor/chat_personal', { // Asumiendo que chat_personal es una vista genérica de chat
+        userId: userId,
+        userName: userName,
+        userType: userType
     });
 });
 
-// ... el resto de tus rutas ...
 
-// Ruta para mostrar la página de verificaciones pendientes (solo para admin)
+// --- RUTA CLAVE AÑADIDA/MODIFICADA PARA EL CONTACTO CON ASESORES (CLIENTE) ---
+// Ahora esta ruta mostrará el dashboard de asesores disponibles
+// Ruta para el contacto con asesores (CLIENTE)
+router.get('/contacto-asesor', requireAuth, async (req, res) => {
+    if (req.session.userType !== 'client') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
+        return res.redirect('/dashboard');
+    }
+    try {
+        const asesoresRef = db.collection('asesores');
+        const snapshot = await asesoresRef
+            .where('verification.status', '==', 'verificado')
+            .where('verificacion.titulo.estado', '==', 'verificado')
+            .get();
+
+        const asesoresDisponibles = [];
+        snapshot.forEach(doc => {
+            const asesor = doc.data();
+            asesor._id = doc.id;
+            asesoresDisponibles.push(asesor);
+        });
+
+        res.render('cliente/asesores-disponibles', {
+            asesores: asesoresDisponibles,
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+    } catch (error) {
+        console.error('Error al obtener asesores disponibles:', error);
+        req.flash('error_msg', 'Error al cargar los asesores disponibles.');
+        res.redirect('/homecliente');
+    }
+});
+// Nueva ruta API para obtener un solo asesor por ID (para el modal)
+router.get('/api/asesor/:id', requireAuth, async (req, res) => {
+    // Esta ruta puede ser accedida tanto por clientes como por asesores
+    // para ver detalles de otros asesores si es necesario.
+    try {
+        const asesorId = req.params.id;
+        const asesorDoc = await db.collection('asesores').doc(asesorId).get();
+
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
+        }
+
+        const asesorData = asesorDoc.data();
+        // Filtrar datos sensibles si es necesario antes de enviar al frontend
+        const publicAsesorData = {
+            _id: asesorDoc.id,
+            nombre: asesorData.nombre,
+            apellido: asesorData.apellido,
+            email: asesorData.email,
+            telefono: asesorData.telefono,
+            especialidad: asesorData.especialidad,
+            fotoPerfilUrl: asesorData.fotoPerfilUrl,
+            descripcion: asesorData.descripcion || 'Asesor financiero experimentado.'
+        };
+
+        res.json(publicAsesorData);
+    } catch (error) {
+        console.error('Error al obtener detalles del asesor:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al obtener detalles del asesor.' });
+    }
+});
+
+
+// Ruta para la página de chat personal del cliente
+router.get('/chat-personal', requireAuth, clienteController.mostrarChatPersonalCliente);
+
+// API para que el frontend del cliente obtenga los mensajes de su chat con el asesor
+router.get('/cliente/api/chat/:asesorId', requireAuth, clienteController.getClienteChatMessages);
+
+// API para que el frontend del cliente envíe mensajes a su asesor
+router.post('/cliente/api/send-message', requireAuth,clienteController.clienteSendMessage);
+
+// Ruta para asignar un asesor a un cliente
+// Ruta para asignar un asesor a un cliente
+router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
+    // Verificación manual de tipo de usuario
+    if (req.session.userType !== 'client') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Debes ser cliente.', redirectTo: '/dashboard' });
+    }
+
+    const clienteId = req.session.userId;
+    const { asesorId } = req.body;
+
+    if (!asesorId) {
+        return res.status(400).json({ success: false, message: 'ID de asesor no proporcionado.' });
+    }
+
+    try {
+        const clienteRef = db.collection('clientes').doc(clienteId);
+        const asesorRef = db.collection('asesores').doc(asesorId);
+
+        const [clienteDoc, asesorDoc] = await Promise.all([
+            clienteRef.get(),
+            asesorRef.get()
+        ]);
+
+        if (!clienteDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Cliente no encontrado.' });
+        }
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
+        }
+
+        const asesorData = asesorDoc.data();
+        // Asegurarse de que el asesor esté verificado antes de la asignación
+        if (asesorData.verification?.status !== 'verificado' || asesorData.verificacion?.titulo?.estado !== 'verificado') {
+            return res.status(400).json({ success: false, message: 'El asesor seleccionado aún no ha sido verificado completamente.' });
+        }
+
+        // Asignar el asesor al cliente
+        await clienteRef.update({
+            // --- ¡CORRECCIÓN AQUÍ! ---
+            asesorAsignado: asesorId // Guarda solo la ID del asesor como una cadena de texto
+            // --- FIN DE LA CORRECCIÓN ---
+        });
+
+        // Actualizar el documento del asesor para añadir este cliente a su lista de clientes asignados
+        await asesorRef.update({
+            clientesAsignados: admin.firestore.FieldValue.arrayUnion(clienteId)
+        });
+
+        // Añadir notificación al asesor
+        const clienteData = clienteDoc.data();
+        const notificationMessage = `¡Tienes un nuevo cliente! ${clienteData.nombre} ${clienteData.apellido} te ha seleccionado como su asesor.`;
+        // Asegúrate de que addNotificationToUser esté correctamente definida y accesible.
+        await addNotificationToUser(asesorId, notificationMessage, `/asesor/clientes/${clienteId}/perfil`);
+
+
+        // EL CAMBIO PRINCIPAL: AHORA REDIRIGE A '/chat-personal'
+        return res.json({
+            success: true,
+            message: 'Asesor asignado correctamente. Redirigiendo al chat...',
+            redirectTo: '/chat-personal'
+        });
+
+    } catch (error) {
+        console.error('Error al asignar asesor a cliente:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error interno del servidor al asignar el asesor.',
+            redirectTo: '/cliente/asesores-disponibles'
+        });
+    }
+});
+// --- FIN DE LA RUTA CLAVE ---
+
+
+
+
 router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req, res) => {
+    // Aquí solo se usa isAdminMiddleware, lo que asume que ese middleware se encarga de verificar el rol de 'admin'.
+    // Si tu lógica de admin se basa en el email (como en tu configuración de `ADMIN_EMAILS`), asegúrate de que `isAdminMiddleware`
+    // realice esa comprobación o que la línea `const adminEmails = process.env.ADMIN_EMAILS...` al inicio de `dashboard`
+    // se replique también aquí, o que `isAdminMiddleware` la use.
     try {
         const asesoresRef = db.collection('asesores');
         const asesoresPendientes = [];
@@ -505,7 +885,8 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
     }
 });
 
-// Ruta para procesar la aprobación o rechazo de documentos
+// Ruta para procesar la aprobación o rechazo de documentos (solo para admin)
+// Aplica la misma lógica de middlewares que la ruta anterior.
 router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res) => {
     const { asesorId, type, action } = req.body;
 
@@ -564,6 +945,7 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
         await asesorRef.update(updateData);
 
+        // addNotificationToUser debe ser una función accesible, ya la tienes definida arriba
         await addNotificationToUser(asesorId, notificationMessage, notificationLink);
 
         res.json({ success: true, message: `Verificación de ${type} actualizada a ${updateData[statusPath]}.` });
@@ -576,12 +958,19 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
 
 // Ruta para la página de notificaciones del asesor
+// Requiere autenticación (requireAuth) Y que el usuario autenticado sea un asesor
 router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
+    // Verificar que el userType en sesión sea 'asesor'.
+    if (req.session.userType !== 'asesor') {
+        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
+        return res.redirect('/dashboard');
+    }
     const userId = req.session.userId;
     try {
         const asesorDoc = await db.collection('asesores').doc(userId).get();
         if (!asesorDoc.exists) {
-            return res.status(404).send('Perfil de asesor no encontrado.');
+            req.flash('error_msg', 'Perfil de asesor no encontrado.');
+            return res.status(404).redirect('/homeasesor');
         }
         const asesorData = asesorDoc.data();
         const notifications = (asesorData.notifications || []).sort((a, b) => {
@@ -592,21 +981,31 @@ router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
 
         res.render('asesor/notificaciones', { notifications: notifications });
     } catch (error) {
-        console.error('Error al cargar notificaciones del asesor:', error);
-        res.status(500).send('Error interno del servidor al cargar notificaciones.');
+        console.error('Error al cargar las notificaciones del asesor:', error);
+        req.flash('error_msg', 'Error al cargar tus notificaciones.');
+        res.redirect('/homeasesor');
     }
 });
 
-// Ruta para marcar notificaciones como leídas
+
 router.post('/asesor/notificaciones/marcar-leida', requireAuth, async (req, res) => {
+    // Verificar que el userType en sesión sea 'asesor'.
+    if (req.session.userType !== 'asesor') {
+        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para asesores.' });
+    }
+
     const userId = req.session.userId;
     const { notificationId } = req.body;
+
+    if (!notificationId) {
+        return res.status(400).json({ success: false, message: 'ID de notificación no proporcionado.' });
+    }
 
     try {
         const asesorRef = db.collection('asesores').doc(userId);
         const asesorDoc = await asesorRef.get();
         if (!asesorDoc.exists) {
-            return res.status(404).json({ success: false, message: 'Perfil de asesor no encontrado.' });
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
         }
 
         const notifications = asesorDoc.data().notifications || [];
@@ -626,32 +1025,59 @@ router.post('/asesor/notificaciones/marcar-leida', requireAuth, async (req, res)
     }
 });
 
-// Ruta API para obtener un resumen de notificaciones para la campana
-router.get('/api/asesor/notificaciones-resumen', requireAuth, async (req, res) => {
-    const userId = req.session.userId;
+// Ruta para la página general del chat del asesor (con barra lateral)
+router.get('/asesor/chat-general', requireAuth, asesorController.mostrarChatGeneralAsesor);
+
+// API para que el frontend del asesor obtenga los mensajes de un chat específico
+router.get('/asesor/api/chat/:clienteId', requireAuth, asesorController.getClienteChatMessages);
+
+// API para que el frontend del asesor envíe mensajes
+router.post('/asesor/api/send-message', requireAuth, asesorController.asesorSendMessage);
+
+// NUEVA API: Ruta para que el frontend del asesor actualice la barra lateral (último mensaje y no leídos)
+router.get('/asesor/api/clientes-chat-sidebar', requireAuth, async (req, res) => {
     try {
-        const asesorDoc = await db.collection('asesores').doc(userId).get();
+        const asesorUid = req.session.userId;
+        const asesorDoc = await db.collection('asesores').doc(asesorUid).get();
         if (!asesorDoc.exists) {
-            return res.status(404).json({ success: false, message: 'Perfil de asesor no encontrado.' });
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
         }
         const asesorData = asesorDoc.data();
-        const notifications = asesorData.notifications || [];
+        const clientesAsignadosIds = asesorData.clientesAsignados || [];
 
-        const unreadCount = notifications.filter(notif => !notif.read).length;
-        const latestNotifications = notifications
-                                            .sort((a, b) => {
-                                                const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
-                                                const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
-                                                return timeA - timeB;
-                                            })
-                                            .slice(0, 3);
+        let clientesActualizados = [];
+        for (const clienteId of clientesAsignadosIds) {
+            const clienteDoc = await db.collection('clientes').doc(clienteId).get();
+            if (clienteDoc.exists) {
+                const clienteData = clienteDoc.data();
+                const roomId = [asesorUid, clienteId].sort().join('_');
+                const chatDoc = await db.collection('chats').doc(`chat_${roomId}`).get(); // Prepend "chat_"
 
-        res.json({ success: true, unreadCount: unreadCount, latestNotifications: latestNotifications });
+                let lastMessage = '';
+                let unreadCount = 0;
+                if (chatDoc.exists) {
+                    const chatData = chatDoc.data();
+                    lastMessage = chatData.lastMessageText || '';
+                    unreadCount = chatData.asesorUnreadCount || 0;
+                }
+
+                clientesActualizados.push({
+                    id: clienteId,
+                    nombre: clienteData.nombre,
+                    apellido: clienteData.apellido,
+                    fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png',
+                    lastMessage: lastMessage,
+                    unreadCount: unreadCount
+                });
+            }
+        }
+        res.json({ success: true, clientes: clientesActualizados });
 
     } catch (error) {
-        console.error('Error al obtener resumen de notificaciones:', error);
-        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+        console.error('Error al obtener datos de clientes para la sidebar:', error);
+        res.status(500).json({ success: false, message: 'Error al actualizar clientes de la sidebar.' });
     }
 });
+
 
 module.exports = router;

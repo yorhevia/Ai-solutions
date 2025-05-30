@@ -49,11 +49,51 @@ app.use(session({
 // ** AÑADIR EL MIDDLEWARE FLASH **
 app.use(flash());
 
-// ** MIDDLEWARE PARA PASAR LOS MENSAJES FLASH A RES.LOCALS **
-app.use((req, res, next) => {
+// Middleware para pasar mensajes flash y user info a las vistas
+// También para poblar req.user y req.session.userType/userName
+app.use(async (req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-    res.locals.error = req.flash('error'); // Mensaje de error general
+    res.locals.userType = req.session.userType || null;
+    res.locals.userName = req.session.userName || null;
+
+    // Poblar req.user (para compatibilidad con middlewares si es necesario)
+    if (req.session.userId) {
+        req.user = {
+            id: req.session.userId,
+            email: req.userEmail,
+            userType: req.session.userType,
+            name: req.session.userName
+        };
+        // Si userType no está en sesión, intentar buscarlo
+        if (!req.session.userType) {
+            try {
+                const clienteDoc = await db.collection('clientes').doc(req.session.userId).get();
+                const asesorDoc = await db.collection('asesores').doc(req.session.userId).get();
+
+                if (clienteDoc.exists) {
+                    req.session.userType = 'client';
+                    req.session.userName = clienteDoc.data().nombre;
+                    req.user.userType = 'client';
+                    req.user.name = clienteDoc.data().nombre;
+                } else if (asesorDoc.exists) {
+                    req.session.userType = 'asesor';
+                    req.session.userName = asesorDoc.data().nombre;
+                    req.user.userType = 'asesor';
+                    req.user.name = asesorDoc.data().nombre;
+                } else {
+                    req.session.userType = 'unregistered'; // Autenticado pero sin perfil
+                    req.session.userName = req.userEmail;
+                    req.user.userType = 'unregistered';
+                    req.user.name = req.userEmail;
+                }
+            } catch (error) {
+                console.error("Error al poblar userType en middleware:", error);
+            }
+        }
+    } else {
+        req.user = null;
+    }
     next();
 });
 

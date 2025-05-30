@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asesores Disponibles - AI Finance Solutions</title>
+
+    <link rel="stylesheet" href="/stylesheets/base.css">
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/footer.css">
+    <link rel="stylesheet" href="/stylesheets/asesores-disponibles.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+</head>
+<body>
+    <%- include('../partials/client_navbar.ejs') %>
+
+    <div class="main-content-wrapper">
+        <div class="custom-container page-top-margin">
+            <h1 class="page-title center-text margin-bottom-4">Encuentra a tu Asesor Financiero Ideal</h1>
+            <p class="page-subtitle center-text lead-text">Explora nuestra lista de asesores verificados y elige al experto que mejor se adapte a tus necesidades financieras.</p>
+
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="custom-alert success-alert" role="alert">
+                    <%= success_msg %>
+                    <button type="button" class="alert-close-btn" aria-label="Close">&times;</button>
+                </div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="custom-alert danger-alert" role="alert">
+                    <%= error_msg %>
+                    <button type="button" class="alert-close-btn" aria-label="Close">&times;</button>
+                </div>
+            <% } %>
+
+            <div class="asesores-grid">
+                <% if (asesores && asesores.length > 0) { %>
+                    <% asesores.forEach(function(asesor) { %>
+                        <div class="asesor-card" data-asesor-id="<%= asesor._id %>">
+                            <img src="<%= asesor.fotoPerfilUrl || '/images/default-profile.png' %>" class="asesor-profile-img" alt="Foto de Perfil de <%= asesor.nombre %>">
+                            <div class="asesor-card-body">
+                                <h5 class="asesor-card-title"><%= asesor.nombre %> <%= asesor.apellido %></h5>
+                                <p class="asesor-card-text"><strong>Especialidad:</strong> <%= asesor.especialidad %></p>
+                                <p class="asesor-card-text description-preview">
+                                    <% 
+                                        if (asesor.descripcion) { 
+                                            let desc = asesor.descripcion;
+                                            if (desc.length > 100) { 
+                                                desc = desc.substring(0, 100) + '...';
+                                            }
+                                    %>
+                                        <%= desc %>
+                                    <% } else { %>
+                                        Sin descripción.
+                                    <% } %>
+                                </p>
+                                <button type="button" class="custom-btn primary-btn small-btn view-profile-btn" data-id="<%= asesor._id %>">Ver Perfil Completo</button>
+                                <button type="button" class="custom-btn success-btn small-btn assign-advisor-btn margin-top-2" data-id="<%= asesor._id %>" data-name="<%= asesor.nombre %> <%= asesor.apellido %>">Contactar y Asignar</button>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="grid-full-width center-text">
+                        <p class="custom-alert info-alert">No hay asesores disponibles en este momento. Por favor, inténtalo más tarde.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-modal-overlay" id="asesorDetailModal">
+        <div class="custom-modal-dialog">
+            <div class="custom-modal-content">
+                <button type="button" class="custom-modal-close-btn" aria-label="Close">&times;</button>
+                <div class="custom-modal-header">
+                    <h5 class="custom-modal-title" id="asesorDetailModalLabel">Detalles del Asesor</h5>
+                </div>
+                <div class="custom-modal-body">
+                    <div class="center-text margin-bottom-3">
+                        <img id="modalProfilePhoto" src="/images/default-profile.png" alt="Foto de Perfil" class="modal-profile-img">
+                    </div>
+                    <p><strong>Nombre:</strong> <span id="modalName"></span></p>
+                    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                    <p><strong>Teléfono:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>Especialidad:</strong> <span id="modalSpecialty"></span></p>
+                    <p><strong>Descripción:</strong> <span id="modalDescription"></span></p>
+                </div>
+                <div class="custom-modal-footer">
+                    <button type="button" class="custom-btn secondary-btn close-modal-btn">Cerrar</button>
+                    <button type="button" class="custom-btn success-btn" id="modalAssignButton">Contactar y Asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Manejar clic en "Ver Perfil Completo"
+            $('.view-profile-btn').on('click', async function() {
+                const asesorId = $(this).data('id');
+                try {
+                    const response = await fetch(`/api/asesor/${asesorId}`);
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los detalles del asesor.');
+                    }
+                    const asesor = await response.json();
+
+                    $('#modalName').text(`${asesor.nombre} ${asesor.apellido}`);
+                    $('#modalEmail').text(asesor.email);
+                    $('#modalPhone').text(asesor.telefono || 'No disponible');
+                    $('#modalSpecialty').text(asesor.especialidad || 'General');
+                    $('#modalDescription').text(asesor.descripcion || 'Sin descripción detallada.');
+                    $('#modalProfilePhoto').attr('src', asesor.fotoPerfilUrl || '/images/default-profile.png');
+
+                    $('#modalAssignButton').data('id', asesor._id);
+                    $('#modalAssignButton').data('name', `${asesor.nombre} ${asesor.apellido}`);
+
+                    // Mostrar el modal personalizado
+                    $('#asesorDetailModal').addClass('active');
+                } catch (error) {
+                    console.error('Error al obtener detalles del asesor:', error);
+                    alert('No se pudieron cargar los detalles del asesor. Inténtalo de nuevo más tarde.');
+                }
+            });
+
+            // Manejar clic para cerrar el modal
+            $('.custom-modal-close-btn, .close-modal-btn, .custom-modal-overlay').on('click', function(e) {
+                // Solo cierra si se hizo clic directamente en el overlay o en los botones de cierre
+                if ($(e.target).hasClass('custom-modal-overlay') || $(e.target).hasClass('custom-modal-close-btn') || $(e.target).hasClass('close-modal-btn')) {
+                    $('#asesorDetailModal').removeClass('active');
+                }
+            });
+
+            // Evitar que el clic dentro del contenido del modal lo cierre
+            $('.custom-modal-content').on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Manejar clic en "Contactar y Asignar" (desde la tarjeta o desde el modal)
+           // Manejar clic en "Contactar y Asignar" (desde la tarjeta o desde el modal)
+$(document).on('click', '.assign-advisor-btn, #modalAssignButton', async function() {
+    const asesorId = $(this).data('id');
+    const asesorName = $(this).data('name');
+
+    if (confirm(`¿Estás seguro de que quieres asignar a ${asesorName} como tu asesor?`)) {
+        try {
+            const response = await fetch('/cliente/asignar-asesor', { // <--- Esta es la ruta a la que apuntas
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ asesorId: asesorId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Muestra el mensaje del backend
+                alert(result.message);
+                // ¡AQUÍ ES DONDE AHORA USAMOS result.redirectTo!
+                if (result.redirectTo) {
+                    window.location.href = result.redirectTo; // Redirige a la URL proporcionada por el backend
+                } else {
+                    // Fallback si por alguna razón no viene redirectTo (aunque debería venir)
+                    window.location.href = '/homecliente'; // O a otra página por defecto
+                }
+            } else {
+                alert(result.message); // Muestra el mensaje de error del backend
+            }
+        } catch (error) {
+            console.error('Error al asignar asesor:', error);
+            alert('Ocurrió un error al intentar asignar el asesor. Por favor, inténtalo de nuevo.');
+        } finally {
+            $('#asesorDetailModal').removeClass('active'); // Cerrar el modal
+        }
+    }
+});
+
+            // Manejar cierre de alertas
+            $(document).on('click', '.alert-close-btn', function() {
+                $(this).closest('.custom-alert').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
