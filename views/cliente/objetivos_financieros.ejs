@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objetivos Financieros - AI Finance Solutions</title>
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/objetivos_financieros.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+    <%- include('../partials/client_navbar') %>
+
+    <div class="objetivos-financieros-container">
+        <h1>Tus Objetivos Financieros</h1>
+
+        <div class="objetivos-content">
+            <div class="objetivo-form-section">
+                <h2>Agregar/Editar Objetivo</h2>
+                <form id="objetivoForm">
+                    <input type="hidden" id="objetivoId">
+
+                    <div class="form-group">
+                        <label for="nombreObjetivo">Nombre del Objetivo:</label>
+                        <input type="text" id="nombreObjetivo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="montoObjetivo">Monto Objetivo:</label>
+                        <input type="number" id="montoObjetivo" min="0" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="montoActual">Monto Actual Ahorrado:</label>
+                        <input type="number" id="montoActual" min="0" step="0.01" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fechaLimite">Fecha Límite:</label>
+                        <input type="date" id="fechaLimite">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="saveObjetivoBtn">Guardar Objetivo</button>
+                        <button type="button" id="cancelEditBtn" style="display:none;">Cancelar Edición</button>
+                        <button type="button" id="deleteObjetivoBtn" class="delete-btn" style="display:none;">Eliminar Objetivo</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="objetivos-list-section">
+                <h2>Mis Objetivos</h2>
+                <ul id="objetivosList" class="objetivos-list">
+                    <li>No tienes objetivos financieros registrados.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const objetivoForm = document.getElementById('objetivoForm');
+            const objetivoIdInput = document.getElementById('objetivoId');
+            const nombreObjetivoInput = document.getElementById('nombreObjetivo');
+            const montoObjetivoInput = document.getElementById('montoObjetivo');
+            const montoActualInput = document.getElementById('montoActual');
+            const fechaLimiteInput = document.getElementById('fechaLimite');
+            const saveObjetivoBtn = document.getElementById('saveObjetivoBtn');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const deleteObjetivoBtn = document.getElementById('deleteObjetivoBtn');
+            const objetivosList = document.getElementById('objetivosList');
+
+            // Función para formatear moneda (ej. $1,234.56)
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('es-VE', { style: 'currency', currency: 'USD' }).format(amount);
+            };
+
+            // Cargar objetivos al iniciar la página
+            async function fetchObjetivos() {
+                try {
+                    const response = await fetch('/cliente/api/objetivos');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    renderObjetivos(data);
+                } catch (error) {
+                    console.error('Error al cargar objetivos:', error);
+                    objetivosList.innerHTML = '<li>Error al cargar tus objetivos financieros.</li>';
+                }
+            }
+
+            // Renderizar la lista de objetivos
+            function renderObjetivos(objetivos) {
+                objetivosList.innerHTML = ''; // Limpiar la lista existente
+                if (objetivos && objetivos.length > 0) {
+                    objetivos.sort((a, b) => new Date(a.fechaLimite || '9999-12-31').getTime() - new Date(b.fechaLimite || '9999-12-31').getTime()); // Ordenar por fecha límite
+
+                    objetivos.forEach(objetivo => {
+                        const li = document.createElement('li');
+                        const progreso = (objetivo.montoActual / objetivo.montoObjetivo) * 100;
+                        const fechaDisplay = objetivo.fechaLimite ? new Date(objetivo.fechaLimite + 'T00:00:00').toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin fecha límite';
+                        
+                        li.innerHTML = `
+                            <div class="objetivo-info">
+                                <h3>${objetivo.nombre}</h3>
+                                <p>Meta: ${formatCurrency(objetivo.montoObjetivo)}</p>
+                                <p>Ahorrado: ${formatCurrency(objetivo.montoActual)}</p>
+                                <p>Fecha Límite: ${fechaDisplay}</p>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: ${Math.min(100, progreso)}%;"></div>
+                                    <span class="progress-text">${progreso.toFixed(2)}%</span>
+                                </div>
+                            </div>
+                            <div class="objetivo-actions">
+                                <button class="edit-btn" data-id="${objetivo.id}">Editar</button>
+                                <button class="delete-btn" data-id="${objetivo.id}">Eliminar</button>
+                            </div>
+                        `;
+                        objetivosList.appendChild(li);
+                    });
+                } else {
+                    objetivosList.innerHTML = '<li>No tienes objetivos financieros registrados. ¡Comienza agregando uno!</li>';
+                }
+
+                // Añadir event listeners a los botones de editar y eliminar
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const id = this.dataset.id;
+                        await editObjetivo(id);
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', async function() {
+                        const id = this.dataset.id;
+                        if (confirm('¿Estás seguro de que quieres eliminar este objetivo?')) {
+                            await deleteObjetivo(id);
+                        }
+                    });
+                });
+            }
+
+            // Función para llenar el formulario con datos de un objetivo para edición
+            async function editObjetivo(id) {
+                try {
+                    const response = await fetch(`/cliente/api/objetivos/${id}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const objetivo = await response.json();
+                    
+                    objetivoIdInput.value = objetivo.id;
+                    nombreObjetivoInput.value = objetivo.nombre;
+                    montoObjetivoInput.value = objetivo.montoObjetivo;
+                    montoActualInput.value = objetivo.montoActual;
+                    fechaLimiteInput.value = objetivo.fechaLimite || ''; // Asegurarse de que sea un string vacío si no hay fecha
+
+                    saveObjetivoBtn.textContent = 'Actualizar Objetivo';
+                    deleteObjetivoBtn.style.display = 'inline-block';
+                    cancelEditBtn.style.display = 'inline-block';
+                } catch (error) {
+                    console.error('Error al cargar objetivo para edición:', error);
+                    alert('No se pudo cargar el objetivo para edición.');
+                }
+            }
+
+            // Manejar el envío del formulario (crear o actualizar)
+            objetivoForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const id = objetivoIdInput.value;
+                const nombre = nombreObjetivoInput.value;
+                const montoObjetivo = parseFloat(montoObjetivoInput.value);
+                const montoActual = parseFloat(montoActualInput.value);
+                const fechaLimite = fechaLimiteInput.value; // YYYY-MM-DD
+
+                if (isNaN(montoObjetivo) || montoObjetivo <= 0) {
+                    alert('El monto objetivo debe ser un número positivo.');
+                    return;
+                }
+                if (isNaN(montoActual) || montoActual < 0) {
+                    alert('El monto actual debe ser un número no negativo.');
+                    return;
+                }
+                if (montoActual > montoObjetivo) {
+                    alert('El monto actual no puede ser mayor que el monto objetivo.');
+                    return;
+                }
+
+                const data = {
+                    nombre,
+                    montoObjetivo,
+                    montoActual,
+                    fechaLimite: fechaLimite || null // Guardar null si está vacío
+                };
+
+                let url = '/cliente/api/objetivos';
+                let method = 'POST';
+
+                if (id) { // Si hay un ID, es una actualización
+                    url = `/cliente/api/objetivos/${id}`;
+                    method = 'PUT';
+                }
+
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error al guardar el objetivo.');
+                    }
+
+                    const result = await response.json();
+                    alert(result.message);
+                    objetivoForm.reset(); // Limpiar el formulario
+                    resetFormState(); // Restablecer botones y título
+                    fetchObjetivos(); // Volver a cargar la lista
+                } catch (error) {
+                    console.error('Error al guardar objetivo:', error);
+                    alert('Error al guardar objetivo: ' + error.message);
+                }
+            });
+
+            // Eliminar objetivo
+            async function deleteObjetivo(id) {
+                try {
+                    const response = await fetch(`/cliente/api/objetivos/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error al eliminar el objetivo.');
+                    }
+
+                    const result = await response.json();
+                    alert(result.message);
+                    objetivoForm.reset();
+                    resetFormState();
+                    fetchObjetivos();
+                } catch (error) {
+                    console.error('Error al eliminar objetivo:', error);
+                    alert('Error al eliminar objetivo: ' + error.message);
+                }
+            }
+
+            // Restablecer el estado del formulario y botones
+            function resetFormState() {
+                objetivoIdInput.value = '';
+                saveObjetivoBtn.textContent = 'Guardar Objetivo';
+                deleteObjetivoBtn.style.display = 'none';
+                cancelEditBtn.style.display = 'none';
+            }
+
+            // Botón de cancelar edición
+            cancelEditBtn.addEventListener('click', () => {
+                objetivoForm.reset();
+                resetFormState();
+            });
+
+            // Cargar los objetivos al cargar la página
+            fetchObjetivos();
+        });
+    </script>
+</body>
+</html>

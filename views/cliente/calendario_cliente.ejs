@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Cliente - Panel de Cliente</title>
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/calendario.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+    <%- include('../partials/client_navbar') %>
+
+    <div class="calendario-page-container">
+        <h1>Tu Calendario de Eventos</h1>
+
+        <div class="calendario-content">
+            <div id="calendar"></div>
+            <div class="sidebar">
+                <h2>Eventos Próximos</h2>
+                <ul id="event-list" class="event-list">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Detalles del Evento</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <div class="form-group">
+                    <label for="eventTitle">Título del Evento:</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+
+                <button type="submit" id="saveEventBtn">Guardar Evento</button>
+                <button type="button" id="deleteEventBtn" style="display:none;">Eliminar Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded. Starting FullCalendar setup for client...');
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar;
+            let currentClickedDate = ''; // Variable para almacenar la fecha clicada en formato YYYY-MM-DD
+
+            if (!calendarEl) {
+                console.error('ERROR: No se encontró el elemento #calendar en el DOM. El calendario no se puede renderizar.');
+                return;
+            } else {
+                console.log('Elemento #calendar encontrado en el DOM.');
+            }
+
+            const eventModal = document.getElementById('eventModal');
+            const modalTitleElement = document.getElementById('modalTitle');
+            const eventIdInput = document.getElementById('eventId');
+            const eventTitleInput = document.getElementById('eventTitle');
+            const saveEventBtn = document.getElementById('saveEventBtn');
+            const deleteEventBtn = document.getElementById('deleteEventBtn');
+            const eventForm = document.getElementById('eventForm');
+            const eventList = document.getElementById('event-list');
+
+            function openEventModal(eventId = null, title = '') {
+                console.log('--- openEventModal called ---');
+                console.log('Event ID (modal):', eventId, 'Title (modal):', title, 'Current Clicked Date (modal):', currentClickedDate);
+
+                eventIdInput.value = eventId;
+                eventTitleInput.value = title;
+
+                // Si necesitas cargar 'time' y 'description' en el modal para editar:
+                // if (eventId) {
+                //     // Si estás editando, podrías necesitar una llamada a la API para obtener los detalles completos del evento
+                //     // O pasar 'time' y 'description' como parámetros adicionales a openEventModal
+                // }
+
+
+                if (eventId) {
+                    modalTitleElement.innerText = 'Editar Evento';
+                    saveEventBtn.innerText = 'Guardar Cambios';
+                    deleteEventBtn.style.display = 'inline-block';
+                } else {
+                    modalTitleElement.innerText = 'Agregar Nuevo Evento';
+                    saveEventBtn.innerText = 'Crear Evento';
+                    deleteEventBtn.style.display = 'none';
+                }
+                eventModal.classList.add('show-modal');
+            }
+
+            function closeEventModal() {
+                console.log('--- closeEventModal called ---');
+                eventModal.classList.remove('show-modal');
+                eventForm.reset(); // Limpia el formulario
+                currentClickedDate = ''; // IMPORTANTE: Limpiar la fecha al cerrar el modal
+                console.log('Modal closed. currentClickedDate reset.');
+            }
+
+            document.querySelector('.modal .close').addEventListener('click', closeEventModal);
+
+            window.onclick = function(event) {
+                if (event.target === eventModal) {
+                    closeEventModal();
+                }
+            }
+
+            console.log('Inicializando FullCalendar...');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                height: 800,
+                selectable: true,
+                selectMirror: true,
+                editable: true,
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    console.log('FullCalendar: Fetching events from API for client...');
+                    fetch('/cliente/api/eventos') // <--- CLIENTE API ENDPOINT
+                        .then(response => {
+                            if (!response.ok) {
+                                console.error('Fetch events API error response:', response.status, response.statusText);
+                                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Eventos recibidos de la API (cliente):', data);
+                            if (Array.isArray(data)) {
+                                // FullCalendar espera 'id', 'title', 'start' y 'end' (opcional).
+                                // Tu backend ya envía 'id', 'title', 'start', 'end'.
+                                // No necesitamos mapear a 'date' aquí si el backend ya usa 'start'.
+                                const formattedEvents = data.map(event => ({
+                                    id: event.id, // Usa event.id
+                                    title: event.title,
+                                    start: event.start, // Asume que event.start es YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss
+                                    end: event.end // Mantén el end si existe
+                                }));
+                                successCallback(formattedEvents);
+                                // Siempre renderizar la sidebar con todos los eventos para que el filtro funcione
+                                renderEventSidebar(data); // Pasa los datos originales (con 'start' y 'id')
+                            } else {
+                                console.error('La API no devolvió un array de eventos o la respuesta es inesperada (cliente):', data);
+                                failureCallback();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar eventos del calendario (API cliente):', error);
+                            alert('Error al cargar eventos: ' + error.message);
+                            failureCallback();
+                        });
+                },
+                dateClick: function(info) {
+                    console.log('Date clicked:', info.dateStr);
+                    currentClickedDate = info.dateStr; // Guarda la fecha clicada (YYYY-MM-DD)
+                    openEventModal(null, ''); // Abre el modal para un nuevo evento
+                },
+                eventClick: function(info) {
+                    console.log('Event clicked:', info.event.id, info.event.title);
+                    // FullCalendar ya te da startStr que es YYYY-MM-DD para eventos de todo el día
+                    // o YYYY-MM-DDTHH:mm:ss. Convertimos a solo YYYY-MM-DD para la edición.
+                    currentClickedDate = info.event.startStr.split('T')[0]; 
+                    openEventModal(
+                        info.event.id,
+                        info.event.title
+                        // Aquí podrías pasar info.event.extendedProps.description y info.event.extendedProps.time
+                        // si los estás recibiendo del backend y los quieres pre-llenar en el modal
+                    );
+                },
+                eventDrop: function(info) {
+                    console.log('Event dropped:', info.event.id, 'New date:', info.event.startStr);
+                    const eventId = info.event.id;
+                    const newDate = info.event.startStr.split('T')[0]; // Solo la fecha (YYYY-MM-DD)
+                    const newTitle = info.event.title; // Título actual del evento
+
+                    console.log('Sending PUT request for event drop. ID:', eventId, 'Title:', newTitle, 'Date:', newDate);
+                    fetch(`/cliente/api/eventos/${eventId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            title: newTitle, // Asegúrate de enviar el título también, ya que tu API lo requiere
+                            date: newDate // Esto mapea a 'start' en tu backend
+                            // También puedes enviar 'time' y 'description' si los tienes y los vas a actualizar
+                            // time: info.event.extendedProps.time,
+                            // description: info.event.extendedProps.description
+                        })
+                    })
+                    .then(response => {
+                        console.log('PUT response status:', response.status);
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                console.error('PUT error response data:', err);
+                                throw new Error(err.message || `HTTP error! status: ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Evento movido exitosamente (cliente). API response:', data);
+                            fetchAndRenderEventSidebar(); // Actualiza la sidebar
+                        } else {
+                            alert('Error al mover evento: ' + data.message);
+                            console.error('API reported error on event move:', data.message);
+                            info.revert(); // Revertir si hay un error
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error de red al mover evento (cliente):', error);
+                        alert('Error de red al mover evento. Revirtiendo cambios.');
+                        info.revert(); // Revertir si hay un error
+                    });
+                }
+            });
+
+            console.log('FullCalendar object created. Attempting to render...');
+            calendar.render();
+            console.log('FullCalendar render() called.');
+
+            fetchAndRenderEventSidebar(); // Cargar la sidebar al inicio
+
+            eventForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('--- Event form submitted ---');
+                const eventId = eventIdInput.value;
+                const title = eventTitleInput.value;
+                const dateToSave = currentClickedDate;
+                // const timeToSave = eventTimeInput.value; // Si agregaste el campo de hora
+                // const descriptionToSave = eventDescriptionInput.value; // Si agregaste el campo de descripción
+
+                console.log('Form data to send. Event ID:', eventId, 'Title:', title, 'Date:', dateToSave);
+
+                if (!dateToSave && !eventId) { // Para crear un nuevo evento, 'dateToSave' debe existir
+                    alert('Por favor, selecciona un día en el calendario antes de crear un evento.');
+                    console.error('Error: No se seleccionó una fecha para el nuevo evento.');
+                    return;
+                }
+
+                let url, method;
+                if (eventId) {
+                    url = `/cliente/api/eventos/${eventId}`;
+                    method = 'PUT';
+                    console.log('Initiating PUT request to:', url);
+                } else {
+                    url = '/cliente/api/eventos';
+                    method = 'POST';
+                    console.log('Initiating POST request to:', url);
+                }
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        title: title, 
+                        date: dateToSave // Este 'date' mapea a 'start' en tu backend
+                        // time: timeToSave, // Incluye si agregaste el campo
+                        // description: descriptionToSave // Incluye si agregaste el campo
+                    })
+                })
+                .then(response => {
+                    console.log('Fetch response status:', response.status, response.statusText);
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            console.error('API error response data:', err);
+                            throw new Error(err.message || `HTTP error! status: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API response data:', data);
+                    if (data.success) {
+                        console.log('Evento guardado exitosamente (cliente).');
+                        closeEventModal();
+                        console.log('Calling calendar.refetchEvents()...');
+                        calendar.refetchEvents(); // Vuelve a cargar todos los eventos en el calendario
+                        console.log('Calling fetchAndRenderEventSidebar()...');
+                        fetchAndRenderEventSidebar(); // Actualiza la sidebar
+                    } else {
+                        alert('Error al guardar evento: ' + (data.message || 'Error desconocido del servidor.'));
+                        console.error('API reported error on event save:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de red o procesamiento del fetch (cliente):', error);
+                    alert('Error al guardar evento: ' + error.message);
+                });
+            });
+
+            deleteEventBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+                    const eventId = eventIdInput.value;
+                    console.log('Attempting to delete event with ID (client):', eventId);
+                    fetch(`/cliente/api/eventos/${eventId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        console.log('DELETE response status:', response.status);
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                console.error('DELETE error response data:', err);
+                                throw new Error(err.message || `HTTP error! status: ${response.status}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('API response data (delete):', data);
+                        if (data.success) {
+                            console.log('Evento eliminado exitosamente (cliente).');
+                            closeEventModal();
+                            calendar.refetchEvents();
+                            fetchAndRenderEventSidebar();
+                        } else {
+                            alert('Error al eliminar: ' + (data.message || 'Error desconocido del servidor.'));
+                            console.error('API reported error on event delete:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error de red al eliminar evento (cliente):', error);
+                        alert('Error de red al eliminar evento.');
+                    });
+                }
+            });
+
+            // --- FUNCIÓN CLAVE MODIFICADA ---
+            function renderEventSidebar(events) {
+                console.log('--- Rendering sidebar events for client ---');
+                eventList.innerHTML = ''; // Limpiar lista existente
+
+                // Obtener la fecha de hoy formateada como YYYY-MM-DD para una comparación simple de día
+                const today = new Date();
+                const todayFormatted = today.getFullYear() + '-' + 
+                                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                       String(today.getDate()).padStart(2, '0');
+                
+                console.log('Today formatted for comparison:', todayFormatted);
+
+
+                if (events && events.length > 0) {
+                    const filteredEvents = events.filter(event => {
+                        // El campo 'start' de Firestore es un string YYYY-MM-DD en tu caso.
+                        // Usamos directamente el string para la comparación a nivel de día.
+                        const eventDateFormatted = event.start; // Usa event.start de los datos de la API
+
+                        // Comparar las fechas como strings YYYY-MM-DD
+                        // Esto asegura que la comparación sea a nivel de día, sin problemas de zona horaria
+                        return eventDateFormatted >= todayFormatted; 
+                    }).sort((a, b) => {
+                        // Para ordenar, convertimos los strings YYYY-MM-DD a objetos Date para una comparación numérica fiable
+                        // (Date.parse(string YYYY-MM-DD) se interpreta como UTC, lo cual es bueno para ordenar consistentemente)
+                        return new Date(a.start).getTime() - new Date(b.start).getTime(); // Usa a.start y b.start para ordenar
+                    });
+
+                    console.log('Filtered events for sidebar:', filteredEvents);
+
+                    if (filteredEvents.length > 0) {
+                        filteredEvents.forEach(event => {
+                            const li = document.createElement('li');
+                            // Para mostrar, creamos un objeto Date desde el string YYYY-MM-DD y formateamos
+                            // Añadir 'T00:00:00' ayuda a new Date() a interpretarlo como hora local para el display.
+                            const displayDate = new Date(event.start + 'T00:00:00'); 
+                            const formattedDate = displayDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+                            
+                            li.innerHTML = `
+                                <div>
+                                    <strong>${event.title}</strong><br>
+                                    <small>${formattedDate}</small>
+                                    ${event.time ? '<br><small>Hora: ' + event.time + '</small>' : ''}
+                                    ${event.description ? '<br><small>Descripción: ' + event.description + '</small>' : ''}
+                                </div>
+                                <div class="event-actions">
+                                    <button class="edit-btn"
+                                            data-id="${event.id}"
+                                            data-title="${event.title}"
+                                            data-date="${event.start}"
+                                            data-time="${event.time || ''}"
+                                            data-description="${event.description || ''}"
+                                            >Editar</button> <button class="delete-btn" data-id="${event.id}">Eliminar</button>
+                                </div>
+                            `;
+                            eventList.appendChild(li);
+                        });
+                    } else {
+                        eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                    }
+
+                    eventList.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const eventId = this.dataset.id;
+                            const eventTitle = this.dataset.title;
+                            currentClickedDate = this.dataset.date; // Esto ya es YYYY-MM-DD
+                            // También puedes cargar la hora y descripción si las agregas al modal
+                            // const eventTime = this.dataset.time;
+                            // const eventDescription = this.dataset.description;
+                            console.log('Edit button clicked for event:', eventId, 'Date:', currentClickedDate);
+                            openEventModal(eventId, eventTitle); // Pasa hora y descripción si están en el modal
+                        });
+                    });
+
+                    eventList.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+                                const eventId = this.dataset.id;
+                                console.log('Attempting to delete event from sidebar with ID (client):', eventId);
+                                fetch(`/cliente/api/eventos/${eventId}`, {
+                                    method: 'DELETE'
+                                })
+                                .then(response => {
+                                    console.log('DELETE sidebar response status:', response.status);
+                                    if (!response.ok) {
+                                        return response.json().then(err => {
+                                            console.error('DELETE sidebar error response data:', err);
+                                            throw new Error(err.message || `HTTP error! status: ${response.status}`);
+                                        });
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    console.log('API response data (sidebar delete):', data);
+                                    if (data.success) {
+                                        console.log('Evento eliminado desde sidebar (cliente).');
+                                        calendar.refetchEvents();
+                                        fetchAndRenderEventSidebar();
+                                    } else {
+                                        alert('Error al eliminar: ' + (data.message || 'Error desconocido del servidor.'));
+                                        console.error('API reported error on sidebar delete:', data.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error de red al eliminar evento desde sidebar (cliente):', error);
+                                    alert('Error de red al eliminar evento.');
+                                });
+                            }
+                        });
+                    });
+
+                } else {
+                    eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                }
+            }
+
+            function fetchAndRenderEventSidebar() {
+                console.log('Fetching events for sidebar (client)...');
+                fetch('/cliente/api/eventos')
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Fetch sidebar events API error response:', response.status, response.statusText);
+                            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            renderEventSidebar(data);
+                        } else {
+                            console.error('La API de eventos no devolvió un array para el sidebar o es inesperada (cliente):', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar eventos para el sidebar (cliente):', error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

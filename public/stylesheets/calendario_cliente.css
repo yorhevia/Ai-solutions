@@ -1,0 +1,343 @@
+/* CSS BÁSICO INTEGRADO PARA LA PÁGINA DEL CALENDARIO Y MODAL */
+/* Considera mover estos estilos a /public/stylesheets/calendario.css para mejor organización */
+
+:root {
+    /* Paleta de colores para el cliente */
+    --color-primary: #3498db; /* Azul principal - para botones, enlaces importantes */
+    --color-secondary: #2ecc71; /* Verde - para acciones de éxito/guardar */
+    --color-tertiary: #f39c12; /* Naranja - para advertencias o elementos destacados */
+    --color-danger: #e74c3c; /* Rojo - para acciones de eliminar */
+    --color-background-light: #ecf0f1; /* Fondo muy claro, casi blanco */
+    --color-background-medium: #f8fcfd; /* Fondo ligeramente más oscuro para secciones */
+    --color-text-dark: #2c3e50; /* Texto oscuro principal */
+    --color-text-medium: #7f8c8d; /* Texto secundario o descriptivo */
+    --color-border: #dcdfe6; /* Bordes suaves */
+    --color-highlight-light: #eaf6fc; /* Resaltado suave para fondos */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--color-background-light); /* Fondo general más suave */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--color-text-dark);
+}
+
+.calendario-page-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    /* Aumentar significativamente el max-width del contenedor principal */
+    max-width: 1800px; /* Ya estaba en 1800px, lo mantenemos */
+    margin: 20px auto;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: var(--color-text-dark);
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2.5em; /* Título más grande y prominente */
+    letter-spacing: -0.5px;
+}
+
+.calendario-content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    /* Remover o comentar min-height si la tiene, vamos a controlar la altura directamente en #calendar */
+    /* min-height: 70vh; */ /* ¡COMENTAR O ELIMINAR ESTA LÍNEA! */
+}
+
+#calendar {
+    /* Mantenemos flex: 5 para el ancho */
+    flex: 5;
+    /* Establecer una altura fija, ¡esto debería forzar el tamaño vertical! */
+    height: 800px; /* ¡Cambio importante! Ajusta este valor (ej. 700px, 900px, etc.) */
+    /* Puedes mantener min-height como respaldo, pero 'height' tendrá prioridad */
+    min-height: 700px;
+
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    min-width: 320px;
+}
+
+/* --- NUEVO CSS PARA SEPARAR EL TÍTULO DEL CALENDARIO --- */
+.fc-toolbar-title {
+    margin-bottom: 18px;
+    font-size: 2em !important;
+    color: var(--color-text-dark);
+    font-weight: 600;
+}
+/* Fin del nuevo CSS */
+
+/* Estilo para resaltar el día actual en el calendario */
+.fc-day-today {
+    background-color: var(--color-highlight-light) !important;
+    border: 2px solid var(--color-primary) !important;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    color: var(--color-text-dark);
+}
+
+/* Estilo para los eventos en el calendario */
+.fc-event {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white !important;
+    border-radius: 5px;
+    padding: 2px 5px;
+    font-size: 0.85em;
+    cursor: pointer;
+}
+
+.sidebar {
+    flex: 1;
+    min-width: 280px;
+    max-width: 320px;
+    background-color: var(--color-background-medium);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+}
+
+.sidebar h2 {
+    text-align: center;
+    color: var(--color-text-dark);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.event-list li {
+    background-color: #ffffff;
+    border: 1px solid var(--color-border);
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 1em;
+    color: var(--color-text-dark);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.event-list li strong {
+    color: var(--color-primary);
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.event-list li small {
+    color: var(--color-text-medium);
+    font-size: 0.9em;
+}
+
+.event-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+.event-actions button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.event-actions button:active {
+    transform: translateY(1px);
+}
+.event-actions .edit-btn {
+    background-color: var(--color-primary);
+    color: white;
+}
+.event-actions .edit-btn:hover { background-color: #2980b9; }
+
+.event-actions .delete-btn {
+    background-color: var(--color-danger);
+    color: white;
+}
+.event-actions .delete-btn:hover { background-color: #c0392b; }
+
+/* Estilos del Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.show-modal {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 35px;
+    border: 1px solid var(--color-border);
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    position: relative;
+    transform: translateY(-40px);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+.modal.show-modal .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.close {
+    color: var(--color-text-medium);
+    position: absolute;
+    top: 18px;
+    right: 28px;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--color-text-dark);
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: var(--color-text-dark);
+    margin-bottom: 30px;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: 1.05em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"] {
+    width: calc(100% - 28px);
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 1.05em;
+    color: var(--color-text-dark);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="datetime-local"]:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+#saveEventBtn, #deleteEventBtn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.15em;
+    margin-top: 20px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    font-weight: 600;
+}
+#saveEventBtn:active, #deleteEventBtn:active {
+    transform: translateY(1px);
+}
+
+#saveEventBtn {
+    background-color: var(--color-secondary);
+    color: white;
+}
+#saveEventBtn:hover { background-color: #27ae60; }
+
+#deleteEventBtn {
+    background-color: var(--color-danger);
+    color: white;
+    margin-left: 20px;
+}
+#deleteEventBtn:hover { background-color: #c0392b; }
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .calendario-content {
+        flex-direction: column;
+        align-items: center;
+        min-height: auto; /* Asegúrate de que esto esté así en móvil */
+    }
+
+    #calendar, .sidebar {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
+
+    #calendar {
+        height: 500px; /* Puedes ajustar esta altura para móviles, por ejemplo */
+        min-height: 400px;
+    }
+
+    .calendario-page-container {
+        padding: 15px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 25px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.8em;
+    }
+
+    #saveEventBtn, #deleteEventBtn {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 15px;
+        font-size: 1.05em;
+    }
+}

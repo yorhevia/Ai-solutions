@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Solutions - Explorar Inversiones</title>
+    <link rel="stylesheet" href="/stylesheets/home_cliente.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/stylesheets/client_navbar.css">
+    <link rel="stylesheet" href="/stylesheets/inversiones.css">
+</head>
+<body>
+    <%- include('../partials/client_navbar') %>
+
+    <div class="container">
+        <main class="inversiones-dashboard">
+            <h1>Explora Opciones de Inversión</h1>
+            <p class="greeting">Aquí encontrarás noticias y novedades sobre emprendimientos, nuevas tecnologías y oportunidades de inversión que podrían interesarte.</p>
+
+            <section class="news-feed">
+                <h2>Novedades y Emprendimientos</h2>
+                <div class="news-grid">
+                    <% news.forEach(item => { %>
+                        <a href="<%= item.link %>" target="_blank" class="news-card-link">
+                            <div class="news-card">
+                                <img src="<%= item.imageUrl %>" alt="<%= item.title %>" class="news-image">
+                                <div class="news-content">
+                                    <h3><%= item.title %></h3>
+                                    <p><%= item.description %></p>
+                                    <span class="read-more">Ver Fuente <i class="fas fa-external-link-alt"></i></span>
+                                </div>
+                            </div>
+                        </a>
+                    <% }); %>
+                </div>
+            </section>
+
+            <p class="info-text">Mantente informado sobre las últimas tendencias y oportunidades en el mundo de las finanzas y la innovación.</p>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
+            <p>Crecimiento inteligente para tus finanzas.</p>
+        </div>
+    </footer>
+</body>
+</html>

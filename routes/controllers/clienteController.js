@@ -590,3 +590,324 @@ exports.clienteSendMessage = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error al enviar mensaje.' });
     }
 };
+
+// Ruta para mostrar la vista del calendario del cliente
+exports.mostrarCalendarioCliente = async (req, res) => {
+    try {
+        if (!req.session.userId) { // Asumiendo que req.session.userId contiene el ID del cliente logueado
+            req.flash('error_msg', 'No has iniciado sesión.');
+            return res.redirect('/login');
+        }
+        res.render('cliente/calendario_cliente'); // Renderiza la vista del calendario del cliente
+    } catch (error) {
+        console.error('Error al cargar la vista del calendario del cliente:', error);
+        req.flash('error_msg', 'Error al cargar la vista del calendario.');
+        res.redirect('/cliente/dashboard'); // O a la página de inicio del cliente
+    }
+};
+
+// API: Obtener todos los eventos para el cliente logueado
+exports.getEventosClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const eventosSnapshot = await db.collection('eventosClienteCalendario')
+                                        .where('clienteId', '==', clienteId)
+                                        .get();
+
+        const eventos = [];
+        eventosSnapshot.forEach(doc => {
+            const data = doc.data();
+            // data.start es un string YYYY-MM-DD (como lo guardas)
+            // FullCalendar lo puede usar directamente como 'start'
+            eventos.push({
+                id: doc.id, // ID del documento para edición/eliminación
+                title: data.title,
+                start: data.start, // Ya es 'YYYY-MM-DD'
+                end: data.end || data.start, 
+                description: data.description || '', 
+                time: data.time || '' 
+            });
+        });
+        res.json(eventos); 
+    } catch (error) {
+        console.error('Error al obtener eventos del calendario del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Crear un nuevo evento para el cliente
+exports.crearEventoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const { title, date, time, description } = req.body; 
+
+        if (!title || !date) {
+            return res.status(400).json({ success: false, message: 'Título y fecha del evento son requeridos.' });
+        }
+
+        const nuevoEvento = {
+            clienteId: clienteId,
+            title: title,
+            start: date, // 'date' del frontend es YYYY-MM-DD, lo guardas como string. ¡Perfecto!
+            time: time || '', 
+            description: description || '', 
+            createdAt: new Date() // Esto sí es un objeto Date y Firestore lo guarda como Timestamp
+        };
+
+        const docRef = await db.collection('eventosClienteCalendario').add(nuevoEvento);
+        res.status(201).json({ success: true, message: 'Evento creado exitosamente.', eventId: docRef.id });
+
+    } catch (error) {
+        console.error('Error al crear evento del calendario del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Editar un evento existente del cliente
+exports.editarEventoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        const eventoId = req.params.id; 
+        const { title, date, time, description } = req.body; 
+
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!eventoId || !title || !date) {
+            return res.status(400).json({ success: false, message: 'ID, título y fecha del evento son requeridos para la edición.' });
+        }
+
+        const eventoRef = db.collection('eventosClienteCalendario').doc(eventoId);
+        const eventoDoc = await eventoRef.get();
+
+        if (!eventoDoc.exists || eventoDoc.data().clienteId !== clienteId) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado o no autorizado.' });
+        }
+
+        await eventoRef.update({
+            title: title,
+            start: date, // 'date' del frontend es YYYY-MM-DD, lo guardas como string. ¡Perfecto!
+            time: time || '',
+            description: description || '',
+            updatedAt: new Date() // Esto también será un Timestamp
+        });
+
+        res.json({ success: true, message: 'Evento actualizado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al editar evento del calendario del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+// API: Eliminar un evento existente del cliente
+exports.eliminarEventoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId; // Obtén el ID del cliente de la sesión
+        const eventoId = req.params.id; // Obtén el ID del evento de los parámetros de la URL
+
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado. Inicia sesión para realizar esta acción.' });
+        }
+        if (!eventoId) {
+            return res.status(400).json({ success: false, message: 'ID del evento es requerido para la eliminación.' });
+        }
+
+        const eventoRef = db.collection('eventosClienteCalendario').doc(eventoId);
+        const eventoDoc = await eventoRef.get();
+
+        // Verificar si el evento existe y si pertenece al cliente autenticado
+        if (!eventoDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado.' });
+        }
+        if (eventoDoc.data().clienteId !== clienteId) {
+            return res.status(403).json({ success: false, message: 'No tienes permiso para eliminar este evento.' });
+        }
+
+        // Si todo está bien, eliminar el evento
+        await eventoRef.delete();
+
+        res.json({ success: true, message: 'Evento eliminado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al eliminar evento del calendario del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al eliminar el evento.' });
+    }
+};
+
+// GET /cliente/objetivos-financieros (Renderiza la vista)
+exports.mostrarObjetivosFinancieros = (req, res) => {
+    res.render('cliente/objetivos_financieros'); // Asegúrate de que este EJS exista en tu carpeta views
+};
+
+// API: Obtener todos los objetivos financieros del cliente
+exports.getObjetivosClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const objetivosSnapshot = await db.collection('objetivosCliente')
+                                        .where('clienteId', '==', clienteId)
+                                        .get();
+
+        const objetivos = [];
+        objetivosSnapshot.forEach(doc => {
+            const data = doc.data();
+            objetivos.push({
+                id: doc.id, // ID del documento para edición/eliminación
+                nombre: data.nombre,
+                montoObjetivo: data.montoObjetivo,
+                montoActual: data.montoActual,
+                fechaLimite: data.fechaLimite || null, // Puede ser null si no hay fecha
+                // Puedes añadir más campos si los necesitas (ej. descripcion)
+            });
+        });
+        res.json(objetivos);
+    } catch (error) {
+        console.error('Error al obtener objetivos financieros del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Obtener un solo objetivo financiero por ID (para edición)
+exports.getObjetivoByIdClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        const objetivoId = req.params.id;
+
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!objetivoId) {
+            return res.status(400).json({ success: false, message: 'ID del objetivo es requerido.' });
+        }
+
+        const objetivoDoc = await db.collection('objetivosCliente').doc(objetivoId).get();
+
+        if (!objetivoDoc.exists || objetivoDoc.data().clienteId !== clienteId) {
+            return res.status(404).json({ success: false, message: 'Objetivo no encontrado o no autorizado.' });
+        }
+
+        const data = objetivoDoc.data();
+        res.json({
+            id: objetivoDoc.id,
+            nombre: data.nombre,
+            montoObjetivo: data.montoObjetivo,
+            montoActual: data.montoActual,
+            fechaLimite: data.fechaLimite || null
+        });
+
+    } catch (error) {
+        console.error('Error al obtener objetivo por ID:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+
+// API: Crear un nuevo objetivo financiero para el cliente
+exports.crearObjetivoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const { nombre, montoObjetivo, montoActual, fechaLimite } = req.body;
+
+        if (!nombre || !montoObjetivo) {
+            return res.status(400).json({ success: false, message: 'Nombre y monto objetivo son requeridos.' });
+        }
+
+        const nuevoObjetivo = {
+            clienteId: clienteId,
+            nombre: nombre,
+            montoObjetivo: parseFloat(montoObjetivo), // Asegúrate de guardar como número
+            montoActual: parseFloat(montoActual) || 0, // Asegúrate de guardar como número, default 0
+            fechaLimite: fechaLimite || null, // Guardar como string YYYY-MM-DD o null
+            createdAt: new Date()
+        };
+
+        const docRef = await db.collection('objetivosCliente').add(nuevoObjetivo);
+        res.status(201).json({ success: true, message: 'Objetivo financiero creado exitosamente.', objetivoId: docRef.id });
+
+    } catch (error) {
+        console.error('Error al crear objetivo financiero del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Editar un objetivo financiero existente del cliente
+exports.editarObjetivoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        const objetivoId = req.params.id;
+        const { nombre, montoObjetivo, montoActual, fechaLimite } = req.body;
+
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!objetivoId || !nombre || !montoObjetivo) {
+            return res.status(400).json({ success: false, message: 'ID, nombre y monto objetivo son requeridos para la edición.' });
+        }
+
+        const objetivoRef = db.collection('objetivosCliente').doc(objetivoId);
+        const objetivoDoc = await objetivoRef.get();
+
+        if (!objetivoDoc.exists || objetivoDoc.data().clienteId !== clienteId) {
+            return res.status(404).json({ success: false, message: 'Objetivo no encontrado o no autorizado.' });
+        }
+
+        await objetivoRef.update({
+            nombre: nombre,
+            montoObjetivo: parseFloat(montoObjetivo),
+            montoActual: parseFloat(montoActual) || 0,
+            fechaLimite: fechaLimite || null,
+            updatedAt: new Date()
+        });
+
+        res.json({ success: true, message: 'Objetivo financiero actualizado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al editar objetivo financiero del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Eliminar un objetivo financiero del cliente
+exports.eliminarObjetivoClienteAPI = async (req, res) => {
+    try {
+        const clienteId = req.session.userId;
+        const objetivoId = req.params.id;
+
+        if (!clienteId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!objetivoId) {
+            return res.status(400).json({ success: false, message: 'ID del objetivo es requerido para la eliminación.' });
+        }
+
+        const objetivoRef = db.collection('objetivosCliente').doc(objetivoId);
+        const objetivoDoc = await objetivoRef.get();
+
+        if (!objetivoDoc.exists || objetivoDoc.data().clienteId !== clienteId) {
+            return res.status(404).json({ success: false, message: 'Objetivo no encontrado o no autorizado.' });
+        }
+
+        await objetivoRef.delete();
+
+        res.json({ success: true, message: 'Objetivo financiero eliminado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al eliminar objetivo financiero del cliente:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al eliminar el objetivo.' });
+    }
+};

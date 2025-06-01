@@ -1,0 +1,326 @@
+/* public/stylesheets/objetivos_financieros.css */
+
+/* --- Estilos Generales para el Layout de la Página --- */
+/* (Idealmente, estas irían en un archivo CSS global como base.css o main.css) */
+html, body {
+    height: 100%; /* Asegura que html y body ocupen toda la altura de la ventana */
+    margin: 0;
+    padding: 0;
+    display: flex; /* Habilita Flexbox en el body */
+    flex-direction: column; /* Organiza los elementos en columna (navbar, contenido, footer) */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistencia de fuente */
+    background-color: #f4f7f6; /* Un color de fondo suave para toda la página */
+    color: #333;
+    overflow-x: hidden; /* Evita el scroll horizontal */
+}
+
+/* El contenido principal de la página debe crecer para empujar el footer hacia abajo */
+.objetivos-financieros-container {
+    flex-grow: 1; /* Esto hace que el contenedor principal ocupe todo el espacio disponible */
+    padding: 30px 20px;
+    max-width: 1200px;
+    margin: 20px auto; /* Mantener centrado y con margen superior/inferior */
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    /* font-family y color ya están en body, pero puedes mantenerlos aquí si quieres sobreescribir */
+}
+
+/* --- Estilos para el Footer (generalmente en un archivo de estilos para el footer) --- */
+.main-footer {
+    background-color: #333;
+    color: #f2f2f2;
+    padding: 20px 0;
+    text-align: center;
+    margin-top: auto; /* Empuja el footer al final de la columna flex */
+    width: 100%; /* Asegura que el footer ocupe todo el ancho */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.main-footer .footer-content p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+
+/* --- Tu CSS existente para el contenido de Objetivos Financieros (sin cambios) --- */
+
+.objetivos-financieros-container h1 {
+    text-align: center;
+    color: #0056b3; /* Azul más oscuro */
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    font-weight: 600;
+}
+
+.objetivos-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+
+.objetivo-form-section,
+.objetivos-list-section {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    min-width: 300px;
+}
+
+.objetivo-form-section {
+    flex: 1.2;
+    max-width: 500px;
+}
+
+.objetivos-list-section {
+    flex: 2;
+    max-width: 700px;
+}
+
+.objetivo-form-section h2,
+.objetivos-list-section h2 {
+    color: #0056b3;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    text-align: center;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+/* Formulario */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"] {
+    width: calc(100% - 20px);
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.form-actions button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+    min-width: 120px;
+}
+
+#saveObjetivoBtn {
+    background-color: #007bff;
+    color: white;
+}
+
+#saveObjetivoBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#cancelEditBtn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#cancelEditBtn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+#deleteObjetivoBtn {
+    background-color: #dc3545;
+    color: white;
+}
+
+#deleteObjetivoBtn:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* Lista de Objetivos */
+.objetivos-list {
+    list-style: none;
+    padding: 0;
+}
+
+.objetivos-list li {
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.objetivos-list li:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.objetivo-info {
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.objetivo-info h3 {
+    margin-top: 0;
+    color: #007bff;
+    font-size: 1.4em;
+    margin-bottom: 8px;
+}
+
+.objetivo-info p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.95em;
+}
+
+.objetivo-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.objetivo-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.objetivo-actions .edit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.objetivo-actions .edit-btn:hover {
+    background-color: #218838;
+}
+
+.objetivo-actions .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.objetivo-actions .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Barra de progreso */
+.progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    height: 20px;
+    overflow: hidden;
+    margin-top: 10px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-align: center;
+    color: white;
+    font-size: 0.85em;
+    line-height: 20px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 20px;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.85em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .objetivos-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .objetivo-form-section,
+    .objetivos-list-section {
+        min-width: unset;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .form-actions,
+    .objetivo-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button,
+    .objetivo-actions button {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+/* Tooltip (mantener de tu home_cliente.css si no está ya) */
+#tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    display: none;
+    transform: translate(-50%, -100%);
+}

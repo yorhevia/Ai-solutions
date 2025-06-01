@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario de Eventos - Asesor</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+        <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
     <link rel="stylesheet" href="/stylesheets/style.css"> 
-    
     <link rel="stylesheet" href="/stylesheets/calendario.css"> 
-
-
 </head>
 <body>
     <%- include('../partials/asesor_navbar') %>
@@ -42,10 +41,6 @@
                     <label for="eventName">Título del Evento:</label>
                     <input type="text" id="eventName" required>
                 </div>
-                <div class="form-group">
-                    <label for="eventDate">Fecha del Evento:</label>
-                    <input type="text" id="eventDate" readonly required>
-                </div>
                 <button type="submit" id="saveEventBtn">Crear Evento</button>
                 <button type="button" id="deleteEventBtn" class="delete-btn" style="display: none;">Eliminar Evento</button>
             </form>
@@ -54,14 +49,15 @@
 
     <%- include('../partials/footer') %>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.js'></script>
+   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded. Starting FullCalendar setup...');
 
             var calendarEl = document.getElementById('calendar');
             var calendar;
+            let selectedDate = ''; // Para almacenar la fecha seleccionada al hacer clic en el calendario
 
             if (!calendarEl) {
                 console.error('ERROR: No se encontró el elemento #calendar en el DOM. El calendario no se puede renderizar.');
@@ -70,20 +66,21 @@
                 console.log('Elemento #calendar encontrado en el DOM.');
             }
 
+            // Referencias a elementos del DOM para el modal y la barra lateral
             const eventModal = document.getElementById('eventModal');
             const modalTitle = document.getElementById('modalTitle');
             const eventIdInput = document.getElementById('eventId');
-            const eventDateInput = document.getElementById('eventDate');
             const eventNameInput = document.getElementById('eventName');
             const saveEventBtn = document.getElementById('saveEventBtn');
             const deleteEventBtn = document.getElementById('deleteEventBtn');
             const eventForm = document.getElementById('eventForm');
             const eventList = document.getElementById('event-list');
 
+            // --- Funciones para el Modal ---
             function openEventModal(eventId = null, date = '', title = '') {
-                console.log('Abriendo modal para evento:', eventId, date, title);
+                console.log('Abriendo modal para evento:', eventId, 'Fecha:', date, 'Título:', title);
                 eventNameInput.value = title;
-                eventDateInput.value = date;
+                selectedDate = date; // Guarda la fecha seleccionada o del evento
                 eventIdInput.value = eventId;
 
                 if (eventId) {
@@ -102,20 +99,21 @@
                 console.log('Cerrando modal.');
                 eventModal.classList.remove('show-modal');
                 eventForm.reset();
+                selectedDate = ''; // Reinicia la fecha seleccionada
             }
 
+            // Event Listeners para cerrar el modal
             document.querySelector('.modal .close').addEventListener('click', closeEventModal);
-
             window.onclick = function(event) {
                 if (event.target === eventModal) {
                     closeEventModal();
                 }
             }
 
+            // --- Inicialización de FullCalendar ---
             console.log('Inicializando FullCalendar...');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                // Asegúrate de que 'es' esté aquí y sea correcto
                 locale: 'es', 
                 headerToolbar: {
                     left: 'prev,next today',
@@ -124,7 +122,7 @@
                 },
                 selectable: true,
                 selectMirror: true,
-                editable: true,
+                editable: true, // Permite arrastrar y soltar eventos
                 events: function(fetchInfo, successCallback, failureCallback) {
                     console.log('FullCalendar: Fetching events from API...');
                     fetch('/asesor/api/eventos')
@@ -135,12 +133,33 @@
                             return response.json();
                         })
                         .then(data => {
-                            console.log('Eventos recibidos de la API:', data);
-                            if (Array.isArray(data)) {
-                                successCallback(data);
-                                renderEventSidebar(data);
+                            console.log('Eventos recibidos de la API (para FullCalendar):', data);
+                            // Mapea los eventos para asegurar que 'start' sea un string ISO (YYYY-MM-DDTHH:mm:ssZ),
+                            // especialmente si Firestore devuelve Timestamps o solo fechas.
+                            const formattedEvents = data.map(event => {
+                                let startDate = event.start;
+                                // Si event.start es un objeto Timestamp de Firestore, conviértelo a Date y luego a ISO string.
+                                if (startDate && typeof startDate === 'object' && typeof startDate.toDate === 'function') {
+                                    startDate = startDate.toDate().toISOString();
+                                }
+                                // Si es un string YYYY-MM-DD sin hora, FullCalendar lo tratará como allDay
+                                // Si incluye hora (ej. YYYY-MM-DDTHH:mm:ssZ), lo tratará como evento con hora.
+                                return {
+                                    id: event.id,
+                                    title: event.title,
+                                    start: startDate, 
+                                    // FullCalendar asumirá `allDay: true` si 'start' es solo fecha.
+                                    // Puedes forzarlo si tienes un campo 'allDay' en tu DB.
+                                    allDay: event.allDay === true 
+                                };
+                            });
+
+                            if (Array.isArray(formattedEvents)) {
+                                successCallback(formattedEvents);
+                                // Llama a renderEventSidebar con los datos formateados después de que FullCalendar los recibe
+                                renderEventSidebar(formattedEvents); 
                             } else {
-                                console.error('La API no devolvió un array de eventos o la respuesta es inesperada:', data);
+                                console.error('La API no devolvió un array de eventos o la respuesta es inesperada:', formattedEvents);
                                 failureCallback();
                             }
                         })
@@ -150,36 +169,37 @@
                             failureCallback();
                         });
                 },
+                // Cuando se hace clic en una fecha del calendario
                 dateClick: function(info) {
                     console.log('Date clicked:', info.dateStr);
-                    openEventModal(null, info.dateStr);
+                    openEventModal(null, info.dateStr, ''); // Abre modal para crear, pasando la fecha
                 },
+                // Cuando se hace clic en un evento existente en el calendario
                 eventClick: function(info) {
                     console.log('Event clicked:', info.event.id, info.event.title);
-                    openEventModal(info.event.id, info.event.startStr, info.event.title);
+                    openEventModal(info.event.id, info.event.startStr, info.event.title); // Abre modal para editar
                 },
+                // Cuando se arrastra y suelta un evento para cambiar su fecha
                 eventDrop: function(info) {
                     console.log('Event dropped:', info.event.id, 'New date:', info.event.startStr);
                     const eventId = info.event.id;
                     const newDate = info.event.startStr;
-                    const newTitle = info.event.title;
+                    const newTitle = info.event.title; // Mantiene el título actual
 
                     fetch(`/asesor/api/eventos/${eventId}`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ title: newTitle, date: newDate })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             console.log('Evento movido exitosamente.');
-                            calendar.refetchEvents();
-                            fetchAndRenderEventSidebar();
+                            calendar.refetchEvents(); // Refresca el calendario principal
+                            fetchAndRenderEventSidebar(); // Refresca el sidebar
                         } else {
                             alert('Error al mover evento: ' + data.message);
-                            info.revert();
+                            info.revert(); // Revierte el arrastre si hay error
                         }
                     })
                     .catch(error => {
@@ -194,15 +214,19 @@
             calendar.render();
             console.log('FullCalendar render() called.');
 
-            fetchAndRenderEventSidebar();
-
+            // --- Manejo del Formulario (Crear/Editar) ---
             eventForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const eventId = eventIdInput.value;
                 const title = eventNameInput.value;
-                const date = eventDateInput.value;
+                const date = selectedDate; // Usa la fecha guardada de la selección/clic
 
                 console.log('Form submitted. Event ID:', eventId, 'Title:', title, 'Date:', date);
+
+                if (!title || !date) { 
+                    alert('Por favor, ingresa el título del evento y asegúrate de haber seleccionado una fecha.');
+                    return;
+                }
 
                 let url, method;
                 if (eventId) {
@@ -215,9 +239,7 @@
 
                 fetch(url, {
                     method: method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title, date })
                 })
                 .then(response => response.json())
@@ -225,8 +247,8 @@
                     if (data.success) {
                         console.log('Evento guardado exitosamente:', data.message);
                         closeEventModal();
-                        calendar.refetchEvents();
-                        fetchAndRenderEventSidebar();
+                        calendar.refetchEvents(); // Refresca el calendario
+                        fetchAndRenderEventSidebar(); // Refresca el sidebar
                     } else {
                         alert('Error al guardar evento: ' + data.message);
                         console.error('Error al guardar evento:', data.message);
@@ -238,20 +260,19 @@
                 });
             });
 
+            // --- Manejo del Botón Eliminar en el Modal ---
             deleteEventBtn.addEventListener('click', function() {
                 if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
                     const eventId = eventIdInput.value;
                     console.log('Attempting to delete event with ID:', eventId);
-                    fetch(`/asesor/api/eventos/${eventId}`, {
-                        method: 'DELETE'
-                    })
+                    fetch(`/asesor/api/eventos/${eventId}`, { method: 'DELETE' })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             console.log('Evento eliminado exitosamente:', data.message);
                             closeEventModal();
-                            calendar.refetchEvents();
-                            fetchAndRenderEventSidebar();
+                            calendar.refetchEvents(); // Refresca el calendario
+                            fetchAndRenderEventSidebar(); // Refresca el sidebar
                         } else {
                             alert('Error al eliminar: ' + data.message);
                             console.error('Error al eliminar evento:', data.message);
@@ -264,22 +285,62 @@
                 }
             });
 
+            // --- Función para Renderizar Eventos en la Barra Lateral ---
             function renderEventSidebar(events) {
-                console.log('Rendering sidebar events...');
-                eventList.innerHTML = '';
+                console.log('--- Debugging Sidebar Render ---');
+                console.log('Rendering sidebar events. Total events received for sidebar:', events.length);
+                eventList.innerHTML = ''; // Limpia la lista antes de añadir nuevos elementos
+
                 if (events && events.length > 0) {
                     const now = new Date();
-                    now.setHours(0, 0, 0, 0);
+                    now.setHours(0, 0, 0, 0); // Establece 'now' a la medianoche del día actual (00:00:00.000)
 
-                    const filteredEvents = events.filter(event => new Date(event.start) >= now)
-                                                 .sort((a, b) => new Date(a.start) - new Date(b.start));
+                    // Filtra eventos que sean HOY o en el FUTURO y luego ordénalos por fecha
+                    const filteredEvents = events.filter(event => {
+                        const eventDate = new Date(event.start);
+                        
+                        if (isNaN(eventDate.getTime())) {
+                            console.warn('Fecha de evento inválida detectada para el sidebar (se ignorará):', event.start, 'Evento completo:', event);
+                            return false; // Excluye eventos con fechas inválidas
+                        }
+
+                        // Normaliza la fecha del evento a medianoche para una comparación de "día completo"
+                        eventDate.setHours(0, 0, 0, 0); 
+                        
+                        // La comparación es 'mayor o igual que la medianoche de hoy'.
+                        // Esto incluye eventos de hoy (sin importar la hora) y eventos futuros.
+                        const shouldInclude = eventDate >= now;
+
+                        console.log(`Event "${event.title}" (Start: ${event.start}) - Parsed Date (Midnight): ${eventDate.toISOString()} - Is Today/Future: ${shouldInclude}`);
+                        return shouldInclude;
+                    }).sort((a, b) => new Date(a.start) - new Date(b.start)); // Ordena cronológicamente
+
+                    console.log('Filtered events for sidebar (count):', filteredEvents.length);
+                    console.log('Filtered events details (for sidebar):', filteredEvents.map(e => ({ id: e.id, title: e.title, start: e.start })));
+                    console.log('--- End Debugging Sidebar Render ---');
 
                     if (filteredEvents.length > 0) {
                         filteredEvents.forEach(event => {
                             const li = document.createElement('li');
                             const eventDate = new Date(event.start);
+                            
+                            // Ya validamos arriba, pero aquí es la última oportunidad de parar si algo salió mal
+                            if (isNaN(eventDate.getTime())) {
+                                console.error('Error al renderizar: Fecha inválida detectada inesperadamente para el evento:', event);
+                                return; 
+                            }
+
+                            // Formateo de fecha y hora para mostrar al usuario
                             const formattedDate = eventDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
-                            const formattedTime = (eventDate.getHours() === 0 && eventDate.getMinutes() === 0 && eventDate.getSeconds() === 0) ? '' : eventDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+                            
+                            // Decide si mostrar la hora: si el string original contiene 'T' o ':' (indicando hora)
+                            // Y si la hora parseada no es medianoche (para evitar mostrar 00:00 para eventos de día completo)
+                            const hasExplicitTimeComponent = event.start.includes('T') || event.start.includes(':');
+                            const isMidnightTime = eventDate.getHours() === 0 && eventDate.getMinutes() === 0 && eventDate.getSeconds() === 0 && eventDate.getMilliseconds() === 0;
+
+                            const formattedTime = (hasExplicitTimeComponent && !isMidnightTime) 
+                                                  ? eventDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) 
+                                                  : '';
 
                             li.innerHTML = `
                                 <div>
@@ -295,8 +356,12 @@
                         });
                     } else {
                         eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                        console.log('El filtro de fechas dejó el array de eventos próximos vacío.');
                     }
 
+                    // --- Adjuntar Event Listeners para Editar/Eliminar en la Sidebar ---
+                    // Es crucial re-adjuntar estos listeners cada vez que se actualiza la lista,
+                    // ya que eventList.innerHTML = '' elimina los elementos anteriores y sus listeners.
                     eventList.querySelectorAll('.edit-btn').forEach(button => {
                         button.addEventListener('click', function() {
                             const eventId = this.dataset.id;
@@ -310,15 +375,14 @@
                         button.addEventListener('click', function() {
                             if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
                                 const eventId = this.dataset.id;
-                                fetch(`/asesor/api/eventos/${eventId}`, {
-                                    method: 'DELETE'
-                                })
+                                console.log('Attempting to delete event from sidebar with ID:', eventId);
+                                fetch(`/asesor/api/eventos/${eventId}`, { method: 'DELETE' })
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
-                                        console.log('Evento eliminado desde sidebar.');
-                                        calendar.refetchEvents();
-                                        fetchAndRenderEventSidebar();
+                                        console.log('Evento eliminado desde sidebar. Refetching events.');
+                                        calendar.refetchEvents(); // Refresca el calendario principal
+                                        fetchAndRenderEventSidebar(); // Refresca el sidebar
                                     } else {
                                         alert('Error al eliminar: ' + data.message);
                                         console.error('Error al eliminar desde sidebar:', data.message);
@@ -333,12 +397,14 @@
                     });
 
                 } else {
-                    eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                    eventList.innerHTML = '<li>No hay eventos registrados.</li>'; 
+                    console.log('La API no devolvió eventos o el array inicial para el sidebar está vacío.');
                 }
             }
 
+            // --- Función para Cargar y Renderizar Eventos en la Barra Lateral (al inicio y refrescos) ---
             function fetchAndRenderEventSidebar() {
-                console.log('Fetching events for sidebar...');
+                console.log('Initiating fetch for sidebar events...');
                 fetch('/asesor/api/eventos')
                     .then(response => {
                         if (!response.ok) {
@@ -347,16 +413,35 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (Array.isArray(data)) {
-                            renderEventSidebar(data);
+                        // Mapea y formatea los eventos de la misma manera que FullCalendar
+                        const formattedEvents = data.map(event => {
+                            let startDate = event.start;
+                            if (startDate && typeof startDate === 'object' && typeof startDate.toDate === 'function') {
+                                startDate = startDate.toDate().toISOString();
+                            }
+                            return {
+                                id: event.id,
+                                title: event.title,
+                                start: startDate,
+                                allDay: event.allDay === true
+                            };
+                        });
+
+                        if (Array.isArray(formattedEvents)) {
+                            renderEventSidebar(formattedEvents);
                         } else {
-                            console.error('La API de eventos no devolvió un array para el sidebar o es inesperada:', data);
+                            console.error('La API de eventos no devolvió un array para el sidebar o es inesperada:', formattedEvents);
                         }
                     })
                     .catch(error => {
                         console.error('Error al cargar eventos para el sidebar:', error);
                     });
             }
+
+            // Llama a la función para cargar y renderizar los eventos en el sidebar cuando la página se carga
+            // (Esta llamada ya se hace dentro de `events` de FullCalendar, pero la mantenemos aquí por si acaso
+            // o para un refresh inicial separado)
+            // fetchAndRenderEventSidebar(); 
         });
     </script>
 </body>

@@ -1035,8 +1035,64 @@ router.post('/asesor/api/eventos', requireAuth, asesorController.crearEventoAPI)
 router.put('/asesor/api/eventos/:id', requireAuth, asesorController.editarEventoAPI); 
 router.delete('/asesor/api/eventos/:id', requireAuth, asesorController.eliminarEventoAPI); 
 
+router.get('/inversiones', requireAuth, async (req, res) => {
+    const news = [
+        {
+            id: 1,
+            title: 'Últimas Novedades en Inteligencia Artificial y su Impacto Financiero',
+            // URL de una imagen genérica pero relevante para IA
+            imageUrl: '/images/anuncio1.jpg', 
+            description: 'Explora cómo los avances en IA están remodelando los mercados financieros y creando nuevas oportunidades de inversión.',
+            link: 'https://www.technologyreview.com/topic/ai/'
+        },
+        {
+            id: 2,
+            title: 'Guía Completa de Inversiones en Energías Renovables para 2025',
+            // URL de una imagen genérica pero relevante para energías renovables
+            imageUrl: '/images/anuncio2.jpg', 
+            description: 'Descubre los sectores más prometedores dentro de la energía limpia y cómo puedes participar en este crecimiento sostenible.',
+            link: 'https://www.bloomberg.com/green'
+        },
+        {
+            id: 3,
+            title: 'Emprendimientos Fintech que Están Transformando el Sistema Bancario',
+            // URL de una imagen genérica pero relevante para Fintech
+            imageUrl: '/images/anuncio3.jpg', 
+            description: 'Conoce las startups que están innovando en pagos digitales, préstamos y gestión de patrimonio con soluciones tecnológicas.',
+            link: 'https://techcrunch.com/category/fintech/'
+        },
+        {
+            id: 4,
+            title: 'Innovación Biotecnológica: Oportunidades de Inversión en Salud y Ciencia',
+            // URL de una imagen genérica pero relevante para Biotecnología
+            imageUrl: '/images/anuncio4.jpg', 
+            description: 'Un vistazo a las empresas de biotecnología que están desarrollando soluciones revolucionarias y captando la atención de inversores.',
+            link: 'https://www.fiercebiotech.com/'
+        }
+    ];
+    res.render('cliente/inversiones', { news: news });
+});
 
 
+// --- Ruta para la página del Calendario del Cliente ---
+router.get('/cliente/calendario', requireAuth, clienteController.mostrarCalendarioCliente);
+
+// --- Rutas API para los Eventos del Cliente ---
+router.get('/cliente/api/eventos', requireAuth, clienteController.getEventosClienteAPI);
+router.post('/cliente/api/eventos', requireAuth, clienteController.crearEventoClienteAPI);
+router.put('/cliente/api/eventos/:id', requireAuth, clienteController.editarEventoClienteAPI);
+router.delete('/cliente/api/eventos/:id', requireAuth, clienteController.eliminarEventoClienteAPI);
+
+
+
+router.get('/objetivos-financieros', requireAuth, clienteController.mostrarObjetivosFinancieros);
+
+// Rutas API para la gestión de objetivos financieros
+router.get('/cliente/api/objetivos', requireAuth, clienteController.getObjetivosClienteAPI); 
+router.get('/cliente/api/objetivos/:id', requireAuth, clienteController.getObjetivoByIdClienteAPI); 
+router.post('/cliente/api/objetivos', requireAuth, clienteController.crearObjetivoClienteAPI); 
+router.put('/cliente/api/objetivos/:id', requireAuth, clienteController.editarObjetivoClienteAPI); 
+router.delete('/cliente/api/objetivos/:id', requireAuth, clienteController.eliminarObjetivoClienteAPI); 
 
 
 module.exports = router;
