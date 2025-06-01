@@ -1,14 +1,16 @@
 <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+
 <header class="navbar">
     <a href="/homeasesor" class="navbar-brand">AI Finance Solutions</a>
     
     <nav class="navbar-nav">
         <a href="/homeasesor" class="nav-link">Inicio</a>
         <a href="/perfilasesor" class="nav-link">Mi Perfil</a>
-        <a href="/consulta" class="nav-link">Consulta</a>
         <a href="/herramientas-analisis" class="nav-link">Herramientas de Análisis</a>
-        <a href="/chat-personal" class="nav-link">Chat Personal <i class="fas fa-comments"></i></a>
-        <div class="nav-item notifications-dropdown">
+        <a href="asesor/chat-general" class="nav-link">Chat Personal <i class="fas fa-comments"></i></a>
+        
+        <div class="nav-item notifications-dropdown"> 
             <a href="#" class="nav-link notification-bell" id="notificationBell">
                 <i class="fas fa-bell"></i>
                 <span class="badge" id="notification-count">0</span>
@@ -26,70 +28,4 @@
     </nav>
 </header>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const notificationBell = document.getElementById('notificationBell');
-        const notificationCount = document.getElementById('notification-count');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-        const latestNotificationsDiv = document.getElementById('latest-notifications');
-
-        // Función para cargar y actualizar las notificaciones
-        window.updateNotificationBell = async function() { 
-            try {
-                const response = await fetch('/api/asesor/notificaciones-resumen');
-                const data = await response.json();
-
-                if (data.success) {
-                    const count = data.unreadCount;
-                    const latest = data.latestNotifications;
-
-                    notificationCount.textContent = count;
-                    notificationCount.style.display = count > 0 ? 'block' : 'none';
-
-                    latestNotificationsDiv.innerHTML = ''; 
-
-                    if (latest.length > 0) {
-                        latest.forEach(notif => {
-                            const message = notif.message.length > 60 ? notif.message.substring(0, 57) + '...' : notif.message;
-                            const notificationDate = notif.timestamp && notif.timestamp._seconds
-                                ? new Date(notif.timestamp._seconds * 1000).toLocaleDateString()
-                                : 'Fecha no disponible';
-
-                            const item = document.createElement('a');
-                            item.href = '/asesor/notificaciones'; 
-                            item.classList.add('dropdown-item');
-                            if (!notif.read) {
-                                item.classList.add('font-weight-bold');
-                            }
-                            item.innerHTML = `<span style="font-size:0.9em; color:#666;">${notificationDate}</span><br>${message}`;
-                            latestNotificationsDiv.appendChild(item);
-                        });
-                    } else {
-                        latestNotificationsDiv.innerHTML = '<span class="dropdown-item">No hay notificaciones recientes.</span>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error al cargar notificaciones en la barra de navegación:', error);
-                notificationCount.textContent = '!'; 
-                notificationCount.style.display = 'block';
-            }
-        };
-
-        // Evento para mostrar/ocultar el dropdown
-        notificationBell.addEventListener('click', function(event) {
-            event.preventDefault(); 
-            notificationDropdown.classList.toggle('show');
-        });
-
-        // Cierra el dropdown si se hace clic fuera de él
-        window.addEventListener('click', function(event) {
-            if (!event.target.closest('.notifications-dropdown') && notificationDropdown.classList.contains('show')) {
-                notificationDropdown.classList.remove('show');
-            }
-        });
-
-        // Cargar notificaciones al cargar la página
-        window.updateNotificationBell();
-
-    });
-</script>
+<script src="/javascripts/asesor_notifications.js"></script>

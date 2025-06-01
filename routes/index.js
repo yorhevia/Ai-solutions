@@ -7,7 +7,7 @@ const moment = require('moment');
 const { v4: uuidv4 } = require('uuid');
 
 
-const requireAuth = require('../config/middleware'); // Importa el objeto completo
+const { requireAuth, requireAsesor } = require('../config/middleware'); // Importa ambos middlewares
 const isAdmin = require('../config/middlewareisadmin'); 
 
 const { admin, db, auth } = require('./firebase');
@@ -58,6 +58,7 @@ async function addNotificationToUser(userId, message, link = '#') {
         console.error('Error al añadir notificación:', error);
     }
 }
+
 
 
 //Rutas de Acceso y Autenticación Login, Registro, Logout
@@ -188,18 +189,24 @@ router.post('/registro', async (req, res) => {
     }
 });
 
-// Ruta de Logout
+
+
+// routes/index.js (o donde tengas tu ruta de logout)
+
 router.get('/logout', (req, res) => {
+    req.flash('success_msg', 'Has cerrado sesión.');
+
     req.session.destroy((err) => {
         if (err) {
             console.error('Error al destruir la sesión:', err);
-            req.flash('error_msg', 'Error al cerrar sesión.');
+     
+            req.flash('error_msg', 'Error al cerrar sesión. Intenta de nuevo.');
             return res.status(500).redirect('/login');
         }
-        req.flash('success_msg', 'Has cerrado sesión.');
-        return res.redirect('/login');
+        res.redirect('/login');
     });
 });
+
 
 
 //Rutas de Registro de Perfil Información Adicional
@@ -239,18 +246,18 @@ router.post('/registro-perfil', requireAuth, async (req, res) => {
             const asesorDataConVerificaciones = {
                 ...datosAGuardar,
                 verification: {
-                    status: 'pendiente', // Estado inicial de la verificación de identidad (KYC)
+                    status: 'No enviado', // Estado inicial de la verificación de identidad (KYC)
                     documentUrl: null,
                     notes: null
                 },
                 verificacion: { // Estructura para títulos y certificaciones
                     titulo: {
-                        estado: 'pendiente',
+                        estado: 'No enviado',
                         url: null,
                         observaciones: null
                     },
                     certificacion: {
-                        estado: 'pendiente',
+                        estado: 'No enviado',
                         url: null,
                         observaciones: null
                     }
@@ -320,6 +327,11 @@ router.get('/dashboard', requireAuth, async (req, res) => {
         return res.status(500).redirect('/login');
     }
 });
+
+// Rutas de notificaciones
+router.get('/api/asesor/notificaciones-resumen', requireAuth, requireAsesor, asesorController.getNotificationSummary); // Necesitarías crear esta función en el controlador
+router.get('/asesor/notificaciones', requireAuth, requireAsesor, asesorController.getFullNotificationsPage); // Necesitarías crear esta función en el controlador
+router.post('/asesor/notificaciones/marcar-leida', requireAuth, requireAsesor, asesorController.markNotificationAsRead); // Necesitarías crear esta función en el controlador
 
 // Rutas Home
 router.get('/homecliente', requireAuth, async (req, res) => {
@@ -956,74 +968,10 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
     }
 });
 
+router.get('/api/cliente/:id', requireAuth, clienteController.getClienteByIdAPI);
 
 // Ruta para la página de notificaciones del asesor
 // Requiere autenticación (requireAuth) Y que el usuario autenticado sea un asesor
-router.get('/asesor/notificaciones', requireAuth, async (req, res) => {
-    // Verificar que el userType en sesión sea 'asesor'.
-    if (req.session.userType !== 'asesor') {
-        req.flash('error_msg', 'Acceso denegado. Esta página es solo para asesores.');
-        return res.redirect('/dashboard');
-    }
-    const userId = req.session.userId;
-    try {
-        const asesorDoc = await db.collection('asesores').doc(userId).get();
-        if (!asesorDoc.exists) {
-            req.flash('error_msg', 'Perfil de asesor no encontrado.');
-            return res.status(404).redirect('/homeasesor');
-        }
-        const asesorData = asesorDoc.data();
-        const notifications = (asesorData.notifications || []).sort((a, b) => {
-            const timeA = (b.timestamp instanceof admin.firestore.Timestamp) ? b.timestamp.toMillis() : new Date(b.timestamp).getTime();
-            const timeB = (a.timestamp instanceof admin.firestore.Timestamp) ? a.timestamp.toMillis() : new Date(a.timestamp).getTime();
-            return timeA - timeB;
-        });
-
-        res.render('asesor/notificaciones', { notifications: notifications });
-    } catch (error) {
-        console.error('Error al cargar las notificaciones del asesor:', error);
-        req.flash('error_msg', 'Error al cargar tus notificaciones.');
-        res.redirect('/homeasesor');
-    }
-});
-
-
-router.post('/asesor/notificaciones/marcar-leida', requireAuth, async (req, res) => {
-    // Verificar que el userType en sesión sea 'asesor'.
-    if (req.session.userType !== 'asesor') {
-        return res.status(403).json({ success: false, message: 'Acceso denegado. Solo para asesores.' });
-    }
-
-    const userId = req.session.userId;
-    const { notificationId } = req.body;
-
-    if (!notificationId) {
-        return res.status(400).json({ success: false, message: 'ID de notificación no proporcionado.' });
-    }
-
-    try {
-        const asesorRef = db.collection('asesores').doc(userId);
-        const asesorDoc = await asesorRef.get();
-        if (!asesorDoc.exists) {
-            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
-        }
-
-        const notifications = asesorDoc.data().notifications || [];
-        const updatedNotifications = notifications.map(notif => {
-            if (notif.id === notificationId) {
-                return { ...notif, read: true };
-            }
-            return notif;
-        });
-
-        await asesorRef.update({ notifications: updatedNotifications });
-        res.json({ success: true, message: 'Notificación marcada como leída.' });
-
-    } catch (error) {
-        console.error('Error al marcar notificación como leída:', error);
-        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
-    }
-});
 
 // Ruta para la página general del chat del asesor (con barra lateral)
 router.get('/asesor/chat-general', requireAuth, asesorController.mostrarChatGeneralAsesor);
@@ -1078,6 +1026,17 @@ router.get('/asesor/api/clientes-chat-sidebar', requireAuth, async (req, res) =>
         res.status(500).json({ success: false, message: 'Error al actualizar clientes de la sidebar.' });
     }
 });
+router.get('/clientes-asignados', requireAuth, asesorController.mostrarClientesAsignados);
+
+router.get('/asesor/calendario', requireAuth, asesorController.mostrarCalendario);
+
+router.get('/asesor/api/eventos', requireAuth, asesorController.getEventosAPI); 
+router.post('/asesor/api/eventos', requireAuth, asesorController.crearEventoAPI); 
+router.put('/asesor/api/eventos/:id', requireAuth, asesorController.editarEventoAPI); 
+router.delete('/asesor/api/eventos/:id', requireAuth, asesorController.eliminarEventoAPI); 
+
+
+
 
 
 module.exports = router;

@@ -1,7 +1,4 @@
-// Importa las instancias de Firebase admin SDK
-const admin = require('firebase-admin');
-const db = admin.firestore();
-const auth = admin.auth();
+const { db, auth, admin } = require('../firebase');
 
 // Importa node-fetch para hacer solicitudes HTTP (necesario para la API de Firebase Auth REST y Imgur)
 const fetch = require('node-fetch');
@@ -16,6 +13,7 @@ const { v4: uuidv4 } = require('uuid');
 const { default: Stripe } = require('stripe');
 
 // Función auxiliar para añadir notificaciones.
+// --- Función auxiliar para añadir notificaciones (ahora exportada) ---
 async function addNotificationToUser(userId, message, link = '#') {
     try {
         const asesorRef = db.collection('asesores').doc(userId);
@@ -29,11 +27,146 @@ async function addNotificationToUser(userId, message, link = '#') {
         await asesorRef.update({
             notifications: admin.firestore.FieldValue.arrayUnion(notification)
         });
-        console.log(`Notificación añadida a ${userId}: ${message}`);
+        console.log(`[Notificación] Añadida a ${userId}: ${message}`);
     } catch (error) {
-        console.error('Error al añadir notificación:', error);
+        console.error('[Notificación Error] Error al añadir notificación:', error);
     }
 }
+
+// Exporta la función de notificación. Esto te permite usarla desde otros módulos:
+exports.addNotificationToUser = addNotificationToUser;
+
+// --- 1. Función para la API del Resumen de Notificaciones (para la campana) ---
+exports.getNotificationSummary = async (req, res) => {
+    const userId = req.session.userId; // Obtiene el ID del usuario de la sesión
+
+    console.log(`[API] Solicitud de resumen de notificaciones para asesor: ${userId}`);
+
+    try {
+        const asesorDoc = await db.collection('asesores').doc(userId).get();
+        if (!asesorDoc.exists) {
+            console.warn(`[API] Perfil de asesor no encontrado para ID: ${userId}.`);
+            // Si el perfil del asesor no existe, devuelve un resumen vacío pero con éxito.
+            return res.json({ success: true, unreadCount: 0, latestNotifications: [], message: 'Perfil de asesor no encontrado.' });
+        }
+
+        const asesorData = asesorDoc.data();
+        const allNotifications = asesorData.notifications || [];
+
+        let unreadCount = 0;
+        allNotifications.forEach(notif => {
+            if (!notif.read) {
+                unreadCount++;
+            }
+        });
+
+        // Ordena notificaciones de la más nueva a la más antigua
+        const sortedNotifications = allNotifications.sort((a, b) => {
+            // Maneja objetos Timestamp de Firebase: convierte a milisegundos para una clasificación fiable
+            const timeA = (a.timestamp && typeof a.timestamp === 'object' && a.timestamp._seconds !== undefined)
+                ? new Date(a.timestamp._seconds * 1000 + (a.timestamp._nanoseconds || 0) / 1000000).getTime()
+                : new Date(a.timestamp).getTime(); // Fallback si no es un Timestamp de Firestore
+            
+            const timeB = (b.timestamp && typeof b.timestamp === 'object' && b.timestamp._seconds !== undefined)
+                ? new Date(b.timestamp._seconds * 1000 + (b.timestamp._nanoseconds || 0) / 1000000).getTime()
+                : new Date(b.timestamp).getTime(); // Fallback si no es un Timestamp de Firestore
+            
+            return timeB - timeA; // Orden descendente (más nueva primero)
+        });
+
+        // Toma las últimas 5 notificaciones para el resumen en el desplegable
+        const latestNotifications = sortedNotifications.slice(0, 5);
+
+        console.log(`[API] Encontradas ${unreadCount} notificaciones no leídas. Enviando ${latestNotifications.length} más recientes.`);
+        res.json({
+            success: true,
+            unreadCount: unreadCount,
+            latestNotifications: latestNotifications
+        });
+
+    } catch (error) {
+        console.error('[API Error] Falló al obtener el resumen de notificaciones del asesor:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor al obtener notificaciones.' });
+    }
+};
+
+// --- 2. Función para la Página Completa de Notificaciones ---
+exports.getFullNotificationsPage = async (req, res) => {
+    const userId = req.session.userId;
+    console.log(`[Página] Cargando página completa de notificaciones para asesor: ${userId}`);
+    try {
+        const asesorDoc = await db.collection('asesores').doc(userId).get();
+        if (!asesorDoc.exists) {
+            req.flash('error_msg', 'Perfil de asesor no encontrado.');
+            return res.status(404).redirect('/homeasesor');
+        }
+        const asesorData = asesorDoc.data();
+        // Obtiene todas las notificaciones y las ordena de la más nueva a la más antigua.
+        // Asegúrate de que las notificaciones tengan un 'timestamp' para ordenar.
+        const notifications = (asesorData.notifications || []).sort((a, b) => {
+            const timeA = (a.timestamp && typeof a.timestamp === 'object' && a.timestamp._seconds !== undefined) ? new Date(a.timestamp._seconds * 1000 + (a.timestamp._nanoseconds || 0) / 1000000).getTime() : new Date(a.timestamp).getTime();
+            const timeB = (b.timestamp && typeof b.timestamp === 'object' && b.timestamp._seconds !== undefined) ? new Date(b.timestamp._seconds * 1000 + (b.timestamp._nanoseconds || 0) / 1000000).getTime() : new Date(b.timestamp).getTime();
+            return timeB - timeA; // Más nueva primero para la lista completa
+        });
+
+        res.render('asesor/notificaciones', {
+            notifications: notifications,
+            user: req.user, // Pasa el objeto user para consistencia en el layout
+            success_msg: req.flash('success_msg'),
+            error_msg: req.flash('error_msg')
+        });
+    } catch (error) {
+        console.error('[Página Error] Falló al cargar la página de notificaciones del asesor:', error);
+        req.flash('error_msg', 'Error al cargar tus notificaciones.');
+        res.redirect('/homeasesor');
+    }
+};
+
+// --- 3. Función para Marcar Notificación como Leída ---
+exports.markNotificationAsRead = async (req, res) => {
+    const userId = req.session.userId;
+    const { notificationId } = req.body;
+
+    console.log(`[API] Marcando notificación ${notificationId} como leída para asesor: ${userId}`);
+
+    if (!notificationId) {
+        return res.status(400).json({ success: false, message: 'ID de notificación no proporcionado.' });
+    }
+
+    try {
+        const asesorRef = db.collection('asesores').doc(userId);
+        const asesorDoc = await asesorRef.get();
+        if (!asesorDoc.exists) {
+            return res.status(404).json({ success: false, message: 'Asesor no encontrado.' });
+        }
+
+        const notifications = asesorDoc.data().notifications || [];
+        let notificationFoundAndUpdated = false;
+        const updatedNotifications = notifications.map(notif => {
+            if (notif.id === notificationId) {
+                notificationFoundAndUpdated = true;
+                return { ...notif, read: true }; // Marca como leída
+            }
+            return notif;
+        });
+
+        if (!notificationFoundAndUpdated) {
+            console.warn(`[API] Notificación ${notificationId} no encontrada para el asesor ${userId}.`);
+            return res.status(404).json({ success: false, message: 'Notificación no encontrada o ya marcada como leída.' });
+        }
+
+        // Actualiza el documento del asesor en Firestore con el array de notificaciones modificado
+        await asesorRef.update({ notifications: updatedNotifications });
+        console.log(`[API] Notificación ${notificationId} marcada como leída exitosamente.`);
+        res.json({ success: true, message: 'Notificación marcada como leída.' });
+
+    } catch (error) {
+        console.error('[API Error] Falló al marcar notificación como leída:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+
 
 
 // Muestra el perfil del asesor
@@ -1084,3 +1217,196 @@ exports.asesorSendMessage = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error al enviar mensaje.', details: error.message });
     }
 };
+
+// Función para mostrar la lista de clientes asignados al asesor
+exports.mostrarClientesAsignados = async (req, res) => {
+    try {
+        const asesorUid = req.session.userId;
+
+        if (!asesorUid) {
+            req.flash('error_msg', 'No has iniciado sesión.');
+            return res.redirect('/login');
+        }
+
+        const asesorDoc = await db.collection('asesores').doc(asesorUid).get();
+
+        if (!asesorDoc.exists) {
+            req.flash('error_msg', 'Perfil de asesor no encontrado.');
+            return res.redirect('/dashboard');
+        }
+
+        const asesorData = asesorDoc.data();
+        const clientesAsignadosIds = asesorData.clientesAsignados || [];
+
+        const clientesPromises = clientesAsignadosIds.map(clienteId => {
+            return db.collection('clientes').doc(clienteId).get().then(clienteDoc => {
+                if (clienteDoc.exists) {
+                    const clienteData = clienteDoc.data();
+                    return {
+                        id: clienteDoc.id,
+                        nombre: clienteData.nombre || 'N/A',
+                        apellido: clienteData.apellido || 'N/A',
+                        fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png', // ¡AÑADIDO ESTO!
+                        email: clienteData.email || 'N/A', // Opcional: si quieres el email en la lista
+                        telefono: clienteData.telefono || 'N/A' // Opcional: si quieres el teléfono en la lista
+                        // Puedes añadir más campos aquí si los necesitas en el objeto 'cliente'
+                        // antes de pasarlo a la vista EJS para la lista.
+                    };
+                }
+                return null;
+            });
+        });
+
+        const clientes = await Promise.all(clientesPromises);
+        const clientesFiltrados = clientes.filter(cliente => cliente !== null); // Filtrar clientes no encontrados
+
+        // console.log('Datos de clientes enviados a la vista:', clientesFiltrados); // Línea para depuración
+
+        res.render('asesor/clientes_asignados', { clientes: clientesFiltrados });
+    } catch (error) {
+        console.error('Error al cargar la lista de clientes asignados:', error);
+        req.flash('error_msg', 'Error al cargar la lista de clientes asignados.');
+        return res.redirect('/dashboard');
+    }
+};
+
+// Ruta para mostrar la vista del calendario
+exports.mostrarCalendario = async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            req.flash('error_msg', 'No has iniciado sesión.');
+            return res.redirect('/login');
+        }
+        res.render('asesor/calendario'); // Renderiza la vista del calendario
+    } catch (error) {
+        console.error('Error al cargar la vista del calendario:', error);
+        req.flash('error_msg', 'Error al cargar la vista del calendario.');
+        res.redirect('/dashboard'); // O a la página de inicio del asesor
+    }
+};
+
+// API: Obtener todos los eventos para el asesor logueado
+exports.getEventosAPI = async (req, res) => {
+    try {
+        const asesorId = req.session.userId;
+        if (!asesorId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const eventosSnapshot = await db.collection('eventosCalendario')
+                                        .where('asesorId', '==', asesorId)
+                                        .get();
+
+        const eventos = [];
+        eventosSnapshot.forEach(doc => {
+            const data = doc.data();
+            eventos.push({
+                id: doc.id, // ID del documento para edición/eliminación
+                title: data.title,
+                start: data.start, // Formato 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:mm:ss'
+                end: data.end || data.start // Si no hay end, el evento es de un solo día
+            });
+        });
+        res.json(eventos); // FullCalendar espera un array de objetos de evento
+    } catch (error) {
+        console.error('Error al obtener eventos del calendario:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Crear un nuevo evento
+exports.crearEventoAPI = async (req, res) => {
+    try {
+        const asesorId = req.session.userId;
+        if (!asesorId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+
+        const { title, date } = req.body; // 'date' será la fecha seleccionada del calendario
+
+        if (!title || !date) {
+            return res.status(400).json({ success: false, message: 'Título y fecha del evento son requeridos.' });
+        }
+
+        const nuevoEvento = {
+            asesorId: asesorId,
+            title: title,
+            start: date, // Guardamos la fecha del evento
+            createdAt: new Date()
+        };
+
+        const docRef = await db.collection('eventosCalendario').add(nuevoEvento);
+        res.status(201).json({ success: true, message: 'Evento creado exitosamente.', eventId: docRef.id });
+
+    } catch (error) {
+        console.error('Error al crear evento del calendario:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Editar un evento existente
+exports.editarEventoAPI = async (req, res) => {
+    try {
+        const asesorId = req.session.userId;
+        const eventoId = req.params.id; // ID del evento a editar
+        const { title, date } = req.body; // Puedes enviar la fecha si también se puede editar
+
+        if (!asesorId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!eventoId || !title || !date) {
+            return res.status(400).json({ success: false, message: 'ID, título y fecha del evento son requeridos.' });
+        }
+
+        const eventoRef = db.collection('eventosCalendario').doc(eventoId);
+        const eventoDoc = await eventoRef.get();
+
+        if (!eventoDoc.exists || eventoDoc.data().asesorId !== asesorId) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado o no autorizado.' });
+        }
+
+        await eventoRef.update({
+            title: title,
+            start: date, // Actualizamos la fecha del evento
+            updatedAt: new Date()
+        });
+
+        res.json({ success: true, message: 'Evento actualizado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al editar evento del calendario:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+// API: Eliminar un evento
+exports.eliminarEventoAPI = async (req, res) => {
+    try {
+        const asesorId = req.session.userId;
+        const eventoId = req.params.id; // ID del evento a eliminar
+
+        if (!asesorId) {
+            return res.status(401).json({ success: false, message: 'No autenticado.' });
+        }
+        if (!eventoId) {
+            return res.status(400).json({ success: false, message: 'ID del evento es requerido.' });
+        }
+
+        const eventoRef = db.collection('eventosCalendario').doc(eventoId);
+        const eventoDoc = await eventoRef.get();
+
+        if (!eventoDoc.exists || eventoDoc.data().asesorId !== asesorId) {
+            return res.status(404).json({ success: false, message: 'Evento no encontrado o no autorizado.' });
+        }
+
+        await eventoRef.delete();
+        res.json({ success: true, message: 'Evento eliminado exitosamente.' });
+
+    } catch (error) {
+        console.error('Error al eliminar evento del calendario:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+
+

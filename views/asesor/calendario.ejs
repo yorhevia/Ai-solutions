@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Eventos - Asesor</title>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+    
+    <link rel="stylesheet" href="/stylesheets/style.css"> 
+    
+    <link rel="stylesheet" href="/stylesheets/calendario.css"> 
+
+
+</head>
+<body>
+    <%- include('../partials/asesor_navbar') %>
+
+    <div class="calendario-page-container">
+        <main>
+            <h1>Mi Calendario de Eventos</h1>
+
+            <div class="calendario-content">
+                <div id="calendar"></div>
+
+                <div class="sidebar">
+                    <h2>Próximos Eventos</h2>
+                    <ul id="event-list" class="event-list">
+                        <li>Cargando eventos...</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Agregar Nuevo Evento</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <div class="form-group">
+                    <label for="eventName">Título del Evento:</label>
+                    <input type="text" id="eventName" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Fecha del Evento:</label>
+                    <input type="text" id="eventDate" readonly required>
+                </div>
+                <button type="submit" id="saveEventBtn">Crear Evento</button>
+                <button type="button" id="deleteEventBtn" class="delete-btn" style="display: none;">Eliminar Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded. Starting FullCalendar setup...');
+
+            var calendarEl = document.getElementById('calendar');
+            var calendar;
+
+            if (!calendarEl) {
+                console.error('ERROR: No se encontró el elemento #calendar en el DOM. El calendario no se puede renderizar.');
+                return;
+            } else {
+                console.log('Elemento #calendar encontrado en el DOM.');
+            }
+
+            const eventModal = document.getElementById('eventModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const eventIdInput = document.getElementById('eventId');
+            const eventDateInput = document.getElementById('eventDate');
+            const eventNameInput = document.getElementById('eventName');
+            const saveEventBtn = document.getElementById('saveEventBtn');
+            const deleteEventBtn = document.getElementById('deleteEventBtn');
+            const eventForm = document.getElementById('eventForm');
+            const eventList = document.getElementById('event-list');
+
+            function openEventModal(eventId = null, date = '', title = '') {
+                console.log('Abriendo modal para evento:', eventId, date, title);
+                eventNameInput.value = title;
+                eventDateInput.value = date;
+                eventIdInput.value = eventId;
+
+                if (eventId) {
+                    modalTitle.innerText = 'Editar Evento';
+                    saveEventBtn.innerText = 'Guardar Cambios';
+                    deleteEventBtn.style.display = 'inline-block';
+                } else {
+                    modalTitle.innerText = 'Agregar Nuevo Evento';
+                    saveEventBtn.innerText = 'Crear Evento';
+                    deleteEventBtn.style.display = 'none';
+                }
+                eventModal.classList.add('show-modal');
+            }
+
+            function closeEventModal() {
+                console.log('Cerrando modal.');
+                eventModal.classList.remove('show-modal');
+                eventForm.reset();
+            }
+
+            document.querySelector('.modal .close').addEventListener('click', closeEventModal);
+
+            window.onclick = function(event) {
+                if (event.target === eventModal) {
+                    closeEventModal();
+                }
+            }
+
+            console.log('Inicializando FullCalendar...');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                // Asegúrate de que 'es' esté aquí y sea correcto
+                locale: 'es', 
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                selectable: true,
+                selectMirror: true,
+                editable: true,
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    console.log('FullCalendar: Fetching events from API...');
+                    fetch('/asesor/api/eventos')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Eventos recibidos de la API:', data);
+                            if (Array.isArray(data)) {
+                                successCallback(data);
+                                renderEventSidebar(data);
+                            } else {
+                                console.error('La API no devolvió un array de eventos o la respuesta es inesperada:', data);
+                                failureCallback();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar eventos del calendario (API):', error);
+                            alert('Error al cargar eventos: ' + error.message);
+                            failureCallback();
+                        });
+                },
+                dateClick: function(info) {
+                    console.log('Date clicked:', info.dateStr);
+                    openEventModal(null, info.dateStr);
+                },
+                eventClick: function(info) {
+                    console.log('Event clicked:', info.event.id, info.event.title);
+                    openEventModal(info.event.id, info.event.startStr, info.event.title);
+                },
+                eventDrop: function(info) {
+                    console.log('Event dropped:', info.event.id, 'New date:', info.event.startStr);
+                    const eventId = info.event.id;
+                    const newDate = info.event.startStr;
+                    const newTitle = info.event.title;
+
+                    fetch(`/asesor/api/eventos/${eventId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title: newTitle, date: newDate })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Evento movido exitosamente.');
+                            calendar.refetchEvents();
+                            fetchAndRenderEventSidebar();
+                        } else {
+                            alert('Error al mover evento: ' + data.message);
+                            info.revert();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error de red al mover evento:', error);
+                        alert('Error de red al mover evento.');
+                        info.revert();
+                    });
+                }
+            });
+
+            console.log('FullCalendar object created. Attempting to render...');
+            calendar.render();
+            console.log('FullCalendar render() called.');
+
+            fetchAndRenderEventSidebar();
+
+            eventForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const eventId = eventIdInput.value;
+                const title = eventNameInput.value;
+                const date = eventDateInput.value;
+
+                console.log('Form submitted. Event ID:', eventId, 'Title:', title, 'Date:', date);
+
+                let url, method;
+                if (eventId) {
+                    url = `/asesor/api/eventos/${eventId}`;
+                    method = 'PUT';
+                } else {
+                    url = '/asesor/api/eventos';
+                    method = 'POST';
+                }
+
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, date })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Evento guardado exitosamente:', data.message);
+                        closeEventModal();
+                        calendar.refetchEvents();
+                        fetchAndRenderEventSidebar();
+                    } else {
+                        alert('Error al guardar evento: ' + data.message);
+                        console.error('Error al guardar evento:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error de red al guardar evento:', error);
+                    alert('Error de red al guardar evento.');
+                });
+            });
+
+            deleteEventBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+                    const eventId = eventIdInput.value;
+                    console.log('Attempting to delete event with ID:', eventId);
+                    fetch(`/asesor/api/eventos/${eventId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Evento eliminado exitosamente:', data.message);
+                            closeEventModal();
+                            calendar.refetchEvents();
+                            fetchAndRenderEventSidebar();
+                        } else {
+                            alert('Error al eliminar: ' + data.message);
+                            console.error('Error al eliminar evento:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error de red al eliminar evento:', error);
+                        alert('Error de red al eliminar evento.');
+                    });
+                }
+            });
+
+            function renderEventSidebar(events) {
+                console.log('Rendering sidebar events...');
+                eventList.innerHTML = '';
+                if (events && events.length > 0) {
+                    const now = new Date();
+                    now.setHours(0, 0, 0, 0);
+
+                    const filteredEvents = events.filter(event => new Date(event.start) >= now)
+                                                 .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+                    if (filteredEvents.length > 0) {
+                        filteredEvents.forEach(event => {
+                            const li = document.createElement('li');
+                            const eventDate = new Date(event.start);
+                            const formattedDate = eventDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
+                            const formattedTime = (eventDate.getHours() === 0 && eventDate.getMinutes() === 0 && eventDate.getSeconds() === 0) ? '' : eventDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+
+                            li.innerHTML = `
+                                <div>
+                                    <strong>${event.title}</strong><br>
+                                    <small>${formattedDate} ${formattedTime ? '- ' + formattedTime : ''}</small>
+                                </div>
+                                <div class="event-actions">
+                                    <button class="edit-btn" data-id="${event.id}" data-title="${event.title}" data-date="${event.start}">Editar</button>
+                                    <button class="delete-btn" data-id="${event.id}">Eliminar</button>
+                                </div>
+                            `;
+                            eventList.appendChild(li);
+                        });
+                    } else {
+                        eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                    }
+
+                    eventList.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const eventId = this.dataset.id;
+                            const eventTitle = this.dataset.title;
+                            const eventDate = this.dataset.date;
+                            openEventModal(eventId, eventDate, eventTitle);
+                        });
+                    });
+
+                    eventList.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+                                const eventId = this.dataset.id;
+                                fetch(`/asesor/api/eventos/${eventId}`, {
+                                    method: 'DELETE'
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        console.log('Evento eliminado desde sidebar.');
+                                        calendar.refetchEvents();
+                                        fetchAndRenderEventSidebar();
+                                    } else {
+                                        alert('Error al eliminar: ' + data.message);
+                                        console.error('Error al eliminar desde sidebar:', data.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error de red al eliminar evento desde sidebar:', error);
+                                    alert('Error de red al eliminar evento.');
+                                });
+                            }
+                        });
+                    });
+
+                } else {
+                    eventList.innerHTML = '<li>No hay eventos próximos.</li>';
+                }
+            }
+
+            function fetchAndRenderEventSidebar() {
+                console.log('Fetching events for sidebar...');
+                fetch('/asesor/api/eventos')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            renderEventSidebar(data);
+                        } else {
+                            console.error('La API de eventos no devolvió un array para el sidebar o es inesperada:', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar eventos para el sidebar:', error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

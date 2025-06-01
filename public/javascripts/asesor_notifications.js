@@ -1,80 +1,28 @@
+// public/javascript/asesor_notifications.js
+
 document.addEventListener('DOMContentLoaded', function() {
-    const notificationIconContainer = document.querySelector('.notification-icon-container');
-    const notificationLink = document.querySelector('.notification-link');
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationCountSpan = document.getElementById('notification-count');
     const notificationDropdown = document.getElementById('notificationDropdown');
-    const notificationCountSpan = document.getElementById('notificationCount');
-    const notificationList = document.getElementById('notificationList');
+    const notificationList = document.getElementById('latest-notifications'); // Este ID es el contenedor de las notificaciones recientes
 
-    let timeout; // Para el temporizador de ocultar el dropdown
+    // ... (Tu función formatRelativeTime - está bien) ...
+    function formatRelativeTime(date) {
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
 
-    // Función para obtener y mostrar las notificaciones
-    async function fetchNotifications() {
-        try {
-            const response = await fetch('/api/asesor/notificaciones-resumen');
-            const data = await response.json();
-
-            if (data.success) {
-                // Actualizar contador
-                if (data.unreadCount > 0) {
-                    notificationCountSpan.textContent = data.unreadCount;
-                    notificationCountSpan.style.display = 'block'; // Mostrar el contador
-                } else {
-                    notificationCountSpan.style.display = 'none'; // Ocultar si no hay no leídas
-                }
-
-                // Llenar el dropdown
-                notificationList.innerHTML = ''; // Limpiar lista existente
-                if (data.latestNotifications.length > 0) {
-                    data.latestNotifications.forEach(notif => {
-                        const listItem = document.createElement('li');
-                        listItem.classList.add('notification-item');
-                        if (!notif.read) {
-                            listItem.classList.add('unread'); // Clase para notificaciones no leídas
-                        }
-                        listItem.dataset.id = notif.id; // Guardar el ID de la notificación
-
-                        const messageLink = document.createElement('a');
-                        messageLink.href = notif.link || '/asesor/notificaciones'; // Enlace a la notificación (o a la página de notificaciones)
-                        messageLink.textContent = notif.message;
-                        
-                        const timestampSpan = document.createElement('span');
-                        timestampSpan.classList.add('notification-timestamp');
-                        // Formatear el timestamp si es un objeto Timestamp de Firebase
-                        if (notif.timestamp && typeof notif.timestamp === 'object' && notif.timestamp._seconds) {
-                            const date = new Date(notif.timestamp._seconds * 1000 + notif.timestamp._nanoseconds / 1000000);
-                            timestampSpan.textContent = formatRelativeTime(date); // Usar una función de formato legible
-                        } else {
-                            timestampSpan.textContent = 'Fecha desconocida';
-                        }
-                        
-                        listItem.appendChild(messageLink);
-                        listItem.appendChild(timestampSpan);
-
-                        // Marcar como leída al hacer clic en la notificación en el dropdown
-                        listItem.addEventListener('click', async function() {
-                            if (!notif.read) {
-                                await markNotificationAsRead(notif.id);
-                                // Actualizar la UI inmediatamente
-                                listItem.classList.remove('unread');
-                                fetchNotifications(); // Volver a cargar para actualizar el contador
-                            }
-                            notificationDropdown.classList.remove('show');
-                        });
-
-                        notificationList.appendChild(listItem);
-                    });
-                } else {
-                    notificationList.innerHTML = '<li>No hay notificaciones.</li>';
-                }
-            } else {
-                console.error('Error al obtener notificaciones:', data.message);
-            }
-        } catch (error) {
-            console.error('Error de red al obtener notificaciones:', error);
-        }
+        if (seconds < 60) return `hace ${seconds} segundos`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `hace ${minutes} minutos`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `hace ${hours} horas`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `hace ${days} días`;
+        
+        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    // Función para marcar una notificación como leída
+    // ... (Tu función markNotificationAsRead - está bien) ...
     async function markNotificationAsRead(notificationId) {
         try {
             const response = await fetch('/asesor/notificaciones/marcar-leida', {
@@ -88,62 +36,135 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!data.success) {
                 console.error('Error al marcar notificación como leída:', data.message);
             }
+            return data.success; // Devuelve si fue exitoso
         } catch (error) {
             console.error('Error de red al marcar notificación como leída:', error);
+            return false;
         }
     }
 
-    // Función para formatear el tiempo de forma relativa (hace X minutos/horas/días)
-    function formatRelativeTime(date) {
-        const now = new Date();
-        const seconds = Math.floor((now - date) / 1000);
+    // Función para obtener y mostrar las notificaciones
+    async function fetchNotifications() {
+        if (!notificationCountSpan || !notificationList) {
+            console.warn('Elementos de notificación (contador o lista) no encontrados en el DOM. Revisa los IDs.');
+            return; // Salir si no se encuentran los elementos
+        }
 
-        if (seconds < 60) return `hace ${seconds} segundos`;
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `hace ${minutes} minutos`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `hace ${hours} horas`;
-        const days = Math.floor(hours / 24);
-        if (days < 7) return `hace ${days} días`;
-        
-        // Si es más de una semana, mostrar la fecha completa
-        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        try {
+            const response = await fetch('/api/asesor/notificaciones-resumen');
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Error ${response.status}: ${errorData.message || 'Error desconocido'}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                const count = data.unreadCount;
+                const latest = data.latestNotifications;
+
+                notificationCountSpan.textContent = count;
+                // Bootstrap oculta el badge si está vacío, o puedes usar display: none/block
+                notificationCountSpan.style.display = count > 0 ? 'inline-block' : 'none'; // 'inline-block' es más común para badges
+
+                notificationList.innerHTML = ''; // Limpiar lista existente
+
+                if (latest.length > 0) {
+                    latest.forEach(notif => {
+                        const listItem = document.createElement('a');
+                        listItem.href = notif.link || '/asesor/notificaciones'; 
+                        listItem.classList.add('dropdown-item');
+                        if (!notif.read) {
+                            listItem.classList.add('font-weight-bold');
+                        }
+                        listItem.dataset.id = notif.id; 
+
+                        let displayMessage = notif.message;
+                        if (displayMessage.length > 60) {
+                            displayMessage = displayMessage.substring(0, 57) + '...';
+                        }
+                        
+                        const notificationDate = (notif.timestamp && notif.timestamp._seconds !== undefined) 
+                            ? formatRelativeTime(new Date(notif.timestamp._seconds * 1000 + (notif.timestamp._nanoseconds || 0) / 1000000)) 
+                            : 'Fecha desconocida';
+
+                        listItem.innerHTML = `
+                            <span style="font-size:0.9em; color:#666;">${notificationDate}</span><br>
+                            ${displayMessage}
+                        `;
+                        
+                        listItem.addEventListener('click', async function(event) {
+                            // Solo prevenimos la navegación si la notificación no ha sido leída y queremos marcarla
+                            if (!notif.read) {
+                                event.preventDefault(); 
+                                const marked = await markNotificationAsRead(notif.id);
+                                if (marked) {
+                                    // Actualizar la UI localmente para que se vea como leída
+                                    this.classList.remove('font-weight-bold');
+                                    // Y luego, redirigir
+                                    window.location.href = this.href;
+                                    // También puedes volver a cargar las notificaciones para actualizar el contador
+                                    // fetchNotifications(); 
+                                } else {
+                                    // Si hubo un error al marcar, aún puedes optar por navegar
+                                    window.location.href = this.href;
+                                }
+                            } else {
+                                // Si ya está leída, simplemente navega
+                                // No se necesita event.preventDefault() aquí
+                            }
+                            notificationDropdown.classList.remove('show'); // Ocultar el dropdown al hacer clic
+                        });
+
+                        notificationList.appendChild(listItem);
+                    });
+                } else {
+                    notificationList.innerHTML = '<span class="dropdown-item text-center text-muted">No hay notificaciones recientes.</span>';
+                }
+            } else {
+                console.error('Error al obtener notificaciones:', data.message);
+            }
+        } catch (error) {
+            console.error('Error de red o API al obtener notificaciones:', error);
+            // Mostrar un indicador de error en el contador si hay un problema
+            if (notificationCountSpan) {
+                notificationCountSpan.textContent = '!'; 
+                notificationCountSpan.style.display = 'inline-block';
+            }
+            if (notificationList) {
+                notificationList.innerHTML = '<span class="dropdown-item text-center text-danger">Error al cargar notificaciones.</span>';
+            }
+        }
     }
 
-    // Mostrar/ocultar el dropdown al hacer clic en la campana
-    notificationLink.addEventListener('click', function(event) {
-        event.preventDefault();
-        notificationDropdown.classList.toggle('show');
-        if (notificationDropdown.classList.contains('show')) {
-            clearTimeout(timeout); // Limpiar cualquier temporizador si ya está visible
-        }
-    });
+    // Validar que los elementos existen antes de añadir listeners
+    if (notificationBell && notificationDropdown) {
+        // Mostrar/ocultar el dropdown al hacer clic en la campana
+        notificationBell.addEventListener('click', function(event) {
+            event.preventDefault(); // Previene el comportamiento por defecto del enlace
+            event.stopPropagation(); // Evita que el clic se propague al 'window' listener y lo cierre de inmediato
 
-    // Ocultar el dropdown cuando el mouse se mueve fuera del contenedor de la campana y del dropdown
-    notificationIconContainer.addEventListener('mouseleave', function() {
-        timeout = setTimeout(() => {
-            notificationDropdown.classList.remove('show');
-        }, 300); // Pequeño retraso para permitir movimiento entre campana y dropdown
-    });
+            notificationDropdown.classList.toggle('show');
+            if (notificationDropdown.classList.contains('show')) {
+                fetchNotifications(); // Cargar notificaciones cuando se abre el dropdown
+            }
+        });
 
-    notificationDropdown.addEventListener('mouseenter', function() {
-        clearTimeout(timeout); // Si el mouse entra al dropdown, cancelar el temporizador
-    });
+        // Ocultar el dropdown si se hace clic fuera de él
+        window.addEventListener('click', function(event) {
+            // Asegúrate de que el clic no fue dentro del dropdown ni en la campana
+            if (!notificationDropdown.contains(event.target) && !notificationBell.contains(event.target) && notificationDropdown.classList.contains('show')) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
 
-    notificationDropdown.addEventListener('mouseleave', function() {
-        timeout = setTimeout(() => {
-            notificationDropdown.classList.remove('show');
-        }, 300);
-    });
+        // Cargar notificaciones al cargar la página inicialmente
+        fetchNotifications();
 
-    // Ocultar el dropdown si se hace clic fuera de él
-    window.addEventListener('click', function(event) {
-        if (!notificationIconContainer.contains(event.target) && !notificationDropdown.contains(event.target)) {
-            notificationDropdown.classList.remove('show');
-        }
-    });
-
-    // Cargar notificaciones al inicio
-    fetchNotifications();
-
+        // Opcional: Recargar notificaciones periódicamente (ej. cada 5 minutos)
+        // setInterval(fetchNotifications, 5 * 60 * 1000); 
+    } else {
+        console.warn('Elementos de notificación (notificationBell o notificationDropdown) no encontrados en el DOM. Revisa tus IDs HTML.');
+    }
 });

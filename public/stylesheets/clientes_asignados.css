@@ -1,0 +1,146 @@
+/* Estilos generales de la lista */
+.clientes-list {
+    list-style-type: none;
+    padding: 0;
+    display: flex; /* Añadido para que la lista interna use flexbox */
+    flex-direction: column; /* Apila los elementos de la lista verticalmente */
+    gap: 15px; /* Espacio entre cada cliente en la lista */
+}
+
+.clientes-list li {
+    display: flex; /* Convierte cada elemento de la lista en un contenedor flex */
+    flex-direction: column; /* Apila los elementos internos (imagen y nombre) verticalmente */
+    align-items: center; /* Centra horizontalmente la imagen y el nombre */
+    margin: 10px 0;
+    padding: 10px; /* Añade un poco de relleno para separación visual */
+    border: 1px solid #eee; /* Borde suave para cada cliente */
+    border-radius: 8px; /* Bordes redondeados */
+    background-color: #f9f9f9; /* Fondo ligero para cada cliente */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra suave */
+    transition: transform 0.2s ease-in-out; /* Transición para el hover */
+}
+
+.clientes-list li:hover {
+    transform: translateY(-3px); /* Efecto de elevación al pasar el mouse */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra más pronunciada al pasar el mouse */
+}
+
+/* Estilos de la imagen de perfil dentro de la lista */
+.clientes-list li img {
+    width: 60px; /* Tamaño un poco más grande para que se aprecie mejor */
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover; /* Asegura que la imagen no se distorsione */
+    margin-bottom: 8px; /* Espacio entre la foto y el nombre */
+    border: 2px solid #007bff; /* Borde alrededor de la foto para destacarla */
+    cursor: pointer;
+}
+
+/* Estilos del nombre del cliente dentro de la lista */
+.clientes-list li span {
+    font-weight: bold; /* Nombre en negrita */
+    color: #333; /* Color de texto más oscuro */
+    text-align: center; /* Centra el texto del nombre */
+    cursor: pointer;
+    font-size: 1.1em; /* Un poco más grande que el tamaño de fuente por defecto */
+}
+
+
+/* Estilos del modal (sin cambios significativos, solo para mantener completo el código) */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 30px; /* Aumentado el padding para mejor espaciado */
+    border: 1px solid #888;
+    width: 90%; /* Ajustado para que sea un poco más grande en móviles */
+    max-width: 500px; /* Máximo ancho en pantallas grandes */
+    border-radius: 10px; /* Bordes redondeados para el modal */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra más pronunciada para el modal */
+    text-align: center; /* Centrar el contenido del modal */
+}
+
+/* Estilos dentro del modal para la foto y los detalles */
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+.modal-content img#modalClientPhoto {
+    width: 120px; /* Tamaño de la foto de perfil en el modal */
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px; /* Espacio debajo de la foto */
+    border: 3px solid #007bff; /* Borde más prominente */
+}
+
+.modal-content #modalClientMoreDetails p {
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: #555;
+    text-align: left; /* Alinea el texto de los detalles a la izquierda */
+    padding: 0 15px; /* Pequeño padding lateral */
+}
+
+.modal-content #modalClientMoreDetails strong {
+    color: #333;
+}
+
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 32px; /* Un poco más grande */
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1; /* Ajusta la altura de línea para que quede bien posicionado */
+    margin-top: -10px; /* Ajuste para que se vea mejor */
+    margin-right: -10px;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* Media Queries para responsividad (opcional pero recomendado) */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        margin: 10% auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .clientes-list li img {
+        width: 50px;
+        height: 50px;
+    }
+    .clientes-list li span {
+        font-size: 1em;
+    }
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+    .modal-content img#modalClientPhoto {
+        width: 90px;
+        height: 90px;
+    }
+}

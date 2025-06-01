@@ -443,7 +443,7 @@
                     showMessage(uploadMessage, 'Subiendo foto...', true, 99999);
                     profilePictureErrorMessage.style.display = 'none';
 
-                    const response = await fetch('/cliente/upload-profile-photo', {
+                    const response = await fetch('/upload-profile-photo', {
                         method: 'POST',
                         body: formData
                     });

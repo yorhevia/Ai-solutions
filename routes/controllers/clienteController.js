@@ -66,6 +66,48 @@ exports.mostrarPerfilCliente = async (req, res) => {
     }
 };
 
+// En tu clienteController.js
+exports.getClienteByIdAPI = async (req, res) => {
+    const clienteId = req.params.id;
+
+    try {
+        const clienteDoc = await db.collection('clientes').doc(clienteId).get();
+        if (!clienteDoc.exists) {
+            console.warn(`[API - getClienteByIdAPI] Cliente con ID ${clienteId} no encontrado.`);
+            return res.status(404).json({ success: false, message: 'Cliente no encontrado.' });
+        }
+
+        const clienteData = clienteDoc.data();
+        
+        // Creamos un objeto con todos los campos relevantes del cliente
+        // y proporcionamos valores predeterminados para evitar 'undefined'
+        const responseData = {
+            success: true,
+            id: clienteDoc.id,
+            nombre: clienteData.nombre || 'N/A',
+            apellido: clienteData.apellido || 'N/A',
+            email: clienteData.email || 'N/A',
+            telefono: clienteData.telefono || 'N/A',
+            direccion: clienteData.direccion || 'N/A', // Añadido
+            fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png', // Añadido (con fallback)
+            ahorros: clienteData.ahorros || '0', // Añadido (asegúrate de que sea string o number)
+            ingresos: clienteData.ingresos || '0', // Añadido (asegúrate de que sea string o number)
+            objetivo_principal: clienteData.objetivo_principal || 'N/A', // Añadido
+            perfil_riesgo: clienteData.perfil_riesgo || 'N/A', // Añadido
+            fechaRegistro: clienteData.fechaRegistro || null // Añadido (Firestore Timestamp)
+            // Quitamos 'especialidad' y 'descripcion' ya que son campos de Asesor.
+        };
+
+        console.log(`[API - getClienteByIdAPI] Detalles del cliente ${clienteId} enviados.`);
+        res.json(responseData);
+
+    } catch (error) {
+        console.error('Error al obtener datos del cliente en la API:', error);
+        res.status(500).json({ success: false, message: 'Error interno del servidor.' });
+    }
+};
+
+
 // --- Función para editar la información personal del cliente (POST) ---
 exports.editarInfoPersonalCliente = async (req, res) => {
     try {
@@ -162,6 +204,7 @@ exports.editarInfoFinancieraCliente = async (req, res) => {
 };
 
 // --- Función para subir la foto de perfil del cliente (POST) ---
+// --- Función para subir la foto de perfil del cliente (POST) ---
 exports.uploadProfilePhotoCliente = async (req, res) => {
     try {
         const clienteUid = req.session.userId;
@@ -182,27 +225,34 @@ exports.uploadProfilePhotoCliente = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Error de configuración del servicio de imágenes.' });
         }
 
-        const response = await fetch('https://api.imgur.com/3/image', {
+        const imageBase64 = req.file.buffer.toString('base64');
+
+        const imgurResponse = await fetch('https://api.imgur.com/3/image', {
             method: 'POST',
             headers: {
                 'Authorization': `Client-ID ${imgurClientId}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                image: req.file.buffer.toString('base64'),
+                image: imageBase64,
                 type: 'base64'
             })
         });
 
-        const imgurResponse = await response.json();
+        const imgurData = await imgurResponse.json();
 
-        if (!imgurResponse.success) {
-            console.error('Error al subir a Imgur:', imgurResponse.data.error || 'Error desconocido.');
-            req.flash('error_msg', `Error al subir la foto a Imgur: ${imgurResponse.data.error || 'Error desconocido.'}`);
-            return res.status(500).json({ success: false, message: `Error al subir la foto a Imgur: ${imgurResponse.data.error || 'Error desconocido.'}` });
+        if (!imgurResponse.ok || imgurData.status !== 200 || !imgurData.success) {
+            console.error('Error al subir a Imgur:', imgurData);
+            const errorMessage = imgurData.data && imgurData.data.error
+                ? imgurData.data.error
+                : 'Error desconocido al subir la imagen a Imgur.';
+            return res.status(imgurResponse.status || 500).json({
+                success: false,
+                message: errorMessage
+            });
         }
 
-        const imageUrl = imgurResponse.data.link;
+        const imageUrl = imgurData.data.link;
 
         // Actualizar la URL de la foto de perfil en Firestore
         await db.collection('clientes').doc(clienteUid).update({
@@ -210,7 +260,7 @@ exports.uploadProfilePhotoCliente = async (req, res) => {
         });
 
         // Opcional: Actualizar la foto de perfil en Firebase Authentication
-        await auth.updateUser(clienteUid, {
+        await auth.updateUser (clienteUid, {
             photoURL: imageUrl
         });
 
@@ -223,6 +273,8 @@ exports.uploadProfilePhotoCliente = async (req, res) => {
         res.status(500).json({ success: false, message: 'Error interno del servidor al subir la foto de perfil.' });
     }
 };
+
+
 
 
 // --- Función para renderizar el formulario de cambio de contraseña del cliente (GET) ---
