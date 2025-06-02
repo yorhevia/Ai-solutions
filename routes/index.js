@@ -191,7 +191,6 @@ router.post('/registro', async (req, res) => {
 
 
 
-// routes/index.js (o donde tengas tu ruta de logout)
 
 router.get('/logout', (req, res) => {
     req.flash('success_msg', 'Has cerrado sesión.');
@@ -311,7 +310,6 @@ router.get('/dashboard', requireAuth, async (req, res) => {
             if (!clienteDoc.exists && !asesorDoc.exists) {
                 return res.render('ingreso/seleccionar_tipo_usuario');
             } else {
-                // Esto debería ser manejado por la lógica anterior, pero como fallback
                 console.warn(`Usuario ${userId} con userType 'unregistered' pero con perfil existente.`);
                 if (clienteDoc.exists) { req.session.userType = 'client'; return res.redirect('/homecliente'); }
                 if (asesorDoc.exists) { req.session.userType = 'asesor'; return res.redirect('/homeasesor'); }
@@ -714,9 +712,7 @@ router.get('/chat_personal', requireAuth, async (req, res) => {
 });
 
 
-// --- RUTA CLAVE AÑADIDA/MODIFICADA PARA EL CONTACTO CON ASESORES (CLIENTE) ---
-// Ahora esta ruta mostrará el dashboard de asesores disponibles
-// Ruta para el contacto con asesores (CLIENTE)
+
 router.get('/contacto-asesor', requireAuth, async (req, res) => {
     if (req.session.userType !== 'client') {
         req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
@@ -747,7 +743,7 @@ router.get('/contacto-asesor', requireAuth, async (req, res) => {
         res.redirect('/homecliente');
     }
 });
-// Nueva ruta API para obtener un solo asesor por ID (para el modal)
+
 router.get('/api/asesor/:id', requireAuth, async (req, res) => {
     // Esta ruta puede ser accedida tanto por clientes como por asesores
     // para ver detalles de otros asesores si es necesario.
@@ -828,9 +824,9 @@ router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
 
         // Asignar el asesor al cliente
         await clienteRef.update({
-            // --- ¡CORRECCIÓN AQUÍ! ---
+
             asesorAsignado: asesorId // Guarda solo la ID del asesor como una cadena de texto
-            // --- FIN DE LA CORRECCIÓN ---
+        
         });
 
         // Actualizar el documento del asesor para añadir este cliente a su lista de clientes asignados
@@ -845,7 +841,7 @@ router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
         await addNotificationToUser(asesorId, notificationMessage, `/asesor/clientes/${clienteId}/perfil`);
 
 
-        // EL CAMBIO PRINCIPAL: AHORA REDIRIGE A '/chat-personal'
+     
         return res.json({
             success: true,
             message: 'Asesor asignado correctamente. Redirigiendo al chat...',
@@ -861,16 +857,13 @@ router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
         });
     }
 });
-// --- FIN DE LA RUTA CLAVE ---
+
 
 
 
 
 router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req, res) => {
-    // Aquí solo se usa isAdminMiddleware, lo que asume que ese middleware se encarga de verificar el rol de 'admin'.
-    // Si tu lógica de admin se basa en el email (como en tu configuración de `ADMIN_EMAILS`), asegúrate de que `isAdminMiddleware`
-    // realice esa comprobación o que la línea `const adminEmails = process.env.ADMIN_EMAILS...` al inicio de `dashboard`
-    // se replique también aquí, o que `isAdminMiddleware` la use.
+
     try {
         const asesoresRef = db.collection('asesores');
         const asesoresPendientes = [];
@@ -897,8 +890,7 @@ router.get('/admin/verificaciones_pendientes', requireAuth, isAdmin, async (req,
     }
 });
 
-// Ruta para procesar la aprobación o rechazo de documentos (solo para admin)
-// Aplica la misma lógica de middlewares que la ruta anterior.
+
 router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res) => {
     const { asesorId, type, action } = req.body;
 

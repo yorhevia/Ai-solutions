@@ -1071,7 +1071,7 @@ exports.mostrarChatGeneralAsesor = async (req, res) => {
 
         if (clientesParaSidebar.length > 0) {
             const firstClientId = clientesParaSidebar[0].id;
-            initialChatCliente = clientesDataMap.get(firstClientId); // Obtén los datos completos del primer cliente
+            initialChatCliente = clientesDataMap.get(firstClientId); 
 
             const roomId = getChatRoomId(asesorUid, firstClientId);
             const chatDoc = await db.collection('chats').doc(roomId).get();
@@ -1088,14 +1088,13 @@ exports.mostrarChatGeneralAsesor = async (req, res) => {
         }
 
         res.render('asesor/chat_general_asesor', {
-            // --- ¡AQUÍ ESTÁ LA MODIFICACIÓN CLAVE! ---
+       
             asesor: {
                 id: asesorUid, // Aseguramos que 'id' contenga el UID del asesor
                 nombre: asesorData.nombre,
-                // Puedes añadir otras propiedades de asesorData aquí si las necesitas en el EJS
-                // ejemplo: fotoPerfilUrl: asesorData.fotoPerfilUrl
+              
             },
-            // ------------------------------------------
+           
             clientesParaSidebar: clientesParaSidebar,
             initialChatCliente: initialChatCliente ? {
                 id: initialChatCliente.id,
@@ -1104,7 +1103,7 @@ exports.mostrarChatGeneralAsesor = async (req, res) => {
                 fotoPerfilUrl: initialChatCliente.fotoPerfilUrl || '/images/default-profile.png',
             } : null,
             initialChatMessages: initialChatMessages,
-            user: req.user, // O req.user.nombre si solo necesitas el nombre para la navbar
+            user: req.user, 
             success_msg: req.flash('success_msg'),
             error_msg: req.flash('error_msg'),
             info_msg: req.flash('info_msg')
@@ -1117,7 +1116,7 @@ exports.mostrarChatGeneralAsesor = async (req, res) => {
     }
 };
 
-// NUEVO: API para obtener mensajes de un chat específico (para peticiones AJAX/fetch)
+// API para obtener mensajes de un chat específico (para peticiones AJAX/fetch)
 exports.getClienteChatMessages = async (req, res) => {
     try {
         const asesorUid = req.session.userId;
@@ -1127,11 +1126,6 @@ exports.getClienteChatMessages = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Datos incompletos.' });
         }
 
-        // Opcional: Verificar si el cliente está asignado a este asesor
-        // const asesorDoc = await db.collection('asesores').doc(asesorUid).get();
-        // if (!asesorDoc.exists || !(asesorDoc.data().clientesAsignados || []).includes(clienteId)) {
-        //     return res.status(403).json({ success: false, message: 'Acceso denegado a este chat.' });
-        // }
 
         const roomId = getChatRoomId(asesorUid, clienteId);
         const chatDoc = await db.collection('chats').doc(roomId).get();
@@ -1157,12 +1151,11 @@ exports.getClienteChatMessages = async (req, res) => {
     }
 };
 
-// NUEVO: API para enviar un mensaje desde el asesor (para peticiones AJAX/fetch)
+// API para enviar un mensaje desde el asesor (para peticiones AJAX/fetch)
 // API para enviar un mensaje desde el asesor (para peticiones AJAX/fetch)
 exports.asesorSendMessage = async (req, res) => {
     try {
         const asesorUid = req.session.userId;
-        // ¡CAMBIO CLAVE AQUÍ! Ahora también esperamos 'timestamp' del frontend
         const { clienteId, messageText, timestamp } = req.body; 
 
         if (!asesorUid || !clienteId || !messageText || !timestamp) { // Validar timestamp
@@ -1180,7 +1173,7 @@ exports.asesorSendMessage = async (req, res) => {
             senderId: asesorUid,
             senderType: 'asesor',
             text: messageText,
-            timestamp: messageTimestamp // ¡Usamos el timestamp del frontend!
+            timestamp: messageTimestamp 
         };
 
         if (!chatDoc.exists) {
@@ -1189,7 +1182,7 @@ exports.asesorSendMessage = async (req, res) => {
                 asesorId: asesorUid,
                 messages: [newMessage],
                 lastMessageText: messageText,
-                lastMessageTimestamp: messageTimestamp, // También para el lastMessageTimestamp
+                lastMessageTimestamp: messageTimestamp, 
                 clientUnreadCount: 1,
                 asesorUnreadCount: 0
             });
@@ -1197,7 +1190,7 @@ exports.asesorSendMessage = async (req, res) => {
             await chatRef.update({
                 messages: admin.firestore.FieldValue.arrayUnion(newMessage),
                 lastMessageText: messageText,
-                lastMessageTimestamp: messageTimestamp, // También para el lastMessageTimestamp
+                lastMessageTimestamp: messageTimestamp,
                 clientUnreadCount: admin.firestore.FieldValue.increment(1)
             });
         }
@@ -1207,7 +1200,6 @@ exports.asesorSendMessage = async (req, res) => {
             message: 'Mensaje enviado.',
             sentMessage: {
                 ...newMessage,
-                // Aseguramos que el timestamp se envía como ISO string
                 timestamp: newMessage.timestamp.toISOString() 
             }
         });
@@ -1246,11 +1238,10 @@ exports.mostrarClientesAsignados = async (req, res) => {
                         id: clienteDoc.id,
                         nombre: clienteData.nombre || 'N/A',
                         apellido: clienteData.apellido || 'N/A',
-                        fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png', // ¡AÑADIDO ESTO!
-                        email: clienteData.email || 'N/A', // Opcional: si quieres el email en la lista
-                        telefono: clienteData.telefono || 'N/A' // Opcional: si quieres el teléfono en la lista
-                        // Puedes añadir más campos aquí si los necesitas en el objeto 'cliente'
-                        // antes de pasarlo a la vista EJS para la lista.
+                        fotoPerfilUrl: clienteData.fotoPerfilUrl || '/images/default-profile.png', 
+                        email: clienteData.email || 'N/A',
+                        telefono: clienteData.telefono || 'N/A' 
+                    
                     };
                 }
                 return null;
@@ -1281,7 +1272,7 @@ exports.mostrarCalendario = async (req, res) => {
     } catch (error) {
         console.error('Error al cargar la vista del calendario:', error);
         req.flash('error_msg', 'Error al cargar la vista del calendario.');
-        res.redirect('/dashboard'); // O a la página de inicio del asesor
+        res.redirect('/dashboard'); 
     }
 };
 
@@ -1307,7 +1298,7 @@ exports.getEventosAPI = async (req, res) => {
                 end: data.end || data.start // Si no hay end, el evento es de un solo día
             });
         });
-        res.json(eventos); // FullCalendar espera un array de objetos de evento
+        res.json(eventos); 
     } catch (error) {
         console.error('Error al obtener eventos del calendario:', error);
         res.status(500).json({ success: false, message: 'Error interno del servidor.' });
@@ -1349,7 +1340,7 @@ exports.editarEventoAPI = async (req, res) => {
     try {
         const asesorId = req.session.userId;
         const eventoId = req.params.id; // ID del evento a editar
-        const { title, date } = req.body; // Puedes enviar la fecha si también se puede editar
+        const { title, date } = req.body; 
 
         if (!asesorId) {
             return res.status(401).json({ success: false, message: 'No autenticado.' });
