@@ -30,7 +30,7 @@ exports.mostrarPerfilCliente = async (req, res) => {
                     perfil_riesgo: 'No definido',
                     objetivo_principal: 'No definido',
                     fechaRegistro: null,
-                    fotoPerfilUrl: 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=Perfil',
+                    fotoPerfilUrl: 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=%EF%A3%BF',
                     asesorAsignado: ''
                 },
                 success_msg: req.flash('success_msg'), // Pasa mensajes flash
@@ -40,6 +40,26 @@ exports.mostrarPerfilCliente = async (req, res) => {
         }
 
         const clienteData = clienteDoc.data();
+        let nombreCompletoAsesor = 'No asignado'; // Cambiamos el nombre de la variable para ser más específico
+
+        // **MODIFICACIÓN CLAVE EN EL BACKEND**
+        if (clienteData.asesorAsignado) {
+            const asesorDoc = await db.collection('asesores').doc(clienteData.asesorAsignado).get();
+            if (asesorDoc.exists) {
+                const asesorData = asesorDoc.data();
+                const nombreAsesor = asesorData.nombre || asesorData.displayName || '';
+                const apellidoAsesor = asesorData.apellido || ''; // Asume que tienes un campo 'apellido'
+
+                // Combina el nombre y el apellido
+                nombreCompletoAsesor = `${nombreAsesor} ${apellidoAsesor}`.trim();
+                // Si solo hay nombre pero no apellido, o viceversa, solo muestra lo que haya.
+                if (nombreCompletoAsesor === '') {
+                    nombreCompletoAsesor = 'Nombre no disponible';
+                }
+            } else {
+                 console.warn(`Asesor con ID ${clienteData.asesorAsignado} no encontrado en la colección 'asesores'.`);
+            }
+        }
 
         // Manejo de la fecha de registro (Firestore Timestamp a ISO String)
         if (clienteData.fechaRegistro) {
@@ -57,7 +77,8 @@ exports.mostrarPerfilCliente = async (req, res) => {
             cliente: clienteData,
             user: req.user,
             success_msg: req.flash('success_msg'), // Pasa mensajes flash
-            error_msg: req.flash('error_msg') // Pasa mensajes flash
+            error_msg: req.flash('error_msg'), // Pasa mensajes flash
+            nombreAsesor: nombreCompletoAsesor // ¡Ahora pasamos el nombre COMPLETO!
         });
     } catch (error) {
         console.error('Error al obtener el perfil del cliente desde Firestore:', error);
