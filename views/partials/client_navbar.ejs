@@ -56,9 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para alternar el menú móvil
     const toggleMobileMenu = () => {
         mainNav.classList.toggle('show-mobile-menu');
-        // Opcional: podrías cambiar el ícono de la hamburguesa a una 'x' si lo deseas
-        // hamburgerMenu.querySelector('i').classList.toggle('fa-bars');
-        // hamburgerMenu.querySelector('i').classList.toggle('fa-times');
+      
     };
 
     // Event listener para el botón de hamburguesa
@@ -81,9 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si el tamaño de la ventana es mayor a 768px (volviendo a desktop)
         if (window.matchMedia("(min-width: 769px)").matches) {
             mainNav.classList.remove('show-mobile-menu'); // Asegura que el menú esté oculto
-            // Asegúrate de que el ícono de hamburguesa esté en su estado original si lo cambiaste
-            // hamburgerMenu.querySelector('i').classList.remove('fa-times');
-            // hamburgerMenu.querySelector('i').classList.add('fa-bars');
+        
         }
     });
 });

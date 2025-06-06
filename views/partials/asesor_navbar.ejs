@@ -250,9 +250,7 @@
 
         // --- Listener global para cerrar menús al hacer clic fuera ---
         document.addEventListener('click', function(event) {
-            // Este listener de cierre global solo es relevante para el menú de hamburguesa
-            // y el dropdown de notificaciones en desktop.
-            // En responsive, la campana redirige, por lo que no hay dropdown de notificaciones que cerrar.
+      
             if (window.innerWidth >= 768) { // Solo aplica esta lógica en desktop
                 const isClickOutsideHamburgerMenu = !openMenuButton.contains(event.target) && !navbarNav.contains(event.target);
                 const isClickOutsideNotificationDropdown = !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target);
@@ -270,11 +268,7 @@
 
         // Opcional: Si la ventana cambia de tamaño entre responsive y desktop, recargar la lógica
         window.addEventListener('resize', () => {
-            // Podrías añadir lógica aquí para limpiar o re-inicializar dependiendo del tamaño
-            // Por ejemplo, si se abre en móvil y luego se hace grande, el dropdown de notificaciones no se mostrará.
-            // Una recarga de página simple (location.reload()) sería la forma más fácil,
-            // pero quizás no la más elegante. Para este caso, con la lógica condicional, no es estrictamente necesario,
-            // pero si la experiencia lo requiere, podrías forzar el cierre de menus o recargar.
+        
         });
     });
 </script>

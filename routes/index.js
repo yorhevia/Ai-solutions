@@ -844,7 +844,6 @@ router.get('/cliente/api/chat/:asesorId', requireAuth, clienteController.getClie
 router.post('/cliente/api/send-message', requireAuth,clienteController.clienteSendMessage);
 
 // Ruta para asignar un asesor a un cliente
-// Ruta para asignar un asesor a un cliente
 router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
     // Verificación manual de tipo de usuario
     if (req.session.userType !== 'client') {
@@ -895,7 +894,7 @@ router.post('/cliente/asignar-asesor', requireAuth, async (req, res) => {
         // Añadir notificación al asesor
         const clienteData = clienteDoc.data();
         const notificationMessage = `¡Tienes un nuevo cliente! ${clienteData.nombre} ${clienteData.apellido} te ha seleccionado como su asesor.`;
-        // Asegúrate de que addNotificationToUser esté correctamente definida y accesible.
+        // Asegura de que addNotificationToUser esté correctamente definida y accesible.
         await addNotificationToUser(asesorId, notificationMessage, `/asesor/clientes/${clienteId}/perfil`);
 
 
@@ -1020,8 +1019,6 @@ router.post('/admin/verificar-documento', requireAuth, isAdmin, async (req, res)
 
 router.get('/api/cliente/:id', requireAuth, clienteController.getClienteByIdAPI);
 
-// Ruta para la página de notificaciones del asesor
-// Requiere autenticación (requireAuth) Y que el usuario autenticado sea un asesor
 
 // Ruta para la página general del chat del asesor (con barra lateral)
 router.get('/asesor/chat-general', requireAuth, asesorController.mostrarChatGeneralAsesor);
