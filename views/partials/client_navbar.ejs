@@ -5,8 +5,12 @@
             <h2>Panel de Cliente</h2>
         </a>
     </div>
-    <nav class="main-nav">
-        <ul>
+
+    <button class="hamburger-menu" aria-label="Abrir menú">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="main-nav" id="mainNav"> <ul>
             <li>
                 <a href="/homecliente" class="nav-link">
                     <i class="fas fa-home"></i> Inicio
@@ -22,19 +26,14 @@
                     <i class="fas fa-calendar-alt"></i> Calendario 
                 </a>
             </li>
-           
             <li>
                 <a href="/inversiones" class="nav-link">
                     <i class="fas fa-lightbulb"></i> Inversiones
                 </a>
             </li>
-            <li>
-                <a href="/contacto-asesor" class="nav-link">
-                    <i class="fas fa-comments"></i> Contactar Asesor
-                </a>
-            </li>
         </ul>
     </nav>
+
     <div class="header-right">
         <a href="/perfilcliente" class="profile-logo-link">
             <div class="profile-logo-container">
@@ -46,3 +45,47 @@
         </button>
     </div>
 </header>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerMenu = document.querySelector('.hamburger-menu');
+    const mainNav = document.getElementById('mainNav'); // El menú principal
+    const allNavLinks = mainNav.querySelectorAll('.nav-link'); // Todos los enlaces del menú
+
+    // Función para alternar el menú móvil
+    const toggleMobileMenu = () => {
+        mainNav.classList.toggle('show-mobile-menu');
+        // Opcional: podrías cambiar el ícono de la hamburguesa a una 'x' si lo deseas
+        // hamburgerMenu.querySelector('i').classList.toggle('fa-bars');
+        // hamburgerMenu.querySelector('i').classList.toggle('fa-times');
+    };
+
+    // Event listener para el botón de hamburguesa
+    if (hamburgerMenu) {
+        hamburgerMenu.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Cerrar el menú si se hace clic en un enlace (en móvil)
+    allNavLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            // Solo cerrar si el menú móvil está abierto
+            if (mainNav.classList.contains('show-mobile-menu')) {
+                toggleMobileMenu(); // Cierra el menú
+            }
+        });
+    });
+
+    // Cierra el menú si se redimensiona la ventana de móvil a desktop
+    window.addEventListener('resize', () => {
+        // Si el tamaño de la ventana es mayor a 768px (volviendo a desktop)
+        if (window.matchMedia("(min-width: 769px)").matches) {
+            mainNav.classList.remove('show-mobile-menu'); // Asegura que el menú esté oculto
+            // Asegúrate de que el ícono de hamburguesa esté en su estado original si lo cambiaste
+            // hamburgerMenu.querySelector('i').classList.remove('fa-times');
+            // hamburgerMenu.querySelector('i').classList.add('fa-bars');
+        }
+    });
+});
+
+</script>

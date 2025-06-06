@@ -4,7 +4,11 @@
 <header class="navbar">
     <a href="/homeasesor" class="navbar-brand">AI Finance Solutions</a>
     
-    <nav class="navbar-nav">
+    <button class="hamburger-button" id="openMenuButton">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="navbar-nav" id="navbarNav">
         <a href="/homeasesor" class="nav-link">Inicio</a>
         <a href="/perfilasesor" class="nav-link">Mi Perfil</a>
         <a href="/herramientas-analisis" class="nav-link">Herramientas de Análisis</a>
@@ -28,4 +32,249 @@
     </nav>
 </header>
 
-<script src="/javascripts/asesor_notifications.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const openMenuButton = document.getElementById('openMenuButton');
+        const navbarNav = document.getElementById('navbarNav');
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationCountSpan = document.getElementById('notification-count');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationList = document.getElementById('latest-notifications');
+
+        // --- Funciones auxiliares para Notificaciones ---
+        function formatRelativeTime(date) {
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return `hace ${seconds} segundos`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `hace ${minutes} minutos`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `hace ${hours} horas`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `hace ${days} días`;
+            
+            return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        async function markNotificationAsRead(notificationId) {
+            try {
+                const response = await fetch('/asesor/notificaciones/marcar-leida', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notificationId: notificationId })
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('Error al marcar notificación como leída:', data.message);
+                }
+                return data.success;
+            } catch (error) {
+                console.error('Error de red al marcar notificación como leída:', error);
+                return false;
+            }
+        }
+
+        async function fetchNotifications() {
+            if (!notificationCountSpan || !notificationList) {
+                console.warn('Elementos de notificación (contador o lista) no encontrados en el DOM. Revisa los IDs.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/asesor/notificaciones-resumen');
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Error ${response.status}: ${errorData.message || 'Error desconocido'}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const count = data.unreadCount;
+                    const latest = data.latestNotifications;
+
+                    notificationCountSpan.textContent = count;
+                    notificationCountSpan.style.display = count > 0 ? 'inline-block' : 'none';
+
+                    // Solo limpiar y rellenar la lista si NO estamos en responsive
+                    if (window.innerWidth >= 768) {
+                        notificationList.innerHTML = ''; 
+
+                        if (latest.length > 0) {
+                            latest.forEach(notif => {
+                                const listItem = document.createElement('a');
+                                listItem.href = notif.link || '/asesor/notificaciones'; 
+                                listItem.classList.add('dropdown-item');
+                                if (!notif.read) {
+                                    listItem.classList.add('font-weight-bold');
+                                }
+                                listItem.dataset.id = notif.id; 
+
+                                let displayMessage = notif.message;
+                                if (displayMessage.length > 60) {
+                                    displayMessage = displayMessage.substring(0, 57) + '...';
+                                }
+                                
+                                const notificationDate = (notif.timestamp && notif.timestamp._seconds !== undefined) 
+                                    ? formatRelativeTime(new Date(notif.timestamp._seconds * 1000 + (notif.timestamp._nanoseconds || 0) / 1000000)) 
+                                    : 'Fecha desconocida';
+
+                                listItem.innerHTML = `
+                                    <span style="font-size:0.9em; color:#666;">${notificationDate}</span><br>
+                                    ${displayMessage}
+                                `;
+                                
+                                listItem.addEventListener('click', async function(event) {
+                                    if (!notif.read) {
+                                        event.preventDefault(); 
+                                        const marked = await markNotificationAsRead(notif.id);
+                                        if (marked) {
+                                            this.classList.remove('font-weight-bold');
+                                            window.location.href = this.href;
+                                        } else {
+                                            window.location.href = this.href;
+                                        }
+                                    }
+                                    // Solo ocultar el dropdown si estamos en desktop
+                                    if (window.innerWidth >= 768) {
+                                        notificationDropdown.classList.remove('show');
+                                    }
+                                });
+
+                                notificationList.appendChild(listItem);
+                            });
+                        } else {
+                            notificationList.innerHTML = '<span class="dropdown-item text-center text-muted">No hay notificaciones recientes.</span>';
+                        }
+                    } // Fin del if para responsive
+                } else {
+                    console.error('Error al obtener notificaciones:', data.message);
+                }
+            } catch (error) {
+                console.error('Error de red o API al obtener notificaciones:', error);
+                if (notificationCountSpan) {
+                    notificationCountSpan.textContent = '!'; 
+                    notificationCountSpan.style.display = 'inline-block';
+                }
+                if (notificationList && window.innerWidth >= 768) { // Solo mostrar este mensaje en desktop
+                    notificationList.innerHTML = '<span class="dropdown-item text-center text-danger">Error al cargar notificaciones.</span>';
+                }
+            }
+        }
+
+        // --- Función para cerrar AMBOS menús si están abiertos ---
+        function closeAllMenus() {
+            if (navbarNav.classList.contains('show')) {
+                navbarNav.classList.remove('show');
+                const icon = openMenuButton.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            }
+            if (notificationDropdown.classList.contains('show')) {
+                notificationDropdown.classList.remove('show');
+            }
+        }
+
+        // --- Lógica del menú de Hamburguesa ---
+        if (openMenuButton && navbarNav) {
+            openMenuButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+
+                // Cierra el dropdown de notificaciones si está abierto (siempre aplica)
+                if (notificationDropdown.classList.contains('show')) {
+                    notificationDropdown.classList.remove('show');
+                }
+
+                navbarNav.classList.toggle('show');
+                const icon = openMenuButton.querySelector('i');
+                if (navbarNav.classList.contains('show')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
+
+            navbarNav.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+
+        // --- Lógica del dropdown de Notificaciones (¡Modificada para Responsive!) ---
+        if (notificationBell && notificationDropdown) {
+            notificationBell.addEventListener('click', function(event) {
+                event.preventDefault(); // Previene el comportamiento de enlace por defecto
+                event.stopPropagation(); // Detener la propagación
+
+                // Cierra el menú principal si está abierto (siempre aplica)
+                if (navbarNav.classList.contains('show')) {
+                    navbarNav.classList.remove('show');
+                    const icon = openMenuButton.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                }
+
+                // Lógica condicional:
+                if (window.innerWidth < 768) { // Si estamos en modo responsive
+                    window.location.href = '/asesor/notificaciones'; // Redirige directamente
+                } else { // Si estamos en desktop
+                    notificationDropdown.classList.toggle('show'); // Abre/cierra el dropdown
+                    if (notificationDropdown.classList.contains('show')) {
+                        fetchNotifications(); // Carga las notificaciones cuando se abre (solo en desktop)
+                    }
+                }
+            });
+
+            // Solo agrega el listener para evitar cierre si estamos en desktop y el dropdown está activo
+            // En responsive, no necesitamos que los clics dentro del dropdown impidan el cierre global
+            // porque no estamos mostrando el dropdown en responsive.
+            if (window.innerWidth >= 768) {
+                notificationDropdown.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                });
+            }
+
+            // Cargar notificaciones al cargar la página inicialmente (el contador siempre se carga)
+            // Y la lista solo si es desktop.
+            fetchNotifications(); 
+        }
+
+        // --- Listener global para cerrar menús al hacer clic fuera ---
+        document.addEventListener('click', function(event) {
+            // Este listener de cierre global solo es relevante para el menú de hamburguesa
+            // y el dropdown de notificaciones en desktop.
+            // En responsive, la campana redirige, por lo que no hay dropdown de notificaciones que cerrar.
+            if (window.innerWidth >= 768) { // Solo aplica esta lógica en desktop
+                const isClickOutsideHamburgerMenu = !openMenuButton.contains(event.target) && !navbarNav.contains(event.target);
+                const isClickOutsideNotificationDropdown = !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target);
+
+                if (isClickOutsideHamburgerMenu && isClickOutsideNotificationDropdown) {
+                    closeAllMenus();
+                }
+            } else { // En responsive, solo necesitamos cerrar el menú de hamburguesa si está abierto
+                const isClickOutsideHamburgerMenu = !openMenuButton.contains(event.target) && !navbarNav.contains(event.target);
+                if (isClickOutsideHamburgerMenu && navbarNav.classList.contains('show')) {
+                    closeAllMenus(); // closeAllMenus() ya maneja el cierre del navbarNav
+                }
+            }
+        });
+
+        // Opcional: Si la ventana cambia de tamaño entre responsive y desktop, recargar la lógica
+        window.addEventListener('resize', () => {
+            // Podrías añadir lógica aquí para limpiar o re-inicializar dependiendo del tamaño
+            // Por ejemplo, si se abre en móvil y luego se hace grande, el dropdown de notificaciones no se mostrará.
+            // Una recarga de página simple (location.reload()) sería la forma más fácil,
+            // pero quizás no la más elegante. Para este caso, con la lógica condicional, no es estrictamente necesario,
+            // pero si la experiencia lo requiere, podrías forzar el cierre de menus o recargar.
+        });
+    });
+</script>

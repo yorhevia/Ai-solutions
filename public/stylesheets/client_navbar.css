@@ -2,7 +2,7 @@
 .main-header {
     background-color: #007bff; /* Fondo azul de la imagen */
     color: white;
-    padding: 15px 20px; /* <--- Este es el padding que debe evitar que se pegue */
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between; /* Espacia el título, nav y botones */
     align-items: center;
@@ -12,24 +12,40 @@
     top: 0;
     z-index: 1000; /* Asegura que esté por encima de otros elementos */
     width: 100%; /* Asegura que ocupe todo el ancho */
-    box-sizing: border-box; /* <--- ¡Aseguramos que el padding se incluya en el ancho! */
+    box-sizing: border-box;
 }
 
 /* Estilos del lado izquierdo (Título) */
 .header-left {
-    flex-shrink: 0; /* No se encoge */
+    flex-shrink: 0;
 }
 
 .header-left .header-title-link {
     text-decoration: none;
-    color: inherit;
+    color: white;
 }
 
 .main-header h2 {
     margin: 0;
-    font-size: 1.8em; /* Tamaño del título "Panel de Cliente" */
-    font-weight: 700; /* Más negrita como en la imagen */
-    white-space: nowrap; /* Evita que el texto se rompa */
+    font-size: 1.8em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Hamburguesa: Oculta por defecto en desktop */
+.hamburger-menu {
+    display: none; /* Oculto en vista de escritorio */
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8em;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s ease;
+}
+
+.hamburger-menu:hover {
+    transform: scale(1.1);
 }
 
 /* Estilos de la navegación principal (enlaces con iconos) */
@@ -38,6 +54,7 @@
     display: flex;
     justify-content: center; /* Centra los enlaces horizontalmente */
     margin: 0 20px; /* Margen a los lados para no pegarse al título/botones */
+    transition: all 0.3s ease-in-out; /* transicion para mostrar/ocultar */
 }
 
 .main-nav ul {
@@ -45,13 +62,13 @@
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: wrap; /* Para que los enlaces se envuelvan si hay poco espacio */
-    justify-content: center; /* Centra los enlaces en la barra de navegación */
-    gap: 20px; /* Espacio entre los elementos de la lista */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
 }
 
 .main-nav li {
-    margin: 0; /* Resetea el margen individual, ahora lo controla el 'gap' del ul */
+    margin: 0;
 }
 
 .main-nav .nav-link {
@@ -61,14 +78,14 @@
     padding: 8px 12px;
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    display: flex; /* Para alinear el icono y el texto */
-    align-items: center; /* Centra verticalmente icono y texto */
-    gap: 8px; /* Espacio entre el icono y el texto */
-    white-space: nowrap; /* Evita que los enlaces se rompan en varias líneas */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
 .main-nav .nav-link i {
-    font-size: 1.1em; /* Ajusta el tamaño del icono */
+    font-size: 1.1em;
 }
 
 .main-nav .nav-link:hover,
@@ -83,6 +100,7 @@
     align-items: center;
     gap: 15px; /* Espacio entre el icono de perfil y el botón */
     flex-shrink: 0; /* No se encoge */
+    /* position: relative;  Ya no es necesario para notificaciones */
 }
 
 .profile-logo-link {
@@ -91,7 +109,7 @@
 }
 
 .profile-logo-container {
-    width: 45px; /* Tamaño del círculo de perfil */
+    width: 45px;
     height: 45px;
     border-radius: 50%;
     background-color: white;
@@ -108,15 +126,15 @@
 }
 
 .profile-logo {
-    font-size: 26px; /* Tamaño del icono de perfil */
-    color: #007bff; /* Color del icono de perfil */
+    font-size: 26px;
+    color: #007bff;
 }
 
 .logout-button-header {
-    background-color: #dc3545; /* Rojo vivo como en la imagen */
+    background-color: #dc3545;
     color: white;
     border: none;
-    padding: 10px 18px; /* Más padding para que se vea más grande */
+    padding: 10px 18px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
@@ -125,8 +143,8 @@
     gap: 8px;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    font-weight: 600; /* Más negrita */
-    white-space: nowrap; /* Evita que el texto se rompa */
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .logout-button-header:hover {
@@ -135,12 +153,17 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* --- SE ELIMINAN TODOS LOS ESTILOS RELACIONADOS CON NOTIFICACIONES --- */
+/* .notifications-container, .notifications-icon, .notification-badge, .notification-preview,
+.notification-preview.show, .notification-preview h3, .notification-preview ul,
+.notification-preview li, .notification-preview .view-all-notifications ya no existen */
+
 /* Media Queries para responsividad */
-@media (max-width: 1024px) { /* Para pantallas de tabletas grandes y menores */
+@media (max-width: 1024px) {
     .main-nav {
         margin: 0 10px;
-        flex-basis: auto; /* Permite que la nav se ajuste si el espacio es limitado */
-        justify-content: flex-start; /* Ajusta la justificación */
+        flex-basis: auto;
+        justify-content: flex-start;
     }
     .main-nav ul {
         gap: 15px;
@@ -148,72 +171,95 @@
 }
 
 @media (max-width: 768px) {
+    /* Reorganizamos la cabecera para móvil */
     .main-header {
-        flex-direction: column; /* Apila los elementos verticalmente */
-        align-items: flex-start; /* Alinea a la izquierda al apilar */
-        padding: 10px; /* Reducimos el padding en pantallas pequeñas */
+        flex-direction: row; /* Mantén la dirección original en row */
+        justify-content: space-between; /* Distribuye espacio */
+        align-items: center; /* Centra verticalmente */
+        padding: 10px 15px; /* Ajusta padding para móviles */
+        height: auto; /* Permite que la altura se ajuste al contenido */
+        position: relative; /* Necesario para posicionar main-nav absoluto */
     }
 
-    .header-left, .header-right, .main-nav {
-        width: 100%; /* Ocupan todo el ancho disponible */
-        margin: 0; /* Resetea márgenes para el apilado */
+    /* Muestra la hamburguesa */
+    .hamburger-menu {
+        display: block;
+        order: 1; /* Colócalo a la izquierda, puedes ajustar el orden si quieres */
     }
 
-    .main-header h2 {
-        font-size: 1.5em;
-        margin-bottom: 10px; /* Espacio debajo del título */
-    }
-
+    /* Oculta la navegación principal en su lugar original */
     .main-nav {
-        margin-bottom: 10px; /* Espacio debajo de la navegación */
+        display: none; /* Oculta la navegación por defecto */
+        position: absolute; /* Para que no afecte el flujo de la cabecera */
+        top: 100%; /* Justo debajo de la cabecera */
+        left: 0;
+        width: 100%;
+        background-color: #007bff; /* Mismo color que la cabecera */
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        flex-direction: column; /* Apila los elementos en el menú desplegable */
+        padding: 10px 0;
+        z-index: 999; /* Debajo de la cabecera, pero sobre el contenido principal */
+        height: 0; /* Oculto por altura */
+        overflow: hidden; /* Oculta el contenido desbordante */
+        opacity: 0; /* Oculto por opacidad */
+        pointer-events: none; /* Deshabilita clics cuando está oculto */
+        margin: 0; /* Resetea márgenes */
+    }
+
+    /* Clase para mostrar el menú móvil */
+    .main-nav.show-mobile-menu {
+        display: flex; /* Vuelve a mostrarlo como flex column */
+        height: auto; /* Restaura la altura */
+        opacity: 1; /* Muestra la opacidad */
+        pointer-events: auto; /* Habilita clics */
     }
 
     .main-nav ul {
         flex-direction: column; /* Apila los enlaces */
-        align-items: flex-start; /* Alinea enlaces a la izquierda */
-        gap: 5px; /* Menos espacio entre enlaces apilados */
+        align-items: center; /* Centra los enlaces */
+        gap: 10px; /* Espacio entre enlaces */
+        width: 100%; /* Ocupa todo el ancho */
     }
 
     .main-nav .nav-link {
-        padding: 10px;
-        width: 100%; /* Ocupa todo el ancho */
-        justify-content: flex-start; /* Alinea el contenido del enlace a la izquierda */
+        width: 90%; /* Ancho de los enlaces en el menú desplegable */
+        justify-content: center; /* Centra el texto del enlace */
+        padding: 12px 0; /* Ajusta padding */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Separador sutil */
+    }
+    .main-nav .nav-link:last-child {
+        border-bottom: none;
     }
 
+    /* Ajustes para el lado derecho (Perfil y Cerrar Sesión) */
     .header-right {
-        flex-direction: row; /* Mantén el perfil y cerrar sesión en fila */
-        justify-content: space-around; /* Distribuye uniformemente */
-        margin-top: 10px;
-        /* Asegurarse que tiene el padding adecuado si no está justificado a los extremos */
-        padding: 0 10px; /* Añadir padding aquí también para asegurar espacio en móvil */
-        box-sizing: border-box; /* Asegurar box-sizing también aquí */
+        order: 3; /* Asegura que esté a la derecha */
+        gap: 10px; /* Menos espacio entre íconos */
+        /* Ya no hay ícono de notificación aquí, así que el espacio será entre perfil y cerrar sesión */
     }
+    
+    /* Ocultar botón de cerrar sesión en el header en móvil (si quieres que solo aparezca en el menú desplegable) */
+    /* .logout-button-header {
+        display: none; 
+    } */
 
-    .logout-button-header {
-        width: auto; /* Permite que el botón se ajuste */
-        padding: 8px 12px;
-        font-size: 0.9em;
-    }
-
-    .profile-logo-container {
-        width: 35px;
-        height: 35px;
-    }
-
-    .profile-logo {
-        font-size: 20px;
-    }
+    /* Si quieres que el botón de cerrar sesión y el perfil sigan visibles en móvil
+    * en el header-right, no necesitas 'display:none' aquí. 
+    * El HTML original ya los mantiene. 
+    * Si el perfil y cerrar sesión deben ir al menú desplegable en móvil,
+    * entonces sí deberías ocultarlos aquí y añadirlos al HTML del main-nav ul.
+    * Para este caso, los mantendremos visibles en el header-right en móvil como estaban.
+    */
 }
 
 @media (max-width: 480px) {
     .main-header h2 {
-        font-size: 1.3em;
+        font-size: 1.4em;
     }
-    .header-right {
-        flex-direction: column; /* Apila también los botones si la pantalla es muy pequeña */
-        gap: 8px;
+    .hamburger-menu {
+        font-size: 1.6em;
     }
-    .logout-button-header {
-        width: 100%; /* El botón ocupa todo el ancho disponible */
-    }
+    /* .notifications-icon { Ya no existe } */
+    /* .header-right { flex-direction: column; } No es necesario si solo quedan dos elementos */
+    /* .logout-button-header { width: 100%; } No es necesario si se mantienen en fila */
 }

@@ -1,6 +1,6 @@
 /* Estilos para la nueva clase principal de la navbar */
 .navbar {
-    background-color: #333333; /* Color de fondo claro */
+    background-color: #333333;
     padding: 15px 20px;
     border-bottom: 1px solid #e9ecef;
     display: flex;
@@ -9,8 +9,10 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     flex-wrap: wrap;
     width: 100%;
-    box-sizing: border-box;  
-    margin: 0; 
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+    z-index: 1000;
 }
 
 /* Estilos para el logo de la navbar */
@@ -24,47 +26,63 @@
     margin-right: 25px;
 }
 
-.navbar-brand i { /* Si tienes un ícono en el brand */
+.navbar-brand i {
     margin-right: 8px;
     color: #28a745;
 }
 
-/* Navegación principal */
+/* --- Botón de Hamburguesa --- */
+.hamburger-button {
+    font-size: 1.8em;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    z-index: 1001;
+    display: none;
+}
+
+/* Navegación principal (Desktop) */
 .navbar-nav {
     display: flex;
-    gap: 20px; /* Espacio entre elementos del menú */
-    list-style: none; /* Asegúrate de que no haya viñetas si no es ul */
+    gap: 20px;
+    list-style: none;
     margin: 0;
     padding: 0;
-    align-items: center; /* Para alinear verticalmente los elementos de navegación */
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+    z-index: 900;
 }
 
 /* Estilos para los enlaces de navegación */
 .nav-link {
     text-decoration: none;
-    color: #555;
+    color: #fff;
     font-weight: 500;
     padding: 8px 12px;
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
 }
 
 .nav-link:hover,
 .nav-link.active {
-    background-color: #e2e6ea;
+    background-color: #555555;
     color: #007bff;
 }
 
 /* Estilos para el contenedor de notificaciones */
 .notifications-dropdown {
-    position: relative;
+    position: relative; /* ¡Mantener como relative siempre que sea el padre del dropdown-menu! */
     margin-left: 20px;
+    z-index: 1002;
 }
 
 /* Estilos para la campana de notificación */
 .notification-bell {
     position: relative;
-    color: #555;
+    color: #fff;
     font-size: 1.8em;
     text-decoration: none;
     display: block;
@@ -80,7 +98,7 @@
     position: absolute;
     top: -5px;
     right: -10px;
-    background-color: #dc3545; /* Rojo */
+    background-color: #dc3545;
     color: white;
     border-radius: 50%;
     padding: 2px 7px;
@@ -90,12 +108,12 @@
     text-align: center;
     line-height: 1;
     border: 1px solid white;
-    display: none; /* Oculto por defecto */
+    display: none;
 }
 
-/* Estilos para el menú desplegable de notificaciones */
+/* Estilos para el menú desplegable de notificaciones (Desktop y como base) */
 .dropdown-menu {
-    display: none; /* Oculto por defecto */
+    display: none;
     position: absolute;
     top: 100%;
     right: 0;
@@ -104,8 +122,10 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     min-width: 280px;
-    z-index: 1000;
+    z-index: 1003;
     padding: 10px 0;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .dropdown-menu.show {
@@ -121,11 +141,8 @@
 }
 
 #latest-notifications {
-    list-style: none; /* Si no es ul */
     padding: 0;
     margin: 0;
-    max-height: 200px; /* Altura máxima para scroll */
-    overflow-y: auto;
 }
 
 .dropdown-item {
@@ -133,16 +150,16 @@
     border-bottom: 1px solid #f0f0f0;
     font-size: 0.9em;
     color: #444;
-    display: block; /* Para que ocupen todo el ancho y se puedan clickear bien */
+    display: block;
     text-decoration: none;
-    white-space: normal; /* Asegura que el texto se envuelva */
+    white-space: normal;
 }
 
 .dropdown-item:last-child {
     border-bottom: none;
 }
 
-.dropdown-item.font-weight-bold { /* Clase para notificaciones no leídas */
+.dropdown-item.font-weight-bold {
     background-color: #e9f7ff;
     font-weight: bold;
 }
@@ -167,34 +184,118 @@
     background-color: #f5f5f5;
 }
 
-/* Media Queries para responsividad (ajusta según tus necesidades) */
+
+/* --- Media Queries para responsividad (¡AJUSTES CLAVE AQUÍ!) --- */
 @media (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        z-index: 1000;
     }
+
+    .hamburger-button {
+        display: block;
+        z-index: 1001;
+    }
+
+    /* Estilos del menú desplegable compacto (cuando la hamburguesa se abre) */
     .navbar-nav {
+        display: none;
         flex-direction: column;
-        width: 100%;
-        margin-top: 10px;
-    }
-    .nav-link {
-        width: 100%;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        min-width: 200px;
+        max-height: 80vh;
+        overflow-y: auto;
+        background-color: #333333;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        padding: 10px 0;
+        z-index: 999;
+        transform-origin: top right;
+        transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        transform: scale(0.9);
+        opacity: 0;
+        pointer-events: none;
+        
+        align-items: center;
         text-align: center;
     }
+
+    .navbar-nav.show {
+        display: flex;
+        transform: scale(1);
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .nav-link {
+        width: calc(100% - 30px);
+        text-align: center;
+        padding: 10px 15px;
+        white-space: normal;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .nav-link:hover {
+        background-color: #555555;
+        color: #007bff;
+    }
+
+    /* EL CAMBIO CLAVE: Volver a position: relative; para que el dropdown se posicione correctamente */
     .notifications-dropdown {
-        width: 100%;
+        width: auto;
         text-align: center;
         margin-left: 0;
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+        position: relative; /* <<--- ¡Volver a relative! */
+        z-index: 1002;
+    }
+
+    /* El menú desplegable de notificaciones en responsive */
+    .dropdown-menu {
+        position: absolute; /* Sigue siendo absoluto */
+        /* Ajustar top para que aparezca debajo de la campana, NO de la navbar si la campana es el padre posicionado */
+        top: 100%; /* Ahora 100% se refiere al alto del .notifications-dropdown */
+        right: 0; /* Alineado a la derecha de .notifications-dropdown */
+        left: auto;
+        width: 280px; /* Mantener un ancho fijo para que no se extienda demasiado */
+        max-width: calc(100vw - 30px); /* Asegura que no se salga de la pantalla (resta padding) */
+        z-index: 1004; /* ¡El más alto! */
+    }
+}
+
+/* Teléfonos móviles y pantallas muy pequeñas (menos de 480px) */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 8px 15px;
+    }
+    .navbar-brand {
+        font-size: 1.6em;
+    }
+    .hamburger-button {
+        font-size: 1.6em;
+    }
+    .navbar-nav {
+        min-width: 180px;
+    }
+    .nav-link {
+        padding: 8px 10px;
+        font-size: 0.95em;
     }
     .notification-bell {
-        display: inline-block; /* Para centrarlo si el padre es text-align: center */
+        font-size: 1.6em;
     }
     .dropdown-menu {
-        left: 50%;
-        transform: translateX(-50%);
-        right: auto;
-        min-width: unset;
-        width: 90%;
+        width: 95%; 
+        max-width: 280px;
+        right: 2.5%; 
+        left: 2.5%; 
     }
 }

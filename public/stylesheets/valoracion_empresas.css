@@ -496,11 +496,11 @@ body {
     }
     .company-valuation-dashboard h1 {
         font-size: 2.2em;
-        flex-direction: column;
+        flex-direction: column; /* Apila el título y el ícono */
         gap: 10px;
     }
     .company-valuation-dashboard h1 .fas {
-        margin-right: 0;
+        margin-right: 0; /* Elimina el margen derecho cuando está apilado */
     }
     .company-valuation-dashboard .description {
         font-size: 1em;
@@ -517,11 +517,27 @@ body {
         padding: 10px 12px;
         font-size: 0.9em;
     }
+    
+    /* Tooltips en modo responsive: ajusta su posición para que no se salgan de la pantalla */
+    .custom-tooltip {
+        left: 5%; /* Ajusta un poco desde la izquierda */
+        transform: translateX(0) translateY(-10px); /* Elimina el centrado con transform X */
+        white-space: normal; /* Permite que el texto se envuelva */
+        width: 90%; /* Ocupa la mayor parte del ancho disponible */
+        max-width: 250px; /* Limita el ancho máximo para no ser demasiado grande */
+    }
+
+    .custom-tooltip::after {
+        left: 20px; /* Ajusta la posición de la flecha si el tooltip no está centrado */
+        transform: rotate(45deg); /* Mantiene la rotación */
+    }
+
     .calculate-button, .reset-button, .pdf-button {
         padding: 12px 20px;
         font-size: 1em;
-        margin-right: 10px;
-        margin-left: 0; /* Reset margin for mobile */
+        /* Elimina los márgenes específicos para botones individuales en favor del gap del flex */
+        margin-right: 0; 
+        margin-left: 0;
     }
     .results-section {
         padding: 20px;
@@ -540,10 +556,13 @@ body {
         flex-direction: column;
         width: 100%; /* Take full width when stacked */
         align-items: center; /* Center stacked buttons */
+        gap: 10px; /* Reduce el espacio entre botones apilados */
     }
+    /* Asegura que los botones ocupen el 100% de su contenedor cuando estén apilados */
     .calculate-button, .reset-button, .pdf-button {
-        width: 100%; /* Make buttons full width when stacked */
-        margin-bottom: 10px; /* Add space between stacked buttons */
+        width: 100%; 
+        max-width: 280px; /* Opcional: limitar el ancho máximo de los botones */
+        margin-bottom: 0; /* El `gap` del `button-group` maneja el espacio */
     }
     .chart-container {
         height: 300px; /* Ajuste para pantallas más pequeñas */
@@ -558,9 +577,11 @@ body {
 @media (max-width: 480px) {
     .container {
         padding: 15px;
+        margin: 15px; /* Reduce aún más el margen en pantallas muy pequeñas */
     }
     .company-valuation-dashboard h1 {
         font-size: 1.8em;
+        /* Ya está flex-direction: column; del media query anterior */
     }
     .company-valuation-dashboard .description {
         font-size: 0.9em;
@@ -571,19 +592,42 @@ body {
     .input-section h2 {
         font-size: 1.3em;
     }
+    /* Botones ya apilados, solo asegura el centrado y los márgenes */
+    .button-group {
+        gap: 8px; /* Espacio un poco más pequeño para botones muy pequeños */
+    }
     .calculate-button, .reset-button, .pdf-button {
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: 10px;
-        justify-content: center;
+        padding: 10px 15px; /* Reduce el padding de los botones */
+        font-size: 0.9em; /* Reduce el tamaño de fuente de los botones */
     }
     .results-section {
-        padding: 20px;
+        padding: 15px; /* Reduce padding de resultados */
     }
     .results-section h2 {
         font-size: 1.6em;
     }
+    .result-item {
+        font-size: 0.95em; /* Ajusta tamaño de texto de resultados */
+    }
+    .result-item .value {
+        font-size: 1.05em; /* Ajusta tamaño de valor de resultados */
+    }
     .chart-container {
         height: 250px; /* Más ajuste para móviles muy pequeños */
+        padding: 10px; /* Reduce padding del contenedor del gráfico */
+    }
+    .chart-container h3 {
+        font-size: 1.2em;
+    }
+    /* Modal responsive adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    .modal-content h2 {
+        font-size: 1.6em;
+    }
+    .modal-content p, .modal-content li {
+        font-size: 0.95em;
     }
 }

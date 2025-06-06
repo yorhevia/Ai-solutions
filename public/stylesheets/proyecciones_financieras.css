@@ -253,7 +253,7 @@ body {
 .pdf-button { /* New PDF button styles */
     background-color: #e74c3c; /* Rojo para PDF */
     color: white;
-    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+    box-shadow: 0 4-10px rgba(231, 76, 60, 0.3);
     margin-left: 15px; /* Adjust margin to separate from reset button */
 }
 
@@ -708,11 +708,11 @@ body {
     }
     .financial-projections-dashboard h1 {
         font-size: 2.2em;
-        flex-direction: column;
+        flex-direction: column; /* Apila el título y el ícono */
         gap: 10px;
     }
     .financial-projections-dashboard h1 .fas {
-        margin-right: 0;
+        margin-right: 0; /* Elimina el margen derecho cuando está apilado */
     }
     .financial-projections-dashboard .description {
         font-size: 1em;
@@ -731,12 +731,36 @@ body {
         padding: 10px 12px;
         font-size: 0.9em;
     }
+
+    /* Tooltips en modo responsive: ajusta su posición para que no se salgan de la pantalla */
+    .custom-tooltip {
+        left: 5%; /* Ajusta un poco desde la izquierda */
+        transform: translateX(0) translateY(-10px); /* Elimina el centrado con transform X */
+        white-space: normal; /* Permite que el texto se envuelva */
+        width: 90%; /* Ocupa la mayor parte del ancho disponible */
+        max-width: 250px; /* Limita el ancho máximo para no ser demasiado grande */
+    }
+
+    .custom-tooltip::after {
+        left: 20px; /* Ajusta la posición de la flecha si el tooltip no está centrado */
+        transform: rotate(45deg); /* Mantiene la rotación */
+    }
+
+    /* Botones apilados verticalmente */
+    .button-group {
+        flex-direction: column;
+        width: 100%; /* Take full width when stacked */
+        align-items: center; /* Center stacked buttons */
+        gap: 10px; /* Espacio entre los botones apilados */
+    }
     .calculate-button, .reset-button, .pdf-button {
         padding: 12px 20px;
         font-size: 1em;
-        margin-right: 10px;
-        margin-left: 0; /* Reset margin for mobile */
+        width: 100%; /* Make buttons full width when stacked */
+        max-width: 280px; /* Limita su ancho máximo para que no se vean demasiado grandes */
+        margin: 0; /* Elimina márgenes individuales ya que el gap los maneja */
     }
+
     .results-section {
         padding: 20px;
     }
@@ -747,16 +771,6 @@ body {
     .projection-table-container td {
         padding: 8px 10px;
         font-size: 0.85em;
-    }
-    /* Stack buttons vertically on smaller screens */
-    .button-group {
-        flex-direction: column;
-        width: 100%; /* Take full width when stacked */
-        align-items: center; /* Center stacked buttons */
-    }
-    .calculate-button, .reset-button, .pdf-button {
-        width: 100%; /* Make buttons full width when stacked */
-        margin-bottom: 10px; /* Add space between stacked buttons */
     }
     .chart-container {
         height: 300px; /* Ajuste para pantallas más pequeñas */
@@ -777,6 +791,7 @@ body {
 @media (max-width: 480px) {
     .container {
         padding: 15px;
+        margin: 15px; /* Reduce aún más el margen en pantallas muy pequeñas */
     }
     .financial-projections-dashboard h1 {
         font-size: 1.8em;
@@ -790,139 +805,44 @@ body {
     .input-section h2 {
         font-size: 1.3em;
     }
+    /* Ajustes finos para los botones en pantallas muy pequeñas */
+    .button-group {
+        gap: 8px; /* Espacio un poco más pequeño para botones muy pequeños */
+    }
     .calculate-button, .reset-button, .pdf-button {
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: 10px;
-        justify-content: center;
+        padding: 10px 15px; /* Reduce el padding de los botones */
+        font-size: 0.9em; /* Reduce el tamaño de fuente de los botones */
+        justify-content: center; /* Centra el contenido de los botones */
     }
     .results-section {
-        padding: 20px;
+        padding: 15px; /* Reduce padding de resultados */
     }
     .results-section h2 {
         font-size: 1.6em;
     }
     .chart-container {
         height: 250px; /* Más ajuste para móviles muy pequeños */
+        padding: 10px; /* Reduce padding del contenedor del gráfico */
     }
     .add-button {
         width: 100%;
         justify-content: center;
     }
+    .chart-container h3 {
+        font-size: 1.2em;
+    }
+    /* Modal responsive adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    .modal-content h2 {
+        font-size: 1.6em;
+    }
+    .modal-content p, .modal-content li {
+        font-size: 0.95em;
+    }
+    .modal { /* Ensure modal display is set to flex for centering */
+        display: flex; /* This ensures it's centered when active */
+    }
 }
-      /* General Modal Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-            justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
-            padding: 20px; /* Add some padding */
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #888;
-            width: 90%; /* Adjust width for responsiveness */
-            max-width: 500px; /* Max width for larger screens */
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-            animation: fadeInModal 0.3s ease-out;
-        }
-
-        @keyframes fadeInModal {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-content .close-button {
-            color: #aaa;
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .modal-content .close-button:hover,
-        .modal-content .close-button:focus {
-            color: #333;
-        }
-
-        .modal-content h2 {
-            color: #34495e;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .modal-content p {
-            line-height: 1.6;
-            color: #555;
-            margin-bottom: 15px;
-        }
-
-        .modal-content ul {
-            list-style-type: disc;
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-
-        .modal-content strong {
-            color: #333;
-        }
-
-        /* Specific styles for tutorial box within modal */
-        .modal-content .tutorial-box {
-            background-color: #e0f7fa;
-            border-left: 5px solid #00bcd4;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .modal-content .tutorial-box .mandatory-step-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #00796b;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .modal-content .tutorial-box .mandatory-step-title i {
-            margin-right: 8px;
-            color: #00bcd4;
-        }
-
-        /* Adjustments for smaller screens for modals */
-        @media (max-width: 600px) {
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-            .modal-content h2 {
-                font-size: 1.5em;
-            }
-            .modal-content .close-button {
-                font-size: 24px;
-                top: 8px;
-                right: 12px;
-            }
-        }
-    

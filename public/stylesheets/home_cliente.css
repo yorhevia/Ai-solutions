@@ -291,3 +291,81 @@ body {
     white-space: nowrap;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
+
+        /* Estilos básicos para el modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Posición fija para cubrir toda la pantalla */
+            z-index: 1000; /* Asegura que esté por encima de todo */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Habilita el scroll si el contenido es muy largo */
+            background-color: rgba(0,0,0,0.6); /* Fondo semi-transparente */
+            justify-content: center; /* Centra el contenido horizontalmente */
+            align-items: center; /* Centra el contenido verticalmente */
+            padding: 20px; /* Espacio alrededor del modal */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 500px; /* Ancho máximo del modal */
+            width: 90%; /* Ancho responsivo */
+            position: relative; /* Para posicionar el botón de cerrar */
+            text-align: center; /* Centra el texto */
+        }
+
+        .modal-content h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .modal-content p {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .modal-content p strong {
+            color: #007bff; /* Color para los campos importantes */
+        }
+
+        .modal-content .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .modal-content .close-button:hover,
+        .modal-content .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content .dismiss-button {
+            background-color: #dc3545; /* Color rojo para "Despedir" */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 25px;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-content .dismiss-button:hover {
+            background-color: #c82333;
+        }

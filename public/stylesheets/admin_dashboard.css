@@ -53,12 +53,19 @@
     padding-bottom: 15px;
 }
 
+/* Contenedor de la tabla para hacerla responsive */
+.table-responsive {
+    overflow-x: auto; /* Permite desplazamiento horizontal en pantallas pequeñas */
+    -webkit-overflow-scrolling: touch; /* Mejora el scroll en iOS */
+}
+
 /* Estilos de la tabla de verificaciones */
 .verification-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
     font-size: 0.95em;
+    min-width: 600px; /* Asegura que la tabla tenga un ancho mínimo para activar el scroll */
 }
 
 .verification-table th, .verification-table td {
@@ -98,6 +105,7 @@
     margin-right: 5px;
     font-size: 0.9em;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    white-space: nowrap; /* Evita que el texto del botón se rompa en varias líneas */
 }
 
 .action-button:hover {
@@ -225,6 +233,8 @@
 }
 
 /* Media Queries para responsividad */
+
+/* Para tablets y pantallas medianas (menos de 768px) */
 @media (max-width: 768px) {
     .main-header {
         flex-direction: column;
@@ -235,6 +245,8 @@
     .main-header h2 {
         font-size: 1.5em;
         margin-top: 10px;
+        text-align: center; /* Centrar el título en modo columna */
+        width: 100%; /* Ocupa todo el ancho */
     }
 
     .back-button {
@@ -262,6 +274,7 @@
         font-size: 0.8em;
         margin-right: 3px;
         margin-bottom: 5px; /* Espacio entre botones en móviles */
+        display: inline-block; /* Asegura que no rompan el layout si están en la misma celda */
     }
 
     .modal-content {
@@ -277,5 +290,91 @@
     .modal-content .reject-button {
         padding: 10px;
         font-size: 1em;
+    }
+}
+
+/* Para teléfonos móviles y pantallas pequeñas (menos de 480px) */
+@media (max-width: 480px) {
+    .main-header {
+        padding: 8px;
+    }
+
+    .main-header h2 {
+        font-size: 1.3em;
+    }
+
+    .back-button {
+        font-size: 1.2em;
+        margin-right: 10px;
+    }
+
+    .admin-container {
+        padding: 10px;
+        margin: 10px auto;
+    }
+
+    .admin-container h1 {
+        font-size: 1.4em;
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+    }
+
+    /* Ajustes específicos para la tabla en pantallas muy pequeñas */
+    .verification-table {
+        font-size: 0.8em; /* Fuente más pequeña para la tabla */
+        min-width: 500px; /* Puedes ajustar este valor si la tabla es muy ancha */
+    }
+
+    .verification-table th, .verification-table td {
+        padding: 6px; /* Menos padding */
+    }
+
+    .action-button {
+        padding: 5px 8px;
+        font-size: 0.75em;
+        margin-right: 2px;
+        margin-bottom: 4px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+
+    .close-button {
+        font-size: 28px;
+        right: 10px;
+        top: 5px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .modal-content p {
+        font-size: 0.95em;
+        margin-bottom: 15px;
+    }
+
+    .modal-content label {
+        font-size: 0.9em;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .modal-content select,
+    .modal-content textarea {
+        padding: 8px;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .modal-content textarea {
+        min-height: 100px;
+    }
+
+    .modal-content .reject-button {
+        padding: 8px 10px;
+        font-size: 0.95em;
     }
 }

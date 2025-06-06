@@ -331,31 +331,89 @@ router.get('/api/asesor/notificaciones-resumen', requireAuth, requireAsesor, ase
 router.get('/asesor/notificaciones', requireAuth, requireAsesor, asesorController.getFullNotificationsPage); // Necesitarías crear esta función en el controlador
 router.post('/asesor/notificaciones/marcar-leida', requireAuth, requireAsesor, asesorController.markNotificationAsRead); // Necesitarías crear esta función en el controlador
 
-// Rutas Home
+
 router.get('/homecliente', requireAuth, async (req, res) => {
-    // Verifica si el userType en sesión es 'client'.
     if (req.session.userType !== 'client') {
         req.flash('error_msg', 'Acceso denegado. Esta página es solo para clientes.');
         return res.redirect('/dashboard');
     }
+
     const userId = req.session.userId;
+
     try {
-        const userDoc = await db.collection('clientes').doc(userId).get();
-        if (!userDoc.exists) {
+        const clienteDoc = await db.collection('clientes').doc(userId).get();
+        let clienteData = {};
+        let tieneAsesorAsignado = false;
+        let asesorAsignadoData = null; // <-- Nueva variable para los datos del asesor
+
+        if (clienteDoc.exists) {
+            clienteData = clienteDoc.data();
+            if (clienteData.asesorAsignado && clienteData.asesorAsignado !== '') {
+                tieneAsesorAsignado = true;
+
+                // Si tiene asesor, busca los datos del asesor
+                const asesorDoc = await db.collection('asesores').doc(clienteData.asesorAsignado).get();
+                if (asesorDoc.exists) {
+                    asesorAsignadoData = {
+                        uid: asesorDoc.id, // Es útil tener el UID en el frontend
+                        nombre: asesorDoc.data().nombre || '',
+                        apellido: asesorDoc.data().apellido || '',
+                        email: asesorDoc.data().email || '',
+                        telefono: asesorDoc.data().telefono || '',
+                        especialidad: asesorDoc.data().especialidad || 'No especificada',
+                        // Agrega otros campos que quieras mostrar en el modal
+                    };
+                }
+            }
+        } else {
             req.flash('error_msg', 'Tu perfil de cliente no se encontró. Por favor, completa tu registro.');
             return res.redirect('/login');
         }
+
         res.render('cliente/homecliente', {
-            user: userDoc.data(),
+            user: clienteData,
             success_msg: req.flash('success_msg'),
-            error_msg: req.flash('error_msg')
+            error_msg: req.flash('error_msg'),
+            tieneAsesorAsignado: tieneAsesorAsignado,
+            asesorAsignado: asesorAsignadoData // <-- ¡Pasamos los datos del asesor a la vista!
         });
+
     } catch (error) {
-        console.error('Error al cargar homeclient:', error);
+        console.error('Error al cargar homecliente:', error);
         req.flash('error_msg', 'Error al cargar tu página de inicio.');
         res.redirect('/login');
     }
 });
+
+router.post('/api/cliente/despedir-asesor', requireAuth, async (req, res) => {
+    // Asegúrate de que solo los clientes autenticados puedan usar esto
+    if (req.session.userType !== 'client' || !req.session.userId) {
+        console.log('Despedir Asesor: Acceso denegado - userType:', req.session.userType, 'userId:', req.session.userId);
+        return res.status(403).json({ message: 'Acceso denegado.' });
+    }
+
+    const clienteUid = req.session.userId;
+    console.log('Despedir Asesor: Intentando desvincular asesor para cliente UID:', clienteUid);
+
+    try {
+        if (!db) { // Verificación adicional para 'db'
+            console.error('Firestore DB object is not initialized!');
+            return res.status(500).json({ message: 'Error interno del servidor: Base de datos no disponible.' });
+        }
+
+        await db.collection('clientes').doc(clienteUid).update({
+            asesorAsignado: '' 
+        });
+
+        console.log('Despedir Asesor: Asesor desvinculado exitosamente para UID:', clienteUid);
+        res.status(200).json({ message: 'Has desvinculado a tu asesor exitosamente.' });
+    } catch (error) {
+        console.error('Error al desvincular asesor del cliente:', error);
+        res.status(500).json({ message: 'Error interno del servidor al desvincular al asesor.' });
+    }
+});
+
+
 
 router.get('/homeasesor', requireAuth, async (req, res) => {
     // Verifica si el userType en sesión es 'asesor'.

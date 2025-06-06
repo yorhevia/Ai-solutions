@@ -7,14 +7,23 @@
     <link rel="stylesheet" href="/stylesheets/home_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/stylesheets/client_navbar.css"> 
+
 </head>
 <body>
-    <%- include('../partials/client_navbar') %>
+    <%- include('../partials/client_navbar', { tieneAsesorAsignado: tieneAsesorAsignado }) %>
 
     <div class="container">
         <main class="client-dashboard">
             <h1>Bienvenido a AI Finance Solutions</h1>
             <p class="greeting">¡Hola! Has accedido a tu panel de cliente. Aquí podrás encontrar información relevante para tus finanzas y contactar con asesores.</p>
+
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="alert alert-success"><%= success_msg %></div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="alert alert-danger"><%= error_msg %></div>
+            <% } %>
+
             <section class="quick-access">
                 <h2>Acceso Rápido</h2>
                 <ul class="feature-list">
@@ -24,11 +33,10 @@
                             <span>Ver tus objetivos financieros.</span>
                         </li>
                     </a>
-                   <a href="/cliente/calendario" class="feature-link" data-tooltip="Gestiona tus citas y eventos financieros.">
+                    <a href="/cliente/calendario" class="feature-link" data-tooltip="Gestiona tus citas y eventos financieros.">
                         <li class="feature-item">
                             <i class="fas fa-calendar-alt icon"></i> <span>Ver tu calendario de eventos.</span>
                         </li>
-                    </a>
                     </a>
                     <a href="/inversiones" class="feature-link" data-tooltip="Explora diferentes opciones de inversión disponibles para ti.">
                         <li class="feature-item">
@@ -36,12 +44,31 @@
                             <span>Explorar posibles inversiones.</span>
                         </li>
                     </a>
-                    <a href="/chat-personal" class="feature-link" data-tooltip="Ponte en contacto con uno de nuestros asesores financieros.">
-                        <li class="feature-item">
-                            <i class="fas fa-comments icon"></i>
-                            <span>Contactar con un asesor financiero.</span>
-                        </li>
-                    </a>
+
+                    <% // OPCIÓN DE ASIGNAR/VER ASESOR INTEGRADA EN LA LISTA %>
+                    <% if (!tieneAsesorAsignado) { %>
+                        <a href="/contacto-asesor" class="feature-link" data-tooltip="Conecta con uno de nuestros asesores expertos para recibir orientación personalizada.">
+                            <li class="feature-item highlight-advisor">
+                                <i class="fas fa-handshake icon"></i>
+                                <span>Asignar un Asesor Financiero</span>
+                            </li>
+                        </a>
+                    <% } else { %>
+                        <a href="#" class="feature-link" id="openAdvisorModal" data-tooltip="Revisa la información de tu asesor asignado.">
+                            <li class="feature-item">
+                                <i class="fas fa-user-tie icon"></i>
+                                <span>Ver detalles de tu Asesor</span>
+                            </li>
+                        </a>
+                         <a href="/chat-personal" class="feature-link" data-tooltip="Envía un mensaje a tu asesor directamente.">
+                            <li class="feature-item">
+                                <i class="fas fa-comments icon"></i>
+                                <span>Mensajear a tu Asesor</span>
+                            </li>
+                        </a>
+                    <% } %>
+                    <% // FIN DE LA MODIFICACIÓN %>
+
                 </ul>
             </section>
             <p class="info-text">Estamos trabajando para ofrecerte la mejor experiencia en la gestión de tus finanzas con el impuso de la inteligencia artificial.</p>
@@ -56,7 +83,20 @@
     </footer>
 
     <div id="tooltip"></div>
+
+    <div id="advisorModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3>Detalles de tu Asesor</h3>
+            <p><strong>Nombre:</strong> <span id="advisorName"></span></p>
+            <p><strong>Email:</strong> <span id="advisorEmail"></span></p>
+            <p><strong>Teléfono:</strong> <span id="advisorPhone"></span></p>
+            <p><strong>Especialidad:</strong> <span id="advisorSpecialty"></span></p>
+            <button id="dismissAdvisorBtn" class="dismiss-button">Despedir Asesor</button>
+        </div>
+    </div>
     <script>
+        // Lógica del Tooltip (ya la tenías)
         const featureLinks = document.querySelectorAll('.feature-link');
         const tooltipDiv = document.getElementById('tooltip');
 
@@ -78,6 +118,71 @@
                 tooltipDiv.style.display = 'none';
             });
         });
+
+        // Lógica del Modal
+        const advisorModal = document.getElementById('advisorModal');
+        const openAdvisorModalBtn = document.getElementById('openAdvisorModal');
+        const closeButton = document.querySelector('.modal .close-button');
+        const dismissAdvisorBtn = document.getElementById('dismissAdvisorBtn');
+
+        // Función para abrir el modal
+        if (openAdvisorModalBtn) { // Asegura que el botón exista (solo si tiene asesor)
+            openAdvisorModalBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // Evita que el enlace # recargue la página
+                
+                // Rellenar el modal con los datos del asesor pasados desde el backend
+                const asesorData = JSON.parse('<%- JSON.stringify(asesorAsignado) %>'); // Cuidado con la sanitización si hay caracteres especiales
+                if (asesorData) {
+                    document.getElementById('advisorName').textContent = asesorData.nombre + ' ' + asesorData.apellido;
+                    document.getElementById('advisorEmail').textContent = asesorData.email;
+                    document.getElementById('advisorPhone').textContent = asesorData.telefono;
+                    document.getElementById('advisorSpecialty').textContent = asesorData.especialidad;
+                }
+
+                advisorModal.style.display = 'flex'; // Usar 'flex' para centrar con justify/align-items
+            });
+        }
+
+        // Función para cerrar el modal
+        closeButton.addEventListener('click', () => {
+            advisorModal.style.display = 'none';
+        });
+
+        // Cerrar el modal al hacer clic fuera del contenido
+        window.addEventListener('click', (event) => {
+            if (event.target == advisorModal) {
+                advisorModal.style.display = 'none';
+            }
+        });
+
+        // Lógica del botón "Despedir Asesor"
+        if (dismissAdvisorBtn) {
+            dismissAdvisorBtn.addEventListener('click', async () => {
+                if (confirm('¿Estás seguro de que quieres despedir a tu asesor? No podrás revertir esta acción de inmediato.')) {
+                    try {
+                        const response = await fetch('/api/cliente/despedir-asesor', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({}) // Puedes enviar un cuerpo vacío o datos si los necesitas
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            alert(result.message || 'Asesor desvinculado exitosamente.');
+                            window.location.reload(); // Recargar la página para que la interfaz se actualice
+                        } else {
+                            alert(result.message || 'Error al desvincular al asesor. Inténtalo de nuevo.');
+                        }
+                    } catch (error) {
+                        console.error('Error al despedir asesor:', error);
+                        alert('Ocurrió un error de red. Inténtalo de nuevo.');
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
