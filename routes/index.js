@@ -1141,5 +1141,17 @@ router.post('/cliente/api/objetivos', requireAuth, clienteController.crearObjeti
 router.put('/cliente/api/objetivos/:id', requireAuth, clienteController.editarObjetivoClienteAPI); 
 router.delete('/cliente/api/objetivos/:id', requireAuth, clienteController.eliminarObjetivoClienteAPI); 
 
+// routes/index.js o routes/asesor.js (ejemplo)
+
+router.get('/politica-privacidad', (req, res) => {
+
+    res.render('politica_privacidad', {
+        title: 'Política de Privacidad',
+        error_msg: req.flash('error_msg'),
+        success_msg: req.flash('success_msg'),
+        info_msg: req.flash('info_msg')
+    });
+});
+
 
 module.exports = router;
