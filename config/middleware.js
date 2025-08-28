@@ -1,51 +1,61 @@
-const { auth } = require('../routes/firebase'); // Importa 'auth' del archivo firebase.js
 
-// Middleware para verificar autenticación y obtener datos del usuario de Firebase Auth
-function requireAuth(req, res, next) {
+const { getDb } = require('./database'); // Importa desde el mismo directorio 'config'
+
+// Middleware para verificar autenticación y obtener datos del usuario de la base de datos SQLite
+async function requireAuth(req, res, next) {
     console.log('Middleware: requireAuth - Verificando sesión...');
     console.log('req.session en requireAuth:', req.session);
 
     if (req.session && req.session.userId) {
-        // Si hay un userId en la sesión, intenta obtener el email del usuario de Firebase Auth
-        auth.getUser(req.session.userId)
-            .then(userRecord => {
-                req.userEmail = userRecord.email; 
-                // Asegúrate de que req.session.userType se establezca en tu lógica de login
-                // Este ejemplo asume que ya lo tienes en la sesión.
-                // Si usas Custom Claims de Firebase Auth, lo obtendrías de userRecord.customClaims
+        try {
+            const db = getDb(); // Usamos la función getDb() para obtener la instancia de la base de datos
+            const userRecord = await db.get(`SELECT email, userType FROM users WHERE id = ?`, [req.session.userId]);
+
+            if (userRecord) {
+                req.user = {
+                    id: req.session.userId,
+                    email: userRecord.email,
+                    userType: userRecord.userType || req.session.userType
+                };
                 
-                console.log(`Middleware: Usuario autenticado: ${req.session.userId}, Email: ${req.userEmail}, Tipo: ${req.session.userType || 'No especificado'}`);
-                next(); // Permite el acceso
-            })
-            .catch(error => {
-                console.error("Middleware Error: Error al obtener usuario de Firebase Auth:", error);
-                // Si hay un error (ej. usuario no existe en Auth, sesión inválida), destruir sesión y redirigir
+                req.session.userType = userRecord.userType || req.session.userType;
+
+                console.log(`Middleware: Usuario autenticado: ${req.user.id}, Email: ${req.user.email}, Tipo: ${req.user.userType}`);
+                next();
+            } else {
+                console.error("Middleware Error: Usuario no encontrado en la base de datos para ID:", req.session.userId);
                 req.session.destroy((err) => {
-                    if (err) console.error('Error al destruir sesión después de fallo de Auth:', err);
-                    // Usa flash si está configurado en tu app.js
+                    if (err) console.error('Error al destruir sesión después de fallo de DB:', err);
                     if (req.flash) req.flash('error_msg', 'Tu sesión ha expirado o es inválida. Por favor, inicia sesión de nuevo.');
-                    res.redirect('/login'); // Redirige a tu página de login
+                    res.redirect('/login');
                 });
+            }
+        } catch (error) {
+            console.error("Middleware Error: Error al obtener usuario de SQLite:", error);
+            req.session.destroy((err) => {
+                if (err) console.error('Error al destruir sesión después de fallo de DB:', err);
+                if (req.flash) req.flash('error_msg', 'Ocurrió un error en la autenticación. Por favor, inicia sesión de nuevo.');
+                res.redirect('/login');
             });
+        }
     } else {
-        // El usuario no está autenticado, redirigir al login
         console.log('Middleware: No userId en sesión, redirigiendo a login.');
         if (req.flash) req.flash('error_msg', 'Por favor, inicia sesión para acceder a este recurso.');
-        res.redirect('/login'); // Redirige a tu página de login
+        res.redirect('/login');
     }
 }
 
-// Middleware específico para requerir que el usuario sea un 'asesor'
 const requireAsesor = (req, res, next) => {
     console.log('Middleware: requireAsesor - Verificando tipo de usuario...');
-    // requireAuth debería ejecutarse antes que este, por lo que req.session.userType debería estar disponible.
-    if (req.session && req.session.userType === 'asesor') {
+    
+    if (req.user && req.user.userType === 'asesor') {
         console.log('Middleware: El usuario es un asesor. Acceso permitido.');
-        return next(); // El usuario es un asesor, procede
+        return next();
     }
-    console.log(`Middleware: Acceso denegado para tipo de usuario: ${req.session ? req.session.userType : 'No logueado'}`);
+
+    console.log(`Middleware: Acceso denegado para tipo de usuario: ${req.user ? req.user.userType : 'No logueado'}`);
     if (req.flash) req.flash('error_msg', 'Acceso denegado. Esta función es solo para asesores.');
-    res.status(403).redirect('/dashboard'); // Redirige a un dashboard general o a home si no es asesor
+    res.status(403).redirect('/dashboard');
 };
 
 module.exports = { requireAuth, requireAsesor };

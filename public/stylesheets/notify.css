@@ -1,48 +1,139 @@
-/* Reset básico para eliminar márgenes y rellenos por defecto */
+/* notify.css */
+
+/* Basic Reset & Body Styles (assuming these are in your main CSS or similar) */
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     min-height: 100vh; 
     overflow-x: hidden; 
-
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6;
+    font-family: 'Roboto', sans-serif; /* A more modern and readable font */
+    background-color: #eef2f5; /* A softer, modern background */
     display: flex;
     flex-direction: column;
 }
 
-/* El nuevo contenedor que empujará el footer */
+/* Content Wrapper to push footer down */
 .content-wrapper {
     flex: 1; 
-   
 }
 
-/* Tus estilos existentes para .container */
+/* Container for the notifications */
 .container {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    box-sizing: border-box; /* Asegura que padding se incluya en el ancho/alto */
- 
+    max-width: 800px; /* Reducido para un contenedor más compacto */
+    margin: 25px auto; /* Menos margen vertical */
+    padding: 20px; /* Menos padding */
+    background-color: #ffffff;
+    border-radius: 10px; /* Ligeramente menos redondeado */
+    box-shadow: 0 5px 18px rgba(0,0,0,0.0); /* Sutilmente menos pronunciado */
+    box-sizing: border-box;
 }
 
-/* Tus estilos existentes para el footer */
-.main-footer {
-    background-color: #333;
-    color: white;
+h2 {
+    font-family: 'Montserrat', sans-serif; /* A stylish font for headings */
+    color: #000000; /* Darker, more professional heading color */
     text-align: center;
-    padding: 1em 2em;
-    width: 100%;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0; /* Evita que el footer se encoja */
-    box-sizing: border-box; /* Asegura que padding se incluya en el ancho */
+    margin-bottom: 25px; /* Menos espacio debajo del encabezado */
+    font-size: 2em; /* Ligeramente más pequeño */
+    font-weight: 700;
+}
+
+/* Notification Card Styles */
+.notification-card {
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
+    border: 1px solid #e0e6ea; /* Subtle border */
+    border-left: 5px solid; /* Placeholder for color-coded border */
+    padding: 15px 20px; /* **¡Reducido!** Padding más pequeño */
+    margin-bottom: 12px; /* Menos espacio entre tarjetas */
+    border-radius: 8px; /* Ligeramente menos redondeado para las tarjetas */
+    box-shadow: 0 3px 12px rgba(0,0,0,0.04); /* Sutilmente menos pronunciado */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover/state changes */
+}
+
+.notification-card:hover {
+    transform: translateY(-2px); /* Menos elevación al pasar el ratón */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08); /* Sombra de hover ajustada */
+}
+
+/* Unread Notification Specific Styles */
+.notification-card.unread {
+    border-left-color: #3498db; /* A vibrant blue for unread notifications */
+    background-color: rgba(230, 240, 250, 0.95); /* A slightly more pronounced transparent blue for unread */
+}
+
+/* Read Notification Specific Styles */
+.notification-card.read {
+    border-left-color: #b0bec5; /* A muted grey for read notifications */
+    opacity: 0.8; /* Slightly fade read notifications */
+}
+
+/* Timestamp Styling */
+.timestamp {
+    font-size: 0.85em; /* Ligeramente más pequeño */
+    color: #7f8c8d; /* Muted grey for timestamp */
+    align-self: flex-end; /* Aligns to the right */
+    margin-bottom: 8px; /* Menos espacio debajo del timestamp */
+    font-weight: 500;
+}
+
+/* Message Styling */
+.message {
+    font-size: 1em; /* **Reducido!** Fuente del mensaje un poco más pequeña */
+    color: #000000; /* Darker text for better contrast */
+    line-height: 1.5; /* Ligeramente menos interlineado */
+    margin-bottom: 12px; /* Menos espacio debajo del mensaje */
+    flex-grow: 1; /* Allows message to take available space */
+}
+
+/* Mark Read Button Styling */
+.mark-read-btn {
+    background-color: #2ecc71; /* A friendly green color */
+    color: white;
+    border: none;
+    padding: 8px 15px; /* **Reducido!** Padding del botón más pequeño */
+    border-radius: 5px; /* Ligeramente menos redondeado */
+    cursor: pointer;
+    font-size: 0.9em; /* Ligeramente más pequeño */
+    font-weight: 600;
+    align-self: flex-start; /* Aligns to the left */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 1px 4px rgba(46, 204, 113, 0.25); /* Sombra más sutil */
+}
+
+.mark-read-btn:hover {
+    background-color: #27ae60; /* Darker green on hover */
+    transform: translateY(-1px); /* Slight lift on hover */
+}
+
+.mark-read-btn:active {
+    transform: translateY(0); /* Press effect */
+}
+
+/* No Notifications Message */
+.no-notifications {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 1.1em; /* Ligeramente más pequeño */
+    padding: 30px 20px; /* Menos padding */
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+/* Footer Styles (assuming these are in your main CSS or similar) */
+.main-footer {
+    background-color: #333; /* Mismo color que la navbar para consistencia */
+    color: #a0aec0;
+    padding: 2rem 1rem;
+    text-align: center;
+    margin-top: 2rem; /* Espacio superior antes del footer */
 }
 
 .footer-content {
@@ -51,4 +142,39 @@ body {
     padding: 0;
 }
 
-/* ... Resto de tus estilos ... */
+.main-footer p {
+    margin: 4px 0; /* Menos margen */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin: 15px auto; /* Menos margen vertical en móvil */
+        padding: 10px; /* Menos padding en móvil */
+    }
+
+    h2 {
+        font-size: 1.6em; /* Más pequeño en móvil */
+        margin-bottom: 15px;
+    }
+
+    .notification-card {
+        padding: 12px 15px; /* **Más pequeño en móvil** */
+        margin-bottom: 10px;
+    }
+
+    .message {
+        font-size: 0.95em; /* Más pequeño en móvil */
+    }
+
+    .timestamp {
+        font-size: 0.75em; /* Más pequeño en móvil */
+    }
+
+    .mark-read-btn {
+        padding: 7px 12px; /* Más pequeño en móvil */
+        font-size: 0.85em;
+    }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500;700&display=swap');

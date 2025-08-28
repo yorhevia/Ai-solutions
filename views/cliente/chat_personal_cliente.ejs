@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Finance Solutions - Mi Chat</title>
     <link rel="stylesheet" href="/stylesheets/chat_personal.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <%- include('../partials/client_navbar', { userName: user.nombre || 'Cliente', currentPage: 'chat' }) %>
 
     <div class="main-container">
         <% if (asesorAsignado) { %>
+            <!-- Elemento oculto para almacenar IDs del cliente y asesor -->
+            <div id="dataContainer"
+                 data-cliente-id="<%= cliente.id || '' %>"
+                 data-asesor-id="<%= asesorAsignado.id || '' %>"
+                 style="display: none;"></div>
+
             <div class="chat-header">
                 <div class="asesor-info-header">
                     <img src="<%= asesorAsignado.fotoPerfilUrl || '/images/default-profile.png' %>" alt="<%= asesorAsignado.nombre %>">
@@ -21,25 +26,27 @@
             </div>
             <div class="chat-messages" id="chatMessages">
                 <% chatMessages.forEach(message => { %>
+                    <% // Convertir el timestamp a objeto Date para usar toLocaleTimeString %>
+                    <% const msgTimestamp = new Date(message.timestamp); %>
                     <div class="message-bubble <%= message.senderId === cliente.id ? 'message-sent-cliente' : 'message-received-asesor' %>"
-                         data-message-id="<%= message.senderId %>-<%= new Date(message.timestamp).getTime() %>">
+                         data-message-id="<%= message.id %>"> <!-- AHORA USAMOS message.id (UUID) -->
                         <%= message.text %>
                         <div class="message-timestamp">
-                            <%= message.timestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
+                            <%= msgTimestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
                         </div>
                     </div>
                 <% }); %>
                 <% if (chatMessages.length === 0) { %>
-                    <div class="message-bubble message-received-asesor" data-message-id="initial-<%= new Date().getTime() %>">
+                    <div class="message-bubble message-received-asesor" data-message-id="static-initial-welcome"> <!-- ID estático para el mensaje inicial -->
                         ¡Hola <%= cliente.nombre %>! Soy tu asesor. ¿Cómo puedo ayudarte con tus finanzas hoy?
                         <div class="message-timestamp">Ahora</div>
                     </div>
                 <% } %>
             </div>
-            <div class="chat-input">
+            <form id="chatForm" class="chat-input">
                 <textarea id="messageInput" placeholder="Escribe tu mensaje..." rows="1"></textarea>
-                <button id="sendMessageBtn">Enviar</button>
-            </div>
+                <button type="submit" id="sendMessageBtn">Enviar</button>
+            </form>
         <% } else { %>
             <div class="no-asesor-assigned">
                 <h2>Aún no tienes un asesor asignado.</h2>
@@ -54,64 +61,57 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const clienteId = "<%= cliente.id %>"; // El ID del cliente logueado
-            const asesorId = "<%= asesorAsignado ? asesorAsignado.id : '' %>"; // ID del asesor asignado
+            const dataContainer = document.getElementById('dataContainer');
+            const clienteId = dataContainer ? dataContainer.dataset.clienteId : '';
+            const asesorId = dataContainer ? dataContainer.dataset.asesorId : '';
 
             const chatMessagesDiv = document.getElementById('chatMessages');
-            const messageInput = document.getElementById('messageInput');
-            const sendMessageBtn = document.getElementById('sendMessageBtn');
-
-            // Usamos un Set para almacenar los IDs de mensajes que ya están en el DOM
             const displayedMessageIds = new Set();
 
-            // Rellenar displayedMessageIds con los mensajes iniciales ya presentes en el DOM
+            // Rellenar displayedMessageIds con los IDs de los mensajes iniciales ya presentes en el DOM
+            // AHORA ESTO LEERÁ LOS UUIDS (message.id) que EJS ha colocado en data-message-id
             document.querySelectorAll('.chat-messages .message-bubble').forEach(bubble => {
-                displayedMessageIds.add(bubble.dataset.messageId);
+                const messageId = bubble.dataset.messageId;
+                if (messageId) {
+                    displayedMessageIds.add(messageId);
+                }
             });
 
-            // Función para auto-redimensionar el textarea
-            const autoResizeTextarea = () => {
-                if (messageInput) {
-                    messageInput.style.height = 'auto';
-                    messageInput.style.height = messageInput.scrollHeight + 'px';
-                }
-            };
-            if (messageInput) {
-                messageInput.addEventListener('input', autoResizeTextarea);
-            }
-
-            // Función para obtener un ID único para un mensaje en el DOM
+            // getUniqueMessageId ya no es estrictamente necesaria si siempre pasamos message.id
+            // pero la mantenemos como fallback o si el EJS inicial no tiene ID, aunque la estamos corrigiendo
             function getUniqueMessageId(message) {
-                const timestampValue = message.timestamp instanceof Date ? message.timestamp.getTime() : new Date(message.timestamp).getTime();
-                return `${message.senderId}-${timestampValue}`;
+                if (message.id) {
+                    return message.id;
+                }
+                // Si llegamos aquí, algo no está enviando el ID correcto. Es un fallback para depuración.
+                console.warn("getUniqueMessageId fue llamado con un mensaje sin ID de DB:", message);
+                return `temp_${message.senderId}_${new Date().getTime()}`; // ID temporal muy específico
             }
 
             // Función para añadir un mensaje al chat (con verificación de duplicados)
             function addMessageToChat(message) {
-                if (!chatMessagesDiv) return; // Asegúrate de que el contenedor exista
+                if (!chatMessagesDiv) return;
 
-                const uniqueId = getUniqueMessageId(message);
+                // Usamos el message.id real, que debería ser el UUID de la base de datos
+                const uniqueId = message.id; 
 
-                // ¡VERIFICACIÓN CLAVE DE DUPLICADOS!
                 if (displayedMessageIds.has(uniqueId)) {
                     // console.log('Mensaje ya existe en el DOM, evitando duplicación:', uniqueId);
-                    return; // El mensaje ya está en el DOM, no lo agregues de nuevo
+                    return; 
                 }
 
                 const messageBubble = document.createElement('div');
                 messageBubble.classList.add('message-bubble');
-                messageBubble.setAttribute('data-message-id', uniqueId); // Establece el ID único
-                displayedMessageIds.add(uniqueId); // Añade el ID al Set de mensajes mostrados
+                messageBubble.setAttribute('data-message-id', uniqueId); 
+                displayedMessageIds.add(uniqueId); 
 
-                // Determina si el mensaje fue enviado por el cliente o recibido del asesor
-                if (message.senderId === clienteId) {
+                if (message.senderId === clienteId) { 
                     messageBubble.classList.add('message-sent-cliente');
                 } else {
                     messageBubble.classList.add('message-received-asesor');
                 }
 
-                // Asegúrate de que el timestamp sea un objeto Date
-                const timestampDate = message.timestamp ? new Date(message.timestamp) : new Date();
+                const timestampDate = new Date(message.timestamp);
 
                 messageBubble.innerHTML = `
                     <span class="message-text">${message.text}</span>
@@ -120,78 +120,103 @@
                     </div>
                 `;
                 chatMessagesDiv.appendChild(messageBubble);
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
             }
 
-            // Lógica para enviar mensajes
-            if (sendMessageBtn && asesorId) { // Solo si hay un asesor asignado
-                sendMessageBtn.addEventListener('click', async () => {
-                    const messageText = messageInput.value.trim();
-                    if (messageText) {
-                        try {
-                            const now = new Date(); // Genera el timestamp AHORA
-                            const localMessage = {
-                                senderId: clienteId, // El ID del cliente
-                                senderType: 'cliente',
-                                text: messageText,
-                                timestamp: now // Usar el timestamp local para mostrarlo inmediatamente
-                            };
-                            console.log('Mensaje local a agregar:', localMessage);
-                            addMessageToChat(localMessage); // Añadir el mensaje localmente inmediatamente
+            // Lógica principal del chat solo si hay un asesor asignado
+            if (asesorId) {
+                const messageInput = document.getElementById('messageInput');
+                const sendMessageBtn = document.getElementById('sendMessageBtn');
+                const chatForm = document.getElementById('chatForm');
 
-                            messageInput.value = '';
-                            autoResizeTextarea();
-                            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll al final
-
-                            const response = await fetch(`/cliente/api/send-message`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    asesorId: asesorId,
-                                    messageText: messageText,
-                                    timestamp: now.toISOString() // ¡ENVÍA EL TIMESTAMP AL BACKEND!
-                                })
-                            });
-                            const data = await response.json();
-                            if (!data.success) {
-                                console.error('Error al enviar mensaje al backend:', data.message);
-                                alert('Error al enviar mensaje: ' + (data.message || 'Error desconocido'));
-                            }
-                        } catch (error) {
-                            console.error('Error enviando mensaje:', error);
-                            alert('Error de conexión al enviar mensaje.');
-                        }
+                const autoResizeTextarea = () => {
+                    if (messageInput) {
+                        messageInput.style.height = 'auto';
+                        messageInput.style.height = messageInput.scrollHeight + 'px';
                     }
-                });
+                };
+                
+                if (messageInput) { 
+                    messageInput.addEventListener('input', autoResizeTextarea);
+                }
 
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                if (chatForm) { 
+                    chatForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        sendMessageBtn.click();
-                    }
-                });
-            } else if (sendMessageBtn) {
-                // Si no hay asesor asignado, deshabilitar el input y botón
-                messageInput.disabled = true;
-                sendMessageBtn.disabled = true;
-                messageInput.placeholder = "No puedes chatear sin un asesor asignado.";
+
+                        const messageText = messageInput.value.trim();
+                        if (messageText) {
+                            try {
+                                const now = new Date();
+                                messageInput.value = ''; 
+                                autoResizeTextarea(); 
+
+                                const response = await fetch(`/cliente/api/chat/send`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        asesorId: asesorId,
+                                        messageText: messageText,
+                                        timestamp: now.toISOString()
+                                    })
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    // AÑADIR MENSAJE SOLO CUANDO EL BACKEND LO CONFIRMA Y DEVUELVE EL ID
+                                    addMessageToChat({
+                                        id: data.messageId, 
+                                        senderId: data.senderId,
+                                        senderType: data.senderType,
+                                        text: data.text,
+                                        timestamp: data.timestamp
+                                    });
+                                } else {
+                                    console.error('Error al enviar mensaje al backend:', data.message);
+                                    alert('Error al enviar mensaje: ' + (data.message || 'Error desconocido'));
+                                }
+                            } catch (error) {
+                                console.error('Error enviando mensaje:', error);
+                                alert('Error de conexión al enviar mensaje.');
+                            }
+                        }
+                    });
+                }
+
+                const pollingInterval = 3000;
+
+                // Iniciar el polling solo si hay un asesor asignado
+                setInterval(pollForUpdates, pollingInterval);
+
+                // Scroll al final del chat al cargar la página
+                if (chatMessagesDiv) {
+                    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                }
+
+            } else { 
+                const messageInputIfPresent = document.getElementById('messageInput');
+                const sendMessageBtnIfPresent = document.getElementById('sendMessageBtn');
+
+                if (messageInputIfPresent) messageInputIfPresent.disabled = true;
+                if (sendMessageBtnIfPresent) sendMessageBtnIfPresent.disabled = true;
+                if (messageInputIfPresent) messageInputIfPresent.placeholder = "No puedes chatear sin un asesor asignado.";
             }
 
-            // Implementar Polling para actualizar los mensajes
-            const pollingInterval = 3000; // Cada 3 segundos, un poco más frecuente para una mejor UX
-
+            // Función de polling
             async function pollForUpdates() {
-                if (asesorId) { // Solo hacer polling si hay un asesor asignado
+                if (asesorId) { 
                     try {
-                        const response = await fetch(`/cliente/api/chat/${asesorId}`); // Pide mensajes para este asesor
+                        const response = await fetch(`/cliente/api/chat/messages/${asesorId}`);
                         const data = await response.json();
                         if (data.success && data.messages) {
                             data.messages.forEach(msg => {
-                                // console.log('Mensaje recibido por polling:', msg);
-                                addMessageToChat(msg); // addMessageToChat se encargará de la deduplicación
+                                // Cada mensaje del polling DEBE tener un 'id' de la DB
+                                addMessageToChat(msg);
                             });
-                            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll al final si hay nuevos mensajes
+                            // No siempre scroll, solo si el usuario no está viendo mensajes anteriores
+                            // if(chatMessagesDiv) chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
+                            // Opcional: solo scroll si el usuario está al final o si el mensaje es del otro usuario
                         }
                     } catch (error) {
                         console.error('Error en polling de chat del cliente:', error);
@@ -199,18 +224,7 @@
                 }
             }
 
-            // Iniciar el polling solo si hay un asesor asignado
-            if (asesorId) {
-                setInterval(pollForUpdates, pollingInterval);
-                // No es necesario un scroll inicial aquí si ya se hace después de agregar los mensajes
-            }
-
-            // Scroll al final del chat al cargar la página (para los mensajes iniciales)
-            if (chatMessagesDiv) {
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-            }
-
-            // JavaScript para el cierre de alertas (CSS puro)
+            // JavaScript para el cierre de alertas
             document.querySelectorAll('.alert .close-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     button.closest('.alert').style.display = 'none';
@@ -218,5 +232,7 @@
             });
         });
     </script>
+
+    <%- include('../partials/footer') %>
 </body>
 </html>

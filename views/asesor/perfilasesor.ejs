@@ -18,7 +18,7 @@
     <div class="container profile-container">
         <section class="profile-photo-section">
             <div class="profile-picture-wrapper">
-                <img id="profilePictureDisplay" src="<%= asesor.fotoPerfilUrl || 'https://via.placeholder.com/100/CCCCCC/FFFFFF?text=%EF%A3%BF' %>" alt="Foto de Perfil">
+          <img id="profilePictureDisplay" src="<%= asesor.fotoPerfilUrl || '/images/default-profile.png' %>" alt="Foto de Perfil">
             </div>
             <input type="file" id="profilePictureUpload" accept="image/*" style="display: none;">
             <label for="profilePictureUpload" class="upload-button">
@@ -44,15 +44,8 @@
             <div class="info-item">
                 <i class="fas fa-phone icon"></i>
                 <span>Teléfono:</span>
-                <span class="value" id="displayTelefono"><%= asesor.telefono %></span>
+                <span class="value" id="displayTelefono"><%= asesor.telefono || 'No especificado' %></span>
             </div>
-            <% if (asesor.direccion) { %>
-            <div class="info-item">
-                <i class="fas fa-map-marker-alt icon"></i>
-                <span>Dirección:</span>
-                <span class="value" id="displayDireccion"><%= asesor.direccion %></span>
-            </div>
-            <% } %>
 
             <a href="#" id="editPersonalLink" class="edit-link" style="margin-top: 15px;">
                 <i class="fas fa-edit"></i> Editar Información Personal
@@ -79,10 +72,6 @@
                     <label for="editTelefono">Teléfono:</label>
                     <input type="tel" id="editTelefono" name="telefono" value="<%= asesor.telefono || '' %>">
                 </div>
-                <div class="form-group">
-                    <label for="editDireccion">Dirección:</label>
-                    <input type="text" id="editDireccion" name="direccion" value="<%= asesor.direccion || '' %>">
-                </div>
                 <div class="button-group">
                     <button type="submit" class="save-button">Guardar</button>
                     <button type="button" id="cancelEditPersonalButton" class="cancel-button">Cancelar</button>
@@ -95,27 +84,27 @@
             <div class="info-item">
                 <i class="fas fa-briefcase icon"></i>
                 <span>Profesión:</span>
-                <span class="value" id="displayProfesion"><%= asesor.profesion %></span>
+                <span class="value" id="displayProfesion"><%= asesor.profesion || 'No especificada' %></span>
             </div>
             <div class="info-item">
                 <i class="fas fa-id-card icon"></i>
                 <span>Número de Licencia Profesional:</span>
-                <span class="value" id="displayLicencia"><%= asesor.licencia %></span>
+                <span class="value" id="displayLicencia"><%= asesor.licencia || 'No especificada' %></span>
             </div>
             <div class="info-item">
                 <i class="fas fa-graduation-cap icon"></i>
                 <span>Especialidad Financiera:</span>
-                <span class="value" id="displayEspecialidad"><%= asesor.especialidad %></span>
+                <span class="value" id="displayEspecialidad"><%= asesor.especialidad || 'No especificada' %></span>
             </div>
             <div class="info-item">
                 <i class="fas fa-chart-line icon"></i>
                 <span>Años de Experiencia:</span>
-                <span class="value" id="displayExperiencia"><%= asesor.experiencia %></span>
+                <span class="value" id="displayExperiencia"><%= asesor.experiencia || '0' %></span>
             </div>
             <div class="info-item">
                 <i class="fas fa-file-alt icon"></i>
                 <span>Descripción Profesional:</span>
-                <p class="value" id="displayDescripcion"><%= asesor.descripcion %></p>
+                <p class="value" id="displayDescripcion"><%= asesor.bio || 'No hay descripción profesional disponible.' %></p>
             </div>
             <a href="#" id="editProfessionalLink" class="edit-link" style="margin-top: 15px;">
                 <i class="fas fa-edit"></i> Editar Información Profesional
@@ -144,8 +133,7 @@
                 </div>
                 <div class="form-group">
                     <label for="editDescripcion">Descripción Profesional:</label>
-                    <textarea id="editDescripcion" name="descripcion"><%= asesor.descripcion || '' %></textarea>
-                </div>
+                    <textarea id="editDescripcion" name="bio"><%= asesor.bio || '' %></textarea> </div>
                 <div class="button-group">
                     <button type="submit" class="save-button">Guardar</button>
                     <button type="button" id="cancelEditProfessionalButton" class="cancel-button">Cancelar</button>
@@ -166,12 +154,12 @@
                 <div class="verification-header">
                     <i class="fas fa-user-check icon"></i>
                     <span>Verificación de Identidad (KYC):</span>
-                    <span class="status-indicator <%= asesor.verification && asesor.verification.status ? 'status-' + asesor.verification.status : 'status-no-enviado' %>">
-                        <% if (asesor.verification && asesor.verification.status === 'verificado') { %>
+                    <span class="status-indicator <%= asesor.kyc_status ? 'status-' + asesor.kyc_status : 'status-no-enviado' %>">
+                        <% if (asesor.kyc_status === 'verificado') { %>
                             Verificado <i class="fas fa-check-circle"></i>
-                        <% } else if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                        <% } else if (asesor.kyc_status === 'pendiente') { %>
                             Pendiente <i class="fas fa-hourglass-half"></i>
-                        <% } else if (asesor.verification && asesor.verification.status === 'rechazado') { %>
+                        <% } else if (asesor.kyc_status === 'rechazado') { %>
                             Rechazado <i class="fas fa-times-circle"></i>
                         <% } else { %>
                             No Enviado <i class="fas fa-exclamation-triangle"></i>
@@ -179,23 +167,23 @@
                     </span>
                 </div>
                 <div class="verification-actions">
-                    <% if (!(asesor.verification && asesor.verification.status === 'verificado')) { %>
+                    <% if (asesor.kyc_status !== 'verificado') { %>
                         <a href="/asesor/verificar_identidad" class="action-button primary-action">
                             <i class="fas fa-shield-alt"></i>
-                            <% if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                            <% if (asesor.kyc_status === 'pendiente') { %>
                                 Ver estado / Re-enviar
-                            <% } else if (asesor.verification && asesor.verification.status === 'rechazado') { %>
+                            <% } else if (asesor.kyc_status === 'rechazado') { %>
                                 Re-enviar para Verificación
                             <% } else { %>
                                 Iniciar Verificación
                             <% } %>
                         </a>
                     <% } %>
-                    <% if (asesor.verification && asesor.verification.notes && asesor.verification.status === 'rechazado') { %>
-                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Motivo de rechazo:** <%= asesor.verification.notes %></p>
+                    <% if (asesor.kyc_notes && asesor.kyc_status === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Motivo de rechazo:** <%= asesor.kyc_notes %></p>
                     <% } %>
-                    <% if (asesor.verification && asesor.verification.photos && asesor.verification.photos.front) { %>
-                        <a href="<%= asesor.verification.photos.front %>" target="_blank" class="action-button secondary-action">
+                    <% if (asesor.fotoIdentificacionUrl) { %> 
+                        <a href="<%= asesor.fotoIdentificacionUrl %>" target="_blank" class="action-button secondary-action">
                             <i class="fas fa-eye"></i> Ver Documento de Identidad Enviado
                         </a>
                     <% } %>
@@ -208,14 +196,13 @@
                     <span>Credenciales Profesionales:</span>
                     <span class="status-indicator 
                         <% 
-                        const isTituloVerified = asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado';
-                        const isCertificacionVerified = asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado';
+                        const isTituloVerified = asesor.title_status === 'verificado';
+                        const isCertificacionVerified = asesor.certification_status === 'verificado';
 
-                        // Professional credentials are fully verified if title is verified, and either certification is verified or not provided.
-                        const isAllProfessionalVerified = isTituloVerified && (!asesor.verificacion.certificacion || isCertificacionVerified);
+                        const isAllProfessionalVerified = isTituloVerified && (asesor.certification_status === 'no enviado' || asesor.certification_status === null || isCertificacionVerified);
 
-                        const isAnyProfessionalPending = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente');
-                        const isAnyProfessionalRejected = (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'rechazado') || (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'rechazado');
+                        const isAnyProfessionalPending = (asesor.title_status === 'pendiente') || (asesor.certification_status === 'pendiente');
+                        const isAnyProfessionalRejected = (asesor.title_status === 'rechazado') || (asesor.certification_status === 'rechazado');
                         
                         if (isAllProfessionalVerified) { %>
                             status-verificado
@@ -252,19 +239,19 @@
                             <% } %>
                         </a>
                     <% } %>
-                    <% if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.observaciones && asesor.verificacion.titulo.estado === 'rechazado') { %>
-                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Título:** <%= asesor.verificacion.titulo.observaciones %></p>
+                    <% if (asesor.title_notes && asesor.title_status === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Título:** <%= asesor.title_notes %></p>
                     <% } %>
-                    <% if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.observaciones && asesor.verificacion.certificacion.estado === 'rechazado') { %>
-                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Certificación:** <%= asesor.verificacion.certificacion.observaciones %></p>
+                    <% if (asesor.certification_notes && asesor.certification_status === 'rechazado') { %>
+                        <p class="observation-message full-width"><i class="fas fa-info-circle"></i> **Certificación:** <%= asesor.certification_notes %></p>
                     <% } %>
-                    <% if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento) { %>
-                        <a href="<%= asesor.verificacion.titulo.urlDocumento %>" target="_blank" class="action-button secondary-action">
+                    <% if (asesor.tituloUrl) { %> 
+                        <a href="<%= asesor.tituloUrl %>" target="_blank" class="action-button secondary-action">
                             <i class="fas fa-eye"></i> Ver Título Enviado
                         </a>
                     <% } %>
-                    <% if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento) { %>
-                        <a href="<%= asesor.verificacion.certificacion.urlDocumento %>" target="_blank" class="action-button secondary-action">
+                    <% if (asesor.certificacionUrl) { %>
+                        <a href="<%= asesor.certificacionUrl %>" target="_blank" class="action-button secondary-action">
                             <i class="fas fa-eye"></i> Ver Certificación Enviada
                         </a>
                     <% } %>
@@ -276,32 +263,47 @@
             <div class="info-item">
                 <i class="fas fa-calendar-alt icon"></i>
                 <span>Fecha de Registro:</span>
-                <span class="value"><%= asesor.fechaRegistro || 'Fecha de registro no disponible' %></span>
+                <span class="value"><%= asesor.formattedCreatedAt %></span>
             </div>
         </section>
     </div>
 
-    <footer class="main-footer">
-        <div class="footer-content">
-            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
-            <p>Crecimiento inteligente para tus finanzas.</p>
-        </div>
-    </footer>
 
-    <script src="/javascripts/asesor_notifications.js"></script>
 
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Script para la subida de foto de perfil
+
+            // --- Script para Formatear la Fecha de Registro del Asesor ---
+            const fechaRegistroAsesorElement = document.querySelector('.additional-info .info-item .value[data-date]');
+
+            if (fechaRegistroAsesorElement && fechaRegistroAsesorElement.getAttribute('data-date').trim() !== '') {
+                const fechaOriginalAsesor = fechaRegistroAsesorElement.getAttribute('data-date');
+                
+                const parsedDateAsesor = moment(fechaOriginalAsesor);
+
+                if (parsedDateAsesor.isValid()) {
+                    // Formatea la fecha en español: Día [de] Mes, Año
+                    const fechaFormateadaAsesor = parsedDateAsesor.locale('es').format('D [de] MMMM, YYYY');
+                    fechaRegistroAsesorElement.textContent = fechaFormateadaAsesor;
+                    console.log('Asesor Frontend: Fecha de registro formateada en español:', fechaFormateadaAsesor);
+                } else {
+                    console.error('Asesor Frontend: Moment.js no pudo parsear la fecha de registro:', fechaOriginalAsesor);
+                    fechaRegistroAsesorElement.textContent = 'Fecha no disponible';
+                }
+            } else if (fechaRegistroAsesorElement) {
+                console.warn('Asesor Frontend: El atributo data-date para la fecha de registro está vacío o no existe.');
+                fechaRegistroAsesorElement.textContent = 'Fecha no disponible';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
             const profilePictureUpload = document.getElementById('profilePictureUpload');
             const profilePictureDisplay = document.getElementById('profilePictureDisplay');
             const uploadMessage = document.getElementById('uploadMessage');
             const profilePictureErrorMessage = document.getElementById('profilePictureErrorMessage');
             const uploadButtonLabel = document.querySelector('.upload-button');
-            const globalMessage = document.getElementById('globalMessage'); // Asegurarse de que globalMessage esté definido
-            let messageTimeout; // Asegurarse de que messageTimeout esté definido
+            const globalMessage = document.getElementById('globalMessage');
+            let messageTimeout;
 
-            // Función showMessage para mensajes globales y de error (copiada de tu código original)
             function showMessage(element, message, isSuccess = true, duration = 5000) {
                 clearTimeout(messageTimeout);
                 element.textContent = message;
@@ -342,6 +344,9 @@
 
                         const response = await fetch('/upload-profile-photo', {
                             method: 'POST',
+                            headers: {
+                                // 'Content-Type': 'application/json', // FormData sets this automatically
+                            },
                             body: formData
                         });
 
@@ -379,7 +384,6 @@
                 });
             }
 
-            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PERSONAL ---
             const editPersonalLink = document.getElementById('editPersonalLink');
             const editPersonalCard = document.getElementById('editPersonalCard');
             const cancelEditPersonalButton = document.getElementById('cancelEditPersonalButton');
@@ -408,8 +412,6 @@
                 const formData = new FormData(editPersonalForm);
                 const data = Object.fromEntries(formData.entries());
 
-                console.log('Frontend (Personal): Datos que se enviarán al backend:', data);
-
                 if (!data.nombre || !data.apellido || !data.email || !data.telefono) {
                     showMessage(editPersonalErrorMessage, 'Nombre, apellido, email y teléfono son obligatorios.', false);
                     return;
@@ -430,34 +432,34 @@
                         body: JSON.stringify(data),
                     });
 
-                    console.log('Frontend (Personal): Respuesta raw del servidor (status, ok):', response.status, response.ok);
-
                     const result = await response.json();
-                    console.log('Frontend (Personal): Contenido de la respuesta JSON del servidor:', result);
 
                     if (response.ok) {
-                        document.getElementById('displayNombre').textContent = result.asesor.nombre;
-                        document.getElementById('displayApellido').textContent = result.asesor.apellido;
-                        document.getElementById('displayEmail').textContent = result.asesor.email;
-                        document.getElementById('displayTelefono').textContent = result.asesor.telefono;
+                        if (result.asesor) {
+                            document.getElementById('displayNombre').textContent = result.asesor.nombre;
+                            document.getElementById('displayApellido').textContent = result.asesor.apellido;
+                            document.getElementById('displayEmail').textContent = result.asesor.email;
+                            document.getElementById('displayTelefono').textContent = result.asesor.telefono;
 
-                        const displayDireccion = document.getElementById('displayDireccion');
-                        if (displayDireccion) {
-                            displayDireccion.textContent = result.asesor.direccion || '';
+                            const displayDireccion = document.getElementById('displayDireccion');
+                            if (displayDireccion) {
+                                displayDireccion.textContent = result.asesor.direccion || '';
+                            }
+
+                            editPersonalCard.style.display = 'none';
+                            showMessage(globalMessage, '¡Información personal actualizada con éxito!', true);
+                        } else {
+                            showMessage(editPersonalErrorMessage, result.message || 'Error al actualizar: faltan datos del perfil.', false);
                         }
-
-                        editPersonalCard.style.display = 'none';
-                        showMessage(globalMessage, '¡Información personal actualizada con éxito!', true);
                     } else {
                         showMessage(editPersonalErrorMessage, result.error || 'Error al actualizar la información personal.', false);
                     }
                 } catch (error) {
-                    console.error('Frontend (Personal): Error en la solicitud fetch o al procesar la respuesta:', error);
+                    console.error('Error en la solicitud fetch o al procesar la respuesta:', error);
                     showMessage(globalMessage, 'Error de conexión o de red al actualizar información personal. Inténtalo de nuevo.', false);
                 }
             });
 
-            // --- LÓGICA PARA EDICIÓN DE INFORMACIÓN PROFESIONAL ---
             const editProfessionalLink = document.getElementById('editProfessionalLink');
             const editProfessionalCard = document.getElementById('editProfessionalCard');
             const cancelEditProfessionalButton = document.getElementById('cancelEditProfessionalButton');
@@ -486,8 +488,6 @@
                 const formData = new FormData(editProfessionalForm);
                 const data = Object.fromEntries(formData.entries());
 
-                console.log('Frontend (Profesional): Datos que se enviarán al backend:', data);
-
                 if (!data.profesion || !data.licencia || !data.especialidad) {
                     showMessage(editProfessionalErrorMessage, 'Profesión, licencia y especialidad son obligatorios.', false);
                     return;
@@ -506,29 +506,31 @@
                         body: JSON.stringify(data),
                     });
 
-                    console.log('Frontend (Profesional): Respuesta raw del servidor (status, ok):', response.status, response.ok);
-
                     const result = await response.json();
-                    console.log('Frontend (Profesional): Contenido de la respuesta JSON del servidor:', result);
 
                     if (response.ok) {
-                        document.getElementById('displayProfesion').textContent = result.asesor.profesion;
-                        document.getElementById('displayLicencia').textContent = result.asesor.licencia;
-                        document.getElementById('displayEspecialidad').textContent = result.asesor.especialidad;
-                        document.getElementById('displayExperiencia').textContent = result.asesor.experiencia;
-                        document.getElementById('displayDescripcion').textContent = result.asesor.descripcion || '';
+                        if (result.asesor) {
+                            document.getElementById('displayProfesion').textContent = result.asesor.profesion;
+                            document.getElementById('displayLicencia').textContent = result.asesor.licencia;
+                            document.getElementById('displayEspecialidad').textContent = result.asesor.especialidad;
+                            document.getElementById('displayExperiencia').textContent = result.asesor.experiencia;
+                            document.getElementById('displayDescripcion').textContent = result.asesor.bio || ''; // Aquí se usa bio
 
-                        editProfessionalCard.style.display = 'none';
-                        showMessage(globalMessage, '¡Información profesional actualizada con éxito!', true);
+                            editProfessionalCard.style.display = 'none';
+                            showMessage(globalMessage, '¡Información profesional actualizada con éxito!', true);
+                        } else {
+                            showMessage(editProfessionalErrorMessage, result.message || 'Error al actualizar: faltan datos del perfil profesional.', false);
+                        }
                     } else {
                         showMessage(editProfessionalErrorMessage, result.error || 'Error al actualizar la información profesional.', false);
                     }
                 } catch (error) {
-                    console.error('Frontend (Profesional): Error en la solicitud fetch o al procesar la respuesta:', error);
+                    console.error('Error en la solicitud fetch o al procesar la respuesta:', error);
                     showMessage(globalMessage, 'Error de conexión o de red al actualizar información profesional. Inténtalo de nuevo.', false);
                 }
             });
         });
     </script>
+    <%- include('../partials/footer') %>
 </body>
 </html>

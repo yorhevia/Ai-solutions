@@ -16,27 +16,7 @@ body {
     width: 100%; /* Asegura que el body no exceda el ancho */
 }
 
-/* Encabezado principal */
-.main-header {
-    background-color: #333;
-    color: white;
-    padding: 1em 2em;
-    width: 100%; /* Ocupa todo el ancho disponible */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
 
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.header-left h2 {
-    color: white;
-    margin: 0;
-}
 
 .back-button {
     color: white;
@@ -481,26 +461,7 @@ span {
     margin-top: 0;
 }
 
-/* Pie de página */
-.main-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1em 2em;
-    width: 100%;
-    margin-top: 2em;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-}
 
-.footer-content {
-    width: 100%;
-    padding: 0;
-}
-
-.footer-content p {
-    margin: 0.5em 0;
-    font-size: 0.9em;
-}
 
 /* MEDIA QUERIES para responsividad */
 @media (max-width: 768px) {

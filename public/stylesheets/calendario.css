@@ -1,62 +1,83 @@
+/* Styles for FullCalendar Header */
+.fc .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+    /* Añade espacio entre los elementos dentro de cada "chunk" del toolbar */
+    gap: 10px; 
+}
 
-        /* CSS BÁSICO INTEGRADO PARA LA PÁGINA DEL CALENDARIO Y MODAL */
-        /* Considera mover estos estilos a /public/stylesheets/calendario.css para mejor organización */
+.fc .fc-toolbar-title {
+    /* **AJUSTE CLAVE:** Margen horizontal para separar el título de los botones. */
+    /* Aumenta este valor (ej. 20px, 25px) si necesitas más espacio visual. */
+    margin: 0 20px; /* 20px de margen a la izquierda y derecha */
+    white-space: nowrap; /* Evita que el título se rompa en varias líneas */
+    font-size: 1.8em !important; /* Tu tamaño de fuente deseado, con !important para asegurar la aplicación */
+    color: #444; /* Tu color de texto deseado para el título */
+}
 
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
+/* Opcional: Ajustes para los botones de navegación si se ven muy juntos */
+.fc .fc-button-group .fc-button {
+    margin: 0 3px; /* Pequeño margen entre botones individuales si están dentro de un grupo */
+}
 
-        .calendario-page-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 20px auto;
-            box-sizing: border-box;
-        }
+/* Opcional: Espacio adicional para los grupos de botones de vista (month, week, day) */
+.fc .fc-button-group {
+    margin-left: 10px; /* Espacio a la izquierda del grupo de botones de vista */
+    margin-right: 10px; /* Espacio a la derecha del grupo de botones de vista */
+}
 
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 2.2em;
-        }
+/* Aumenta el espacio debajo de toda la barra de herramientas del calendario si es necesario */
+.fc-toolbar {
+    margin-bottom: 1.5em; 
+}
 
-        .calendario-content {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
-        }
+/* Otros estilos del calendario (mantenidos de tu código original) */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+}
 
-        #calendar {
-            flex: 3;
-            min-height: 500px;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-            min-width: 300px;
-        }
+.calendario-page-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 20px auto;
+    box-sizing: border-box;
+}
 
-        /* --- NUEVO CSS PARA SEPARAR EL TÍTULO DEL CALENDARIO --- */
-        /* FullCalendar usa esta clase para el título (ej. "Junio 2025") */
-        .fc-toolbar-title {
-            margin-bottom: 15px; /* Aumenta este valor si necesitas más espacio */
-            font-size: 1.8em !important; /* Haz el título un poco más grande si quieres */
-            color: #444; /* Un color un poco más oscuro para el título */
-        }
-        /* Fin del nuevo CSS */
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2.2em;
+}
 
-        /* Estilo para resaltar el día actual en el calendario */
+.calendario-content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#calendar {
+    flex: 3;
+    min-height: 500px;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    min-width: 300px;
+}
+
+/* Estilo para resaltar el día actual en el calendario */
 .fc-day-today {
     background-color: #e0f2f7 !important; /* Un azul claro suave como fondo */
     border: 2px solid #007bff !important; /* Un borde azul más notorio */
@@ -66,214 +87,214 @@
     color: #333; /* Color de texto más oscuro para contraste */
 }
 
-        .sidebar {
-            flex: 1;
-            min-width: 280px;
-            max-width: 380px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
+.sidebar {
+    flex: 1;
+    min-width: 280px;
+    max-width: 380px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
 
-        .sidebar h2 {
-            text-align: center;
-            color: #000000;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
+.sidebar h2 {
+    text-align: center;
+    color: #000000;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
 
-        .event-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-        .event-list li {
-            background-color: #e6f7ff;
-            border: 1px solid #b3e0ff;
-            margin-bottom: 10px;
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.95em;
-            color: #333;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+.event-list li {
+    background-color: #e6f7ff;
+    border: 1px solid #b3e0ff;
+    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.95em;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
 
-        .event-list li strong {
-            color: #0056b3;
-            font-size: 1.1em;
-            margin-bottom: 4px;
-        }
+.event-list li strong {
+    color: #0056b3;
+    font-size: 1.1em;
+    margin-bottom: 4px;
+}
 
-        .event-list li small {
-            color: #666;
-        }
+.event-list li small {
+    color: #666;
+}
 
-        .event-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 5px;
-        }
-        .event-actions button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: background-color 0.2s ease;
-        }
-        .event-actions .edit-btn { 
-            background-color: #007bff; 
-            color: white; 
-        }
-        .event-actions .edit-btn:hover { background-color: #0056b3; }
+.event-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 5px;
+}
+.event-actions button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color 0.2s ease;
+}
+.event-actions .edit-btn { 
+    background-color: #007bff; 
+    color: white; 
+}
+.event-actions .edit-btn:hover { background-color: #0056b3; }
 
-        .event-actions .delete-btn { 
-            background-color: #dc3545; 
-            color: white; 
-        }
-        .event-actions .delete-btn:hover { background-color: #c82333; }
+.event-actions .delete-btn { 
+    background-color: #dc3545; 
+    color: white; 
+}
+.event-actions .delete-btn:hover { background-color: #c82333; }
 
-        /* Estilos del Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
+/* Estilos del Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
 
-        .modal.show-modal {
-            display: flex;
-            opacity: 1;
-        }
+.modal.show-modal {
+    display: flex;
+    opacity: 1;
+}
 
-        .modal-content {
-            background-color: #fefefe;
-            padding: 30px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 550px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            position: relative;
-            transform: translateY(-30px);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 0;
-        }
-        .modal.show-modal .modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
+.modal-content {
+    background-color: #fefefe;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    position: relative;
+    transform: translateY(-30px);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+.modal.show-modal .modal-content {
+    transform: translateY(0);
+    opacity: 1;
+}
 
-        .close {
-            color: #888;
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            font-size: 32px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
+.close {
+    color: #888;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
 
-        .close:hover,
-        .close:focus {
-            color: #333;
-        }
+.close:hover,
+.close:focus {
+    color: #333;
+}
 
-        .modal-content h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 25px;
-            font-size: 1.8em;
-        }
+.modal-content h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+.form-group {
+    margin-bottom: 20px;
+}
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
 
-        .form-group input[type="text"] {
-            width: calc(100% - 24px);
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1em;
-        }
+.form-group input[type="text"] {
+    width: calc(100% - 24px);
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+}
 
-        #saveEventBtn, #deleteEventBtn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1.1em;
-            margin-top: 15px;
-            transition: background-color 0.2s ease;
-        }
+#saveEventBtn, #deleteEventBtn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+}
 
-        #saveEventBtn {
-            background-color: #28a745;
-            color: white;
-        }
-        #saveEventBtn:hover { background-color: #218838; }
+#saveEventBtn {
+    background-color: #28a745;
+    color: white;
+}
+#saveEventBtn:hover { background-color: #218838; }
 
-        #deleteEventBtn {
-            background-color: #dc3545;
-            color: white;
-            margin-left: 15px;
-        }
-        #deleteEventBtn:hover { background-color: #c82333; }
+#deleteEventBtn {
+    background-color: #dc3545;
+    color: white;
+    margin-left: 15px;
+}
+#deleteEventBtn:hover { background-color: #c82333; }
 
-        /* Media Queries para responsividad */
-        @media (max-width: 768px) {
-            .calendario-content {
-                flex-direction: column;
-                align-items: center;
-            }
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .calendario-content {
+        flex-direction: column;
+        align-items: center;
+    }
 
-            #calendar, .sidebar {
-                flex: none;
-                width: 100%;
-                max-width: none;
-            }
+    #calendar, .sidebar {
+        flex: none;
+        width: 100%;
+        max-width: none;
+    }
 
-            .calendario-page-container {
-                padding: 15px;
-            }
+    .calendario-page-container {
+        padding: 15px;
+    }
 
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
 
-            .modal-content h2 {
-                font-size: 1.5em;
-            }
+    .modal-content h2 {
+        font-size: 1.5em;
+    }
 
-            #saveEventBtn, #deleteEventBtn {
-                width: 100%;
-                margin-left: 0;
-                margin-top: 10px;
-            }
-        }
+    #saveEventBtn, #deleteEventBtn {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

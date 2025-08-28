@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="/stylesheets/kyc.css">
     <link rel="stylesheet" href="/stylesheets/asesor_navbar.css">
-   
+    
 </head>
 <body>
     <%- include('../partials/asesor_navbar') %>
@@ -57,18 +57,27 @@
 
             <%
             const isIdentityVerified = asesor && asesor.verification && asesor.verification.status === 'verificado';
+            const isIdentityRejected = asesor && asesor.verification && asesor.verification.status === 'rechazado'; // Nuevo estado para rechazo
+            const canEditIdentity = !isIdentityVerified; // Puedes editar si no está verificado
             %>
 
             <% if (isIdentityVerified) { %>
                 <div class="info-message show">
                     <i class="fas fa-info-circle"></i> Tu verificación de identidad ya ha sido **VERIFICADA**. No es necesario volver a enviarla.
                 </div>
+            <% } else if (isIdentityRejected) { %>
+                <div class="error-message show">
+                    <i class="fas fa-exclamation-triangle"></i> Tu verificación de identidad ha sido **RECHAZADA**. Por favor, revisa tus documentos y vuelve a subirlos.
+                    <% if (asesor.verification.notes) { %>
+                        <br>Notas del rechazo: <%= asesor.verification.notes %>
+                    <% } %>
+                </div>
             <% } %>
 
             <fieldset>
                 <div class="form-group">
                     <label for="documentType">Tipo de Documento:</label>
-                    <select id="documentType" name="documentType" required>
+                    <select id="documentType" name="documentType" required <%= canEditIdentity ? '' : 'readonly' %> >
                         <option value="">Selecciona un tipo de documento</option>
                         <option value="cedula" <%= asesor && asesor.verification && asesor.verification.documentType === 'cedula' ? 'selected' : '' %>>Cédula de Identidad</option>
                         <option value="pasaporte" <%= asesor && asesor.verification && asesor.verification.documentType === 'pasaporte' ? 'selected' : '' %>>Pasaporte</option>
@@ -79,25 +88,37 @@
 
                 <div class="form-group">
                     <label for="documentNumber">Número de Documento:</label>
-                    <input type="text" id="documentNumber" name="documentNumber" placeholder="Número de identificación único" value="<%= asesor && asesor.verification && asesor.verification.documentNumber || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
+                    <input type="text" id="documentNumber" name="documentNumber" placeholder="Número de identificación único" value="<%= asesor && asesor.verification && asesor.verification.documentNumber || '' %>" required <%= canEditIdentity ? '' : 'readonly' %>>
                 </div>
 
                 <div class="form-group">
                     <label for="frontPhotoUrl">URL Foto Frontal del Documento:</label>
-                    <input type="url" id="frontPhotoUrl" name="frontPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto frontal" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.front || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
-                    <small>Ej: `https://drive.google.com/file/d/ABCD123xyz/view?usp=sharing`</small>
+                    <input type="url" id="frontPhotoUrl" name="frontPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto frontal" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.front || '' %>" required <%= canEditIdentity ? '' : 'readonly' %>>
+                    <small>Ej: `https://drive.google.com/file/d/ABCD123xyz/view?usp=sharing`
+                        <% if (asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.front) { %>
+                            <a href="<%= asesor.verification.photos.front %>" target="_blank">(Ver documento)</a>
+                        <% } %>
+                    </small>
                 </div>
 
                 <div class="form-group">
                     <label for="backPhotoUrl">URL Foto Trasera del Documento (si aplica):</label>
-                    <input type="url" id="backPhotoUrl" name="backPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto trasera" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.back || '' %>" <%= isIdentityVerified ? 'readonly' : '' %>>
-                    <small>Opcional para algunos documentos.</small>
+                    <input type="url" id="backPhotoUrl" name="backPhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para la foto trasera" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.back || '' %>" <%= canEditIdentity ? '' : 'readonly' %>>
+                    <small>Opcional para algunos documentos.
+                        <% if (asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.back) { %>
+                            <a href="<%= asesor.verification.photos.back %>" target="_blank">(Ver documento)</a>
+                        <% } %>
+                    </small>
                 </div>
 
                 <div class="form-group">
                     <label for="selfiePhotoUrl">URL Selfie con Documento:</label>
-                    <input type="url" id="selfiePhotoUrl" name="selfiePhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu selfie con el documento" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.selfie || '' %>" required <%= isIdentityVerified ? 'readonly' : '' %>>
-                    <small>Tu rostro debe ser visible y el documento legible.</small>
+                    <input type="url" id="selfiePhotoUrl" name="selfiePhotoUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu selfie con el documento" value="<%= asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.selfie || '' %>" required <%= canEditIdentity ? '' : 'readonly' %>>
+                    <small>Tu rostro debe ser visible y el documento legible.
+                        <% if (asesor && asesor.verification && asesor.verification.photos && asesor.verification.photos.selfie) { %>
+                            <a href="<%= asesor.verification.photos.selfie %>" target="_blank">(Ver documento)</a>
+                        <% } %>
+                    </small>
                 </div>
             </fieldset>
 
@@ -107,17 +128,33 @@
             <%
             const isTituloVerified = asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'verificado';
             const isCertificacionVerified = asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'verificado';
+            const isTituloRejected = asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'rechazado';
+            const isCertificacionRejected = asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'rechazado';
+            const canEditTitulo = !isTituloVerified;
+            const canEditCertificacion = !isCertificacionVerified;
             %>
 
             <% if (isTituloVerified) { %>
                 <div class="info-message show">
                     <i class="fas fa-info-circle"></i> Tu título universitario ya ha sido **VERIFICADO**.
                 </div>
+            <% } else if (isTituloRejected) { %>
+                <div class="error-message show">
+                    <i class="fas fa-exclamation-triangle"></i> Tu **Título Universitario** ha sido **RECHAZADO**. Por favor, revisa y vuelve a subirlo.
+                    <% if (asesor.verificacion.titulo.notas) { %>
+                        <br>Notas del rechazo: <%= asesor.verificacion.titulo.notas %>
+                    <% } %>
+                </div>
             <% } %>
             <fieldset> 
                 <div class="form-group">
                     <label for="tituloUniversitarioUrl">URL Título Universitario:</label>
-                    <input type="url" id="tituloUniversitarioUrl" name="tituloUniversitarioUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu título" value="<%= asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento || '' %>" required <%= isTituloVerified ? 'readonly' : '' %>>
+                    <input type="url" id="tituloUniversitarioUrl" name="tituloUniversitarioUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu título" value="<%= asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento || '' %>" required <%= canEditTitulo ? '' : 'readonly' %>>
+                    <small>
+                        <% if (asesor && asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.urlDocumento) { %>
+                            <a href="<%= asesor.verificacion.titulo.urlDocumento %>" target="_blank">(Ver documento)</a>
+                        <% } %>
+                    </small>
                 </div>
             </fieldset>
 
@@ -125,17 +162,29 @@
                 <div class="info-message show">
                     <i class="fas fa-info-circle"></i> Tu certificación profesional ya ha sido **VERIFICADA**.
                 </div>
+            <% } else if (isCertificacionRejected) { %>
+                <div class="error-message show">
+                    <i class="fas fa-exclamation-triangle"></i> Tu **Certificación Profesional** ha sido **RECHAZADA**. Por favor, revisa y vuelve a subirla.
+                    <% if (asesor.verificacion.certificacion.notas) { %>
+                        <br>Notas del rechazo: <%= asesor.verificacion.certificacion.notas %>
+                    <% } %>
+                </div>
             <% } %>
             <fieldset> 
                 <div class="form-group">
                     <label for="certificacionProfesionalUrl">URL Certificación Profesional (Opcional):</label>
-                    <input type="url" id="certificacionProfesionalUrl" name="certificacionProfesionalUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu certificación" value="<%= asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento || '' %>" <%= isCertificacionVerified ? 'readonly' : '' %>>
+                    <input type="url" id="certificacionProfesionalUrl" name="certificacionProfesionalUrl" placeholder="Pega aquí el enlace de Google Drive/Dropbox para tu certificación" value="<%= asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento || '' %>" <%= canEditCertificacion ? '' : 'readonly' %>>
+                    <small>
+                        <% if (asesor && asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.urlDocumento) { %>
+                            <a href="<%= asesor.verificacion.certificacion.urlDocumento %>" target="_blank">(Ver documento)</a>
+                        <% } %>
+                    </small>
                 </div>
             </fieldset>
 
             <div class="form-group">
                 <label for="notes">Notas Adicionales (Opcional):</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Ej. si el documento es 'Otro', especifica aquí... o cualquier aclaración sobre tus documentos." <%= isIdentityVerified ? 'readonly' : '' %>><%= asesor && asesor.verification && asesor.verification.notes || '' %></textarea>
+                <textarea id="notes" name="notes" rows="3" placeholder="Ej. si el documento es 'Otro', especifica aquí... o cualquier aclaración sobre tus documentos." <%= canEditIdentity ? '' : 'readonly' %>><%= asesor && asesor.verification && asesor.verification.notes || '' %></textarea>
             </div>
 
             <% if (!isIdentityVerified || !isTituloVerified || !isCertificacionVerified) { %>

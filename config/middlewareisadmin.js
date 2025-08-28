@@ -1,18 +1,24 @@
-// config/middlewareisadmin.js
+
+
 const isAdmin = async (req, res, next) => {
-    if (!req.userEmail) {
-        console.warn('Error: userEmail no disponible en req. Es posible que requireAuth no se haya ejecutado o haya fallado.');
-        return res.status(403).send('Acceso denegado. No autenticado o email no disponible.');
+    if (!req.user || !req.user.email) {
+        console.warn('Error: req.user o req.user.email no disponible. Asegúrate de que `requireAuth` se haya ejecutado primero.');
+        req.flash('error_msg', 'Acceso denegado. No autenticado o información de usuario no disponible.');
+        return res.status(403).redirect('/login'); 
     }
 
+    const userEmail = req.user.email;
+    
     const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
 
-    if (adminEmails.includes(req.userEmail)) {
-        req.userRole = 'admin';
+    if (adminEmails.includes(userEmail)) {
+        req.user.role = 'admin';
+        console.log(`Middleware: Acceso de administrador concedido para: ${userEmail}`);
         next();
     } else {
-        console.warn(`Intento de acceso admin no autorizado para el email: ${req.userEmail}`);
-        return res.status(403).send('Acceso denegado. Permisos de administrador requeridos.');
+        console.warn(`Intento de acceso admin no autorizado para el email: ${userEmail}`);
+        req.flash('error_msg', 'Acceso denegado. Se requieren permisos de administrador.');
+        return res.status(403).redirect('/dashboard');
     }
 };
 

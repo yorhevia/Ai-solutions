@@ -8,7 +8,6 @@ body {
     margin: 0;
     padding: 0; /* Asegura que no haya padding extra en el body */
     background-color: #e6f7ff;
-    color: #333;
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* El cuerpo ocupa al menos el 100% de la altura de la ventana */
@@ -17,75 +16,6 @@ body {
     /* Removido align-items: center; del body para no afectar el header/footer con width:100% */
 }
 
-/* Header */
-.main-header {
-    background-color: #fff;
-    color: #007bff;
-    padding: 15px 20px;
-    border-bottom: 1px solid #d9edf7;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%; /* Ocupa todo el ancho disponible */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.main-header h2 {
-    font-size: 1.8em;
-    font-weight: 600;
-    margin: 0;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-}
-
-.header-right button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
-}
-
-.header-right button i {
-    margin-right: 5px;
-}
-
-.header-right button:hover {
-    background-color: #0056b3;
-}
-
-.header-right .logout-button-header {
-    background-color: #dc3545;
-    color: white;
-}
-
-.header-right .logout-button-header:hover {
-    background-color: #c82333;
-}
-
-.profile-logo-container {
-    cursor: pointer;
-    margin-left: 15px;
-}
-
-.profile-logo {
-    font-size: 2em;
-    color: #555;
-}
 
 /* Contenedor principal que envuelve el main content */
 .container {
@@ -117,7 +47,6 @@ body {
 
 .client-dashboard .greeting {
     line-height: 1.7;
-    color: #555;
     margin-bottom: 30px;
     font-size: 1.1em;
     text-align: center;
@@ -177,39 +106,16 @@ body {
 
 .feature-item span {
     font-size: 1.1em;
-    color: #333;
 }
 
 /* Texto informativo */
 .client-dashboard .info-text {
     line-height: 1.7;
-    color: #777;
     font-size: 1em;
     text-align: center;
     margin-top: auto; /* Empuja este texto hacia abajo dentro del main si es necesario */
 }
 
-/* Footer elegante */
-.main-footer {
-    text-align: center;
-    padding: 25px 0;
-    margin-top: auto; /* CLAVE: Esto empuja el footer hasta el final del body flexbox */
-    background-color: #1e1e1e;
-    color: #f0f0f0;
-    width: 100%; /* Ocupa todo el ancho */
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05); /* Sombra hacia arriba */
-}
-
-.main-footer .footer-content {
-    font-size: 0.9em;
-    margin: 0 auto; /* Centra el contenido del footer */
-    max-width: 90%; /* Limita el ancho para que no se extienda demasiado en pantallas grandes */
-}
-
-.main-footer .footer-content p {
-    margin: 8px 0;
-    opacity: 0.8;
-}
 
 /* Media Queries para responsividad */
 @media (max-width: 600px) {
@@ -269,13 +175,7 @@ body {
         font-size: 0.9em;
     }
 
-    .main-footer {
-        padding: 18px 0;
-    }
 
-    .main-footer .footer-content p {
-        font-size: 0.85em;
-    }
 }
 
 /* Tooltip personalizado */

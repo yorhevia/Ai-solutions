@@ -17,23 +17,22 @@
 
             <% if (notifications && notifications.length > 0) { %>
                 <% notifications.forEach(notification => { %>
-                    <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-id="<%= notification.id %>">
-                        <span class="timestamp"><%= new Date(notification.timestamp._seconds * 1000).toLocaleDateString() %></span>
-                        <p class="message"><%- notification.message %></p> <% if (!notification.read) { %>
-                            <button class="mark-read-btn">Marcar como leída</button>
-                        <% } %>
-                    </div>
+                   <div class="notification-card <%= notification.read ? 'read' : 'unread' %>" data-id="<%= notification.id %>">
+                  <span class="timestamp">
+                        <%= new Date(notification.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) %> 
+                        <%= new Date(notification.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true }) %>
+                    </span>
+                    <p class="message"><%- notification.message %></p>
+                    <% if (!notification.read) { %>
+                        <button class="mark-read-btn">Marcar como leída</button>
+                    <% } %>
+                </div>
                 <% }); %>
             <% } else { %>
                 <p class="no-notifications">No tienes notificaciones.</p>
             <% } %>
         </div>
-    </div> <footer class="main-footer">
-        <div class="footer-content">
-            <p>&copy; 2025 AI Finance Solutions. Todos los derechos reservados.</p>
-            <p>Crecimiento inteligente para tus finanzas.</p>
-        </div>
-    </footer>
+<%- include('../partials/footer') %>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

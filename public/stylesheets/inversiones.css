@@ -43,8 +43,9 @@
 
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    /* REDUCIDO: Ancho mínimo de las columnas para hacer las tarjetas más pequeñas */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 1.5rem; /* Pequeño ajuste en el espacio entre tarjetas */
     justify-content: center;
     padding: 1rem 0;
 }
@@ -74,30 +75,30 @@
 
 .news-image {
     width: 100%;
-    height: 200px;
+    height: 160px; /* REDUCIDO: Altura de la imagen */
     object-fit: cover;
     border-bottom: 1px solid #eee;
 }
 
 .news-content {
-    padding: 1.5rem;
+    padding: 1rem; /* REDUCIDO: Padding interno del contenido */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
 .news-content h3 {
-    font-size: 1.5rem;
+    font-size: 1.3rem; /* LIGERAMENTE REDUCIDO: Tamaño del título */
     color: #007bff;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.6rem; /* LIGERAMENTE REDUCIDO */
     line-height: 1.3;
 }
 
 .news-content p {
-    font-size: 1rem;
+    font-size: 0.9rem; /* LIGERAMENTE REDUCIDO: Tamaño del texto */
     color: #555;
-    line-height: 1.6;
-    margin-bottom: 1rem;
+    line-height: 1.5; /* LIGERAMENTE AJUSTADO */
+    margin-bottom: 0.8rem; /* LIGERAMENTE AJUSTADO */
     flex-grow: 1;
 }
 
@@ -106,17 +107,17 @@
     align-items: center;
     color: #007bff;
     font-weight: bold;
-    font-size: 0.95rem;
-    margin-top: auto; /* Empuja el "Leer más" hacia abajo */
+    font-size: 0.9rem; /* LIGERAMENTE REDUCIDO */
+    margin-top: auto;
 }
 
 .news-card .read-more .fas {
-    margin-left: 0.5rem;
+    margin-left: 0.4rem; /* LIGERAMENTE AJUSTADO */
     transition: margin-left 0.2s ease-in-out;
 }
 
 .news-card-link:hover .read-more .fas {
-    margin-left: 0.8rem;
+    margin-left: 0.6rem; /* LIGERAMENTE AJUSTADO */
 }
 
 /* Responsive adjustments */
@@ -135,7 +136,7 @@
 
     .news-card {
         margin: 0 auto;
-        max-width: 400px;
+        max-width: 350px; /* Ajuste el max-width para pantallas pequeñas si es necesario */
     }
 }
 
@@ -153,10 +154,10 @@
     }
 
     .news-content h3 {
-        font-size: 1.3rem;
+        font-size: 1.2rem; /* Más reducido para móviles */
     }
 
     .news-content p {
-        font-size: 0.9rem;
+        font-size: 0.85rem; /* Más reducido para móviles */
     }
 }

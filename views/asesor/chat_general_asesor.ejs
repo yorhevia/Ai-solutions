@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat de Asesor</title>
+    <title>AI Finance Solutions - Chat Asesor</title>
     <link rel="stylesheet" href="/stylesheets/chat_general_asesor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <%- include('../partials/asesor_navbar', { userName: user.nombre || 'Asesor', currentPage: 'chat' }) %>
+    <%- include('../partials/asesor_navbar', { userName: asesor && asesor.nombre ? asesor.nombre : 'Asesor', currentPage: 'chat' }) %> 
 
     <div class="main-container">
         <div class="sidebar">
@@ -15,11 +16,15 @@
             <div id="clientList">
                 <% if (clientesParaSidebar && clientesParaSidebar.length > 0) { %>
                     <% clientesParaSidebar.forEach(cliente => { %>
-                        <div class="client-item" data-client-id="<%= cliente.id %>">
-                            <img src="<%= cliente.fotoPerfilUrl %>" alt="<%= cliente.nombre %>">
+                        <div class="client-item <%= (initialChatCliente && cliente.id === initialChatCliente.id) ? 'active' : '' %>" 
+                             data-client-id="<%= cliente.id %>"
+                             data-client-name-first="<%= cliente.nombre ? encodeURIComponent(cliente.nombre) : '' %>" 
+                             data-client-name-last="<%= cliente.apellido ? encodeURIComponent(cliente.apellido) : '' %>" 
+                             data-client-photo-url="<%= cliente.fotoPerfilUrl ? encodeURIComponent(cliente.fotoPerfilUrl) : '' %>"> 
+                            <img src="<%= cliente.fotoPerfilUrl || '/images/default-profile.png' %>" alt="<%= cliente.nombre %>">
                             <div class="client-info">
                                 <div class="client-name"><%= cliente.nombre %> <%= cliente.apellido %></div>
-                                <div class="last-message"><%= cliente.lastMessage %></div>
+                                <div class="last-message" id="last-message-<%= cliente.id %>"><%= cliente.lastMessage || 'Sin mensajes' %></div>
                             </div>
                             <% if (cliente.unreadCount > 0) { %>
                                 <span class="unread-badge" id="badge-<%= cliente.id %>"><%= cliente.unreadCount %></span>
@@ -36,23 +41,24 @@
             <% if (initialChatCliente) { %>
                 <div class="chat-header" id="chatHeader">
                     <div class="cliente-info-header">
-                        <img src="<%= initialChatCliente.fotoPerfilUrl %>" alt="<%= initialChatCliente.nombre %>">
+                        <img id="chatClientPhoto" src="<%= initialChatCliente.fotoPerfilUrl || '/images/default-profile.png' %>" alt="<%= initialChatCliente.nombre %>">
                         <h4 id="chatClientName">Cliente: <%= initialChatCliente.nombre %> <%= initialChatCliente.apellido %></h4>
                     </div>
                 </div>
                 <div class="chat-messages" id="chatMessages">
                     <% initialChatMessages.forEach(message => { %>
+                        <% const msgTimestamp = new Date(message.timestamp); %>
                         <div class="message-bubble <%= message.senderId === asesor.id ? 'message-sent-asesor' : 'message-received-cliente' %>"
-                             data-message-id="<%= message.senderId %>-<%= new Date(message.timestamp).getTime() %>">
+                             data-message-id="<%= message.id %>">
                             <%= message.text %>
                             <div class="message-timestamp">
-                                <%= message.timestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
+                                <%= msgTimestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) %>
                             </div>
                         </div>
                     <% }); %>
                     <% if (initialChatMessages.length === 0) { %>
-                        <div class="message-bubble message-received-cliente" data-message-id="initial-<%= new Date().getTime() %>">
-                            ¡Hola <%= asesor.nombre %>! ¿Cómo puedo ayudarte con tus finanzas hoy?
+                        <div class="message-bubble message-received-cliente" data-message-id="static-initial-welcome">
+                            ¡Hola! ¿Cómo puedo ayudarte con tus finanzas hoy?
                             <div class="message-timestamp">Ahora</div>
                         </div>
                     <% } %>
@@ -74,74 +80,83 @@
         <a href="/homeasesor" class="back-to-home-btn">Volver al Inicio</a>
     </div>
 
-  
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const asesorId = "<%= asesor.id %>";
-            console.log('Asesor ID en frontend:', asesorId);
+            console.log('DOMContentLoaded: Script principal cargado.');
+
+            const asesorId = JSON.parse('<%- JSON.stringify(asesor && asesor.id ? asesor.id : "") %>');
+            const asesorNombre = JSON.parse('<%- JSON.stringify(asesor && asesor.nombre ? asesor.nombre : "Asesor") %>');
+            const asesorApellido = JSON.parse('<%- JSON.stringify(asesor && asesor.apellido ? asesor.apellido : "") %>');
+            const asesorName = asesorNombre + ' ' + asesorApellido; 
+            
+            console.log('DOMContentLoaded: Asesor ID en frontend:', asesorId);
 
             const clientListDiv = document.getElementById('clientList');
-            const chatHeader = document.getElementById('chatHeader');
-            const chatMessagesDiv = document.getElementById('chatMessages');
-            const messageInput = document.getElementById('messageInput');
-            const sendMessageBtn = document.getElementById('sendMessageBtn');
-            const chatInputArea = document.getElementById('chatInputArea');
+            let chatMessagesDiv = document.getElementById('chatMessages');
+            let messageInput = document.getElementById('messageInput');
+            let sendMessageBtn = document.getElementById('sendMessageBtn');
+            const chatArea = document.querySelector('.chat-area');
+            const noClientSelectedDiv = document.querySelector('.no-client-selected');
 
-            let currentChatClientId = "<%= initialChatCliente ? initialChatCliente.id : '' %>";
+            let currentChatClientId = JSON.parse('<%- JSON.stringify(initialChatCliente && initialChatCliente.id ? initialChatCliente.id : "") %>');
 
-            // Usamos un Set para almacenar los IDs de mensajes que ya están en el DOM
-            // El ID será: `${senderId}-${timestamp_en_milisegundos}`
             const displayedMessageIds = new Set();
 
-            // Rellenar displayedMessageIds con los mensajes iniciales ya presentes en el DOM
-            document.querySelectorAll('.chat-messages .message-bubble').forEach(bubble => {
-                displayedMessageIds.add(bubble.dataset.messageId);
-            });
+            if (chatMessagesDiv) {
+                document.querySelectorAll('#chatMessages .message-bubble').forEach(bubble => {
+                    const messageId = bubble.dataset.messageId;
+                    if (messageId) {
+                        displayedMessageIds.add(messageId);
+                    }
+                });
+                console.log('DOMContentLoaded: displayedMessageIds inicializado con', displayedMessageIds.size, 'mensajes.');
+            } else {
+                console.log('DOMContentLoaded: chatMessagesDiv no encontrado inicialmente (quizás no hay cliente seleccionado).');
+            }
 
             const autoResizeTextarea = () => {
                 if (messageInput) {
                     messageInput.style.height = 'auto';
                     messageInput.style.height = messageInput.scrollHeight + 'px';
+                    // console.log('autoResizeTextarea: Altura ajustada.');
                 }
             };
-            if (messageInput) {
-                messageInput.addEventListener('input', autoResizeTextarea);
-            }
-
-            // Función para obtener un ID único para un mensaje en el DOM
-            function getUniqueMessageId(message) {
-                // Asegúrate de que message.timestamp sea un objeto Date o un string parseable
-                const timestampValue = message.timestamp instanceof Date ? message.timestamp.getTime() : new Date(message.timestamp).getTime();
-                return `${message.senderId}-${timestampValue}`;
-            }
-
-            // Función para añadir un mensaje al chat (con verificación de duplicados)
-            function addMessageToChat(message) {
-                if (!chatMessagesDiv) return;
-
-                const uniqueId = getUniqueMessageId(message);
-
-                // ¡VERIFICACIÓN CLAVE DE DUPLICADOS!
-                if (displayedMessageIds.has(uniqueId)) {
-                    // console.log('Mensaje ya existe en el DOM, evitando duplicación:', uniqueId);
-                    return; // El mensaje ya está en el DOM, no lo agregues de nuevo
+            
+            function getUniqueMessageId(message) { 
+                if (message.id) {
+                    return message.id;
                 }
+                console.warn("getUniqueMessageId: Mensaje sin ID de DB, usando ID temporal:", message);
+                return `temp_${message.senderId}_${new Date().getTime()}`; 
+            }
+
+            function addMessageToChat(message) {
+                console.log('addMessageToChat: Intentando añadir mensaje con ID:', message.id, 'Texto:', message.text);
+                if (!chatMessagesDiv) {
+                    console.error('addMessageToChat: chatMessagesDiv es null, no se puede añadir mensaje.');
+                    return;
+                }
+
+                const uniqueId = getUniqueMessageId(message); 
+
+                if (displayedMessageIds.has(uniqueId)) {
+                    console.log('addMessageToChat: Mensaje ya existe en el DOM, evitando duplicación:', uniqueId);
+                    return; 
+                }
+                console.log('addMessageToChat: Añadiendo mensaje nuevo con ID:', uniqueId);
 
                 const messageBubble = document.createElement('div');
                 messageBubble.classList.add('message-bubble');
-                messageBubble.setAttribute('data-message-id', uniqueId); // Establece el ID único
-                displayedMessageIds.add(uniqueId); // Añade el ID al Set de mensajes mostrados
+                messageBubble.setAttribute('data-message-id', uniqueId); 
+                displayedMessageIds.add(uniqueId); 
 
-                // Determina si el mensaje fue enviado por el asesor o recibido de un cliente
-                if (message.senderId === asesorId) {
+                if (message.senderId === asesorId) { 
                     messageBubble.classList.add('message-sent-asesor');
                 } else {
                     messageBubble.classList.add('message-received-cliente');
                 }
 
-                // Asegúrate de que el timestamp sea un objeto Date
-                const timestampDate = message.timestamp ? new Date(message.timestamp) : new Date();
+                const timestampDate = new Date(message.timestamp);
 
                 messageBubble.innerHTML = `
                     <span class="message-text">${message.text}</span>
@@ -150,139 +165,246 @@
                     </div>
                 `;
                 chatMessagesDiv.appendChild(messageBubble);
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
+                console.log('addMessageToChat: Mensaje añadido y scroll ajustado.');
             }
 
-            // Función para cargar los mensajes de un cliente específico
-            async function loadChat(clientId) {
-                if (!clientId) return;
+            // Centraliza la configuración de listeners del input/botón de chat
+            function setupChatInputListeners() {
+                console.log('setupChatInputListeners: Intentando configurar listeners para input/botón...');
+                if (messageInput) {
+                    messageInput.removeEventListener('input', autoResizeTextarea); // Evitar duplicados
+                    messageInput.removeEventListener('keypress', handleMessageInputKeypress); // Evitar duplicados
 
-                // Limpiar displayedMessageIds para el nuevo chat
-                displayedMessageIds.clear();
-                chatMessagesDiv.innerHTML = '<div style="text-align: center; padding: 20px;">Cargando mensajes...</div>';
-                if (chatInputArea) chatInputArea.style.display = 'flex';
+                    messageInput.addEventListener('input', autoResizeTextarea);
+                    messageInput.addEventListener('keypress', handleMessageInputKeypress);
+                    console.log('setupChatInputListeners: Listeners de textarea configurados.');
+                } else {
+                    console.warn('setupChatInputListeners: messageInput es null.');
+                }
+                
+                if (sendMessageBtn) {
+                    sendMessageBtn.removeEventListener('click', handleSendMessageClick); // Evitar duplicados
+                    sendMessageBtn.addEventListener('click', handleSendMessageClick);
+                    console.log('setupChatInputListeners: Listener de botón de enviar configurado.');
+                } else {
+                    console.warn('setupChatInputListeners: sendMessageBtn es null.');
+                }
+            }
+
+            // Handlers para los event listeners
+            function handleMessageInputKeypress(e) {
+                console.log('handleMessageInputKeypress: Keypress detectado:', e.key);
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    console.log('handleMessageInputKeypress: Enter presionado sin Shift, simulando click en botón.');
+                    sendMessageBtn.click();
+                }
+            }
+
+            function handleSendMessageClick() {
+                console.log('handleSendMessageClick: Botón de enviar clickeado. currentChatClientId:', currentChatClientId);
+                sendMessage(currentChatClientId);
+            }
+
+            async function loadChat(clientId, firstName, lastName, photoUrl) { 
+                console.log('loadChat: Iniciando carga de chat para clienteId:', clientId);
+                const clientName = decodeURIComponent(firstName) + ' ' + decodeURIComponent(lastName);
+                const clientPhoto = photoUrl ? decodeURIComponent(photoUrl) : '/images/default-profile.png';
+
+                if (!clientId || clientId === currentChatClientId) {
+                    console.log('loadChat: Cliente ya cargado o ID inválido, abortando carga.');
+                    return;
+                }
 
                 currentChatClientId = clientId;
+                displayedMessageIds.clear(); 
+                console.log('loadChat: currentChatClientId actualizado, displayedMessageIds limpiado.');
 
+                if (noClientSelectedDiv) noClientSelectedDiv.style.display = 'none';
+
+                // Reconstruye el área del chat dinámicamente
+                chatArea.innerHTML = `
+                    <div class="chat-header" id="chatHeader">
+                        <div class="cliente-info-header">
+                            <img id="chatClientPhoto" src="${clientPhoto}" alt="${clientName}">
+                            <h4 id="chatClientName">Cliente: ${clientName}</h4>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div style="text-align: center; padding: 20px;">Cargando mensajes...</div>
+                    </div>
+                    <div class="chat-input" id="chatInputArea">
+                        <textarea id="messageInput" placeholder="Escribe tu mensaje..." rows="1"></textarea>
+                        <button id="sendMessageBtn">Enviar</button>
+                    </div>
+                `;
+                console.log('loadChat: HTML del área de chat reconstruido.');
+
+                // Vuelve a obtener las referencias a los elementos que se acaban de recrear en el DOM
+                chatMessagesDiv = document.getElementById('chatMessages');
+                messageInput = document.getElementById('messageInput');
+                sendMessageBtn = document.getElementById('sendMessageBtn');
+                
+                setupChatInputListeners(); // Llama a la función para adjuntar listeners
+                console.log('loadChat: Referencias de elementos y listeners reconfigurados.');
+
+                // Actualiza el estilo del cliente seleccionado en el sidebar
                 document.querySelectorAll('.client-item').forEach(item => {
                     item.classList.remove('active');
-                    if (item.dataset.clientId === clientId) {
-                        item.classList.add('active');
-                        const clientImg = item.querySelector('img').src;
-                        const clientName = item.querySelector('.client-name').textContent;
-                        if (chatHeader) {
-                            chatHeader.innerHTML = `
-                                <div class="cliente-info-header">
-                                    <img src="${clientImg}" alt="${clientName}">
-                                    <h4 id="chatClientName">Cliente: ${clientName}</h4>
-                                </div>
-                            `;
-                        }
-                        const badge = document.getElementById(`badge-${clientId}`);
-                        if (badge) badge.style.display = 'none';
-                    }
                 });
+                const selectedClientItem = document.querySelector(`.client-item[data-client-id="${clientId}"]`);
+                if (selectedClientItem) {
+                    selectedClientItem.classList.add('active');
+                    const badge = document.getElementById(`badge-${clientId}`);
+                    if (badge) badge.style.display = 'none'; 
+                    console.log('loadChat: Sidebar actualizado para cliente:', clientId);
+                }
 
+                // Carga los mensajes del chat
                 try {
-                    const response = await fetch(`/asesor/api/chat/${clientId}`);
+                    console.log('loadChat: Fetching messages desde /asesor/api/chat/messages/' + clientId);
+                    const response = await fetch(`/asesor/api/chat/messages/${clientId}`);
                     const data = await response.json();
+                    console.log('loadChat: Respuesta de mensajes recibida:', data);
+
+                    chatMessagesDiv.innerHTML = ''; // Limpiar antes de añadir mensajes
 
                     if (data.success) {
-                        chatMessagesDiv.innerHTML = ''; // Limpiar mensajes antiguos ANTES de agregar los nuevos
                         if (data.messages.length === 0) {
+                            const welcomeText = `¡Hola ${clientName.split(' ')[0]}! ¿Cómo puedo ayudarte con tus finanzas hoy?`;
                             addMessageToChat({
-                                senderId: 'initial', // ID ficticio para el mensaje de bienvenida
-                                text: `¡Hola <%= asesor.nombre %>! ¿Cómo puedo ayudarte con tus finanzas hoy?`,
+                                id: `static-initial-welcome-${clientId}`, 
+                                senderId: 'initial', 
+                                text: welcomeText, 
                                 timestamp: new Date()
                             });
+                            console.log('loadChat: No hay mensajes previos, añadiendo mensaje de bienvenida.');
                         } else {
-                            data.messages.forEach(msg => addMessageToChat(msg));
+                            data.messages.forEach(msg => addMessageToChat(msg)); 
+                            console.log('loadChat: Mensajes previos cargados:', data.messages.length);
                         }
-                        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll al final
+                        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
                     } else {
                         chatMessagesDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: red;">${data.message}</div>`;
+                        console.error('loadChat: Fallo al cargar mensajes:', data.message);
                     }
                 } catch (error) {
-                    console.error('Error al cargar chat:', error);
+                    console.error('loadChat: Error al cargar chat (fetch failed):', error);
                     chatMessagesDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: red;">Error al cargar el chat.</div>`;
                 }
             }
 
-            clientListDiv.addEventListener('click', (event) => {
-                const clientItem = event.target.closest('.client-item');
-                if (clientItem) {
-                    loadChat(clientItem.dataset.clientId);
+            async function sendMessage(targetClientId) {
+                console.log('sendMessage: Iniciando envío de mensaje para clienteId:', targetClientId);
+                const messageText = messageInput.value.trim();
+                if (!messageText) {
+                    console.log('sendMessage: Mensaje vacío, no se envía.');
+                    return;
                 }
-            });
+                if (!targetClientId) {
+                    console.error('sendMessage: targetClientId es null/undefined, no se puede enviar mensaje.');
+                    alert('Error: No se ha seleccionado un cliente para chatear.');
+                    return;
+                }
 
-            if (sendMessageBtn) {
-                sendMessageBtn.addEventListener('click', async () => {
-                    const messageText = messageInput.value.trim();
-                    if (messageText && currentChatClientId) {
-                        try {
-                            const now = new Date(); // Genera el timestamp AHORA
-                            const localMessage = {
-                                senderId: asesorId,
-                                senderType: 'asesor',
-                                text: messageText,
-                                timestamp: now // Usamos este timestamp para el mensaje optimista
-                            };
-                            console.log('Mensaje local a agregar:', localMessage);
-                            addMessageToChat(localMessage); // Añadir el mensaje localmente inmediatamente
+                try {
+                    const now = new Date(); 
+                    console.log('sendMessage: Mensaje a enviar:', messageText);
+                    
+                    messageInput.value = '';
+                    autoResizeTextarea();
+                    console.log('sendMessage: Input limpiado.');
 
-                            messageInput.value = '';
-                            autoResizeTextarea();
-                            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-
-                            const clientItemSidebar = document.querySelector(`.client-item[data-client-id="${currentChatClientId}"] .last-message`);
-                            if (clientItemSidebar) {
-                                clientItemSidebar.textContent = messageText;
-                            }
-
-                            const response = await fetch(`/asesor/api/send-message`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ 
-                                    clienteId: currentChatClientId, 
-                                    messageText: messageText,
-                                    timestamp: now.toISOString() // ¡ENVÍA EL TIMESTAMP AL BACKEND!
-                                })
-                            });
-                            const data = await response.json();
-                            if (!data.success) {
-                                console.error('Error al enviar mensaje al backend:', data.message);
-                                alert('Error al enviar mensaje: ' + data.message);
-                            }
-                        } catch (error) {
-                            console.error('Error enviando mensaje:', error);
-                            alert('Error de conexión al enviar mensaje.');
-                        }
+                    const clientItemSidebar = document.getElementById(`last-message-${targetClientId}`);
+                    if (clientItemSidebar) {
+                        clientItemSidebar.textContent = messageText;
+                        console.log('sendMessage: Sidebar actualizado con último mensaje.');
                     }
-                });
+                    
+                    console.log('sendMessage: Realizando fetch POST a /asesor/api/chat/send');
+                    const response = await fetch(`/asesor/api/chat/send`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            clienteId: targetClientId, 
+                            messageText: messageText,
+                            timestamp: now.toISOString(),
+                            senderId: asesorId, 
+                            senderType: 'asesor' 
+                        })
+                    });
+                    
+                    console.log('sendMessage: Respuesta del backend recibida, status:', response.status);
+                    const data = await response.json();
+                    console.log('sendMessage: Datos de respuesta del backend:', data);
 
-                messageInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessageBtn.click();
+                    if (data.success) { 
+                        addMessageToChat({
+                            id: data.messageId, 
+                            senderId: data.senderId, 
+                            senderType: data.senderType,
+                            text: data.text,
+                            timestamp: data.timestamp
+                        });
+                        console.log('sendMessage: Mensaje añadido al chat desde la respuesta del backend.');
+                    } else {
+                        console.error('sendMessage: Error del backend al enviar mensaje:', data.message);
+                        alert('Error al enviar mensaje: ' + data.message);
                     }
-                });
+                } catch (error) {
+                    console.error('sendMessage: Error en el bloque try-catch (posiblemente error de red):', error);
+                    alert('Error de conexión al enviar mensaje.');
+                }
             }
 
-            const pollingInterval = 3000;
+            // Listener principal para la lista de clientes en la sidebar
+            if (clientListDiv) {
+                clientListDiv.addEventListener('click', (event) => {
+                    console.log('clientListDiv click: Evento detectado.');
+                    const clientItem = event.target.closest('.client-item');
+                    if (clientItem && clientItem.dataset.clientId) {
+                        const clientId = clientItem.dataset.clientId;
+                        const clientFirstName = clientItem.dataset.clientNameFirst; 
+                        const clientLastName = clientItem.dataset.clientNameLast;
+                        const clientPhotoUrl = clientItem.dataset.clientPhotoUrl;
+                        console.log('clientListDiv click: Cliente clickeado - ID:', clientId, 'Nombre:', decodeURIComponent(clientFirstName), decodeURIComponent(clientLastName));
+                        loadChat(clientId, clientFirstName, clientLastName, clientPhotoUrl);
+                    } else {
+                        console.log('clientListDiv click: Click no fue en un client-item válido.');
+                    }
+                });
+            } else {
+                console.error('DOMContentLoaded: clientListDiv no encontrado.');
+            }
+
+            const pollingInterval = 3000; 
 
             async function pollForUpdates() {
+                // console.log('pollForUpdates: Iniciando polling...'); // Demasiado ruidoso si cada 3s
+
                 if (currentChatClientId && chatMessagesDiv) {
                     try {
-                        const response = await fetch(`/asesor/api/chat/${currentChatClientId}`);
+                        const response = await fetch(`/asesor/api/chat/messages/${currentChatClientId}`);
                         const data = await response.json();
                         if (data.success && data.messages) {
+                            let newMessagesAdded = 0;
                             data.messages.forEach(msg => {
-                                // console.log('Mensaje recibido por polling:', msg);
-                                addMessageToChat(msg); // addMessageToChat se encargará de la deduplicación
+                                const uniqueId = getUniqueMessageId(msg);
+                                if (!displayedMessageIds.has(uniqueId)) {
+                                    addMessageToChat(msg); 
+                                    newMessagesAdded++;
+                                }
                             });
-                            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                            if (newMessagesAdded > 0) {
+                                console.log(`pollForUpdates: Añadidos ${newMessagesAdded} nuevos mensajes al chat actual.`);
+                                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                            }
+                        } else if (!data.success) {
+                            console.error('pollForUpdates: Fallo al obtener mensajes del chat actual:', data.message);
                         }
                     } catch (error) {
-                        console.error('Error en polling de chat:', error);
+                        // console.error('pollForUpdates: Error en polling de chat (fetch failed):', error); // También puede ser ruidoso
                     }
                 }
 
@@ -295,7 +417,10 @@
                             if (clientItem) {
                                 const lastMessageDiv = clientItem.querySelector('.last-message');
                                 if (lastMessageDiv) {
-                                    lastMessageDiv.textContent = updatedClient.lastMessage;
+                                    if (lastMessageDiv.textContent !== updatedClient.lastMessage) {
+                                        lastMessageDiv.textContent = updatedClient.lastMessage;
+                                        // console.log(`pollForUpdates: Último mensaje de ${updatedClient.nombre} actualizado.`);
+                                    }
                                 }
                                 let badge = document.getElementById(`badge-${updatedClient.id}`);
                                 if (updatedClient.unreadCount > 0 && updatedClient.id !== currentChatClientId) {
@@ -314,33 +439,59 @@
                                 }
                             }
                         });
+                    } else if (!data.success) {
+                        console.error('pollForUpdates: Fallo al obtener datos de la sidebar:', data.message);
                     }
                 } catch (error) {
-                    console.error('Error en polling de sidebar:', error);
+                    // console.error('pollForUpdates: Error en polling de sidebar (fetch failed):', error); // También puede ser ruidoso
                 }
             }
 
             setInterval(pollForUpdates, pollingInterval);
+            console.log(`DOMContentLoaded: Polling iniciado cada ${pollingInterval}ms.`);
 
+            // Lógica de inicialización para el chat si initialChatCliente está presente
             if (currentChatClientId) {
-                const firstClientItem = document.querySelector(`.client-item[data-client-id="${currentChatClientId}"]`);
-                if (firstClientItem) {
-                    firstClientItem.classList.add('active');
+                console.log('DOMContentLoaded: Cliente inicial detectado, configurando UI.');
+                const initialClientItem = document.querySelector(`.client-item[data-client-id="${currentChatClientId}"]`);
+                if (initialClientItem) {
+                    initialClientItem.classList.add('active');
                     const badge = document.getElementById(`badge-${currentChatClientId}`);
-                    if (badge) badge.style.display = 'none';
+                    if (badge) badge.style.display = 'none'; 
+                    console.log('DOMContentLoaded: Cliente inicial marcado como activo en sidebar.');
                 }
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-            } else {
-                if (chatInputArea) chatInputArea.style.display = 'none';
-            }
 
+                if(chatMessagesDiv) {
+                    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                    console.log('DOMContentLoaded: Scroll del chat inicial ajustado.');
+                }
+                
+                setupChatInputListeners(); // Configura listeners para el chat inicial
+
+                if (messageInput) {
+                    messageInput.disabled = false;
+                    messageInput.placeholder = "Escribe tu mensaje...";
+                }
+                if (sendMessageBtn) {
+                    sendMessageBtn.disabled = false;
+                }
+            } else {
+                console.log('DOMContentLoaded: No hay cliente inicial, mostrando mensaje "selecciona un cliente".');
+                if (chatArea) chatArea.innerHTML = `<div class="no-client-selected"><h2>Selecciona un cliente para chatear</h2><p>Haz clic en un cliente de la lista para iniciar una conversación.</p></div>`;
+                
+                // Si no hay cliente inicial, los inputs no existen, entonces deshabilitamos si por alguna razón aparecen
+                if (messageInput) { messageInput.disabled = true; }
+                if (sendMessageBtn) { sendMessageBtn.disabled = true; }
+            }
+            
             document.querySelectorAll('.alert .close-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     button.closest('.alert').style.display = 'none';
                 });
             });
+            console.log('DOMContentLoaded: Listeners de cierre de alertas configurados.');
         });
     </script>
-      <% include('../partials/footer') %>
+    <%- include('../partials/footer') %>
 </body>
 </html>

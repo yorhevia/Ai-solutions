@@ -46,73 +46,89 @@
 
     <%- include('../partials/footer') %>
 
-    <script>
-        function openModal(clienteId) {
-            fetch(`/api/cliente/${clienteId}`)
-                .then(response => {
-                    // Verificar si la respuesta es OK (status 200-299)
-                    if (!response.ok) {
-                        // Si no es OK, lanzar un error para que lo capture el .catch()
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Asumo que tu backend devuelve el objeto del cliente directamente si success es true
-                    // O un objeto como { success: true, cliente: { ... } }
-                    const clienteData = data.cliente || data; // Ajusta según lo que tu backend devuelva exactamente
+<script>
+    function openModal(clienteId) {
+        console.log('openModal: Intentando abrir modal para clienteId:', clienteId);
+        fetch(`/api/cliente/${clienteId}`) 
+            .then(response => {
+                console.log('openModal: Respuesta de la API recibida, status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP! Estado: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('openModal: Datos JSON completos del cliente recibidos de la API:', data);
+                
+                const clienteData = data.cliente; 
+                
+                console.log('openModal: Objeto clienteData extraído para rellenar modal:', clienteData);
 
-                    if (clienteData && clienteData.nombre) { // Verificar si los datos del cliente son válidos
-                        document.getElementById('modalClientName').innerText = `${clienteData.nombre} ${clienteData.apellido}`;
-                        document.getElementById('modalClientPhoto').src = clienteData.fotoPerfilUrl || '/images/default-profile.png';
+                if (clienteData && clienteData.nombre) {
+                    document.getElementById('modalClientName').innerText = `${clienteData.nombre} ${clienteData.apellido}`;
+                    document.getElementById('modalClientPhoto').src = clienteData.fotoPerfilUrl || '/images/default-profile.png';
+
+                    const detailsContainer = document.getElementById('modalClientMoreDetails');
+                    detailsContainer.innerHTML = ''; 
+
+                    detailsContainer.innerHTML += `<p><strong>Email:</strong> ${clienteData.email || 'N/A'}</p>`;
+                    detailsContainer.innerHTML += `<p><strong>Teléfono:</strong> ${clienteData.telefono || 'N/A'}</p>`;
+                    detailsContainer.innerHTML += `<p><strong>Dirección:</strong> ${clienteData.direccion || 'N/A'}</p>`;
+                    detailsContainer.innerHTML += `<p><strong>Ahorros:</strong> $${(clienteData.ahorrosActuales || 0).toLocaleString('es-VE')}</p>`;
+                    detailsContainer.innerHTML += `<p><strong>Ingresos:</strong> $${(clienteData.ingresosMensuales || 0).toLocaleString('es-VE')}</p>`;
+                    
+                    detailsContainer.innerHTML += `<p><strong>Objetivo Principal:</strong> ${clienteData.objetivo_principal || 'N/A'}</p>`;
+                    detailsContainer.innerHTML += `<p><strong>Perfil de Riesgo:</strong> ${clienteData.perfil_riesgo || 'N/A'}</p>`;
+                    
+                    if (clienteData.fechaRegistro) {
+                        console.log('openModal: Fecha de registro raw:', clienteData.fechaRegistro); 
+
+                        // *** CAMBIO CLAVE AQUÍ: AÑADIR 'Z' para indicar que la fecha es UTC ***
+                        // Esto hace que JavaScript interprete el string como una fecha UTC,
+                        // en lugar de una fecha local, antes de aplicar el timezone de Caracas.
+                        const dateStringUTC = clienteData.fechaRegistro.endsWith('Z') ? clienteData.fechaRegistro : `${clienteData.fechaRegistro}Z`;
+                        const date = new Date(dateStringUTC); 
                         
-                        // Crear el contenido detallado
-                        const detailsContainer = document.getElementById('modalClientMoreDetails');
-                        detailsContainer.innerHTML = ''; // Limpiar contenido anterior
-
-                        detailsContainer.innerHTML += `<p><strong>Email:</strong> ${clienteData.email || 'N/A'}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Teléfono:</strong> ${clienteData.telefono || 'N/A'}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Dirección:</strong> ${clienteData.direccion || 'N/A'}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Ahorros:</strong> $${(clienteData.ahorros || 0).toLocaleString('es-VE')}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Ingresos:</strong> $${(clienteData.ingresos || 0).toLocaleString('es-VE')}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Objetivo Principal:</strong> ${clienteData.objetivo_principal || 'N/A'}</p>`;
-                        detailsContainer.innerHTML += `<p><strong>Perfil de Riesgo:</strong> ${clienteData.perfil_riesgo || 'N/A'}</p>`;
-                        // Puedes añadir más campos aquí si los necesitas
-
-                        // La fecha de registro que muestras es un Timestamp, necesitarás formatearla
-                        if (clienteData.fechaRegistro) {
-                            const date = new Date(clienteData.fechaRegistro._seconds * 1000); // Para Firebase Timestamps
-                            const formattedDate = date.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' });
-                            detailsContainer.innerHTML += `<p><strong>Fecha de Registro:</strong> ${formattedDate}</p>`;
-                        } else {
-                            detailsContainer.innerHTML += `<p><strong>Fecha de Registro:</strong> N/A</p>`;
-                        }
-
-
-                        document.getElementById('clientModal').style.display = "block";
-                        document.getElementById('modalClientDetails').style.display = "none"; // Ocultar el <p> viejo si usas el nuevo div
+                        // Formato específico para Venezuela con zona horaria de Caracas
+                        const formattedDate = date.toLocaleDateString('es-VE', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            timeZone: 'America/Caracas' 
+                        });
+                        console.log('openModal: Fecha de registro formateada:', formattedDate); 
+                        detailsContainer.innerHTML += `<p><strong>Fecha de Registro:</strong> ${formattedDate}</p>`;
                     } else {
-                        alert('Error: Datos de cliente incompletos o no encontrados.');
-                        console.error('Datos recibidos:', data);
+                        detailsContainer.innerHTML += `<p><strong>Fecha de Registro:</strong> N/A</p>`;
+                        console.log('openModal: fechaRegistro es nulo/indefinido.');
                     }
-                })
-                .catch(error => {
-                    console.error('Error al obtener los datos del cliente:', error);
-                    alert('Error al cargar los datos del cliente. Inténtalo de nuevo.');
-                });
-        }
 
-        function closeModal() {
-            document.getElementById('clientModal').style.display = "none";
-        }
+                    document.getElementById('clientModal').style.display = "flex"; 
+                    document.getElementById('modalClientDetails').style.display = "none"; 
+                    console.log('openModal: Modal mostrado.');
 
-        // Cerrar el modal si se hace clic fuera de él
-        window.onclick = function(event) {
-            const modal = document.getElementById('clientModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+                } else {
+                    const errorMessage = 'Error: Datos de cliente incompletos o no encontrados en la respuesta de la API.';
+                    console.error('openModal: Datos recibidos (posiblemente incompletos de la API):', data);
+                }
+            })
+            .catch(error => {
+                console.error('openModal: Error al obtener los datos del cliente para el modal (AJAX):', error);
+                const errorMessage = 'Error al cargar los datos del cliente. Por favor, revisa la consola para más detalles.';
+            });
+    }
+
+    function closeModal() {
+        console.log('closeModal: Cerrando modal.');
+        document.getElementById('clientModal').style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('clientModal');
+        if (event.target === modal) {
+            closeModal();
         }
-    </script>
+    }
+</script>
 </body>
 </html>

@@ -12,7 +12,7 @@
         <a href="/homeasesor" class="nav-link">Inicio</a>
         <a href="/perfilasesor" class="nav-link">Mi Perfil</a>
         <a href="/herramientas-analisis" class="nav-link">Herramientas de Análisis</a>
-        <a href="asesor/chat-general" class="nav-link">Chat Personal <i class="fas fa-comments"></i></a>
+        <a href="/asesor/chat/general" class="nav-link">Chat Personal <i class="fas fa-comments"></i></a>
         
         <div class="nav-item notifications-dropdown"> 
             <a href="#" class="nav-link notification-bell" id="notificationBell">
@@ -44,17 +44,33 @@
         // --- Funciones auxiliares para Notificaciones ---
         function formatRelativeTime(date) {
             const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
+            let diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000); // Diferencia en segundos
 
-            if (seconds < 60) return `hace ${seconds} segundos`;
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `hace ${minutes} minutos`;
+            // Si la notificación es del futuro o la diferencia es negativa, mostrar la fecha completa
+            if (diffSeconds < 0) {
+                // Si la fecha de la notificación es en el futuro (desincronización o error),
+                // la consideramos como si fuera "ahora" para evitar mensajes negativos.
+                return "Hace un momento"; 
+            }
+
+            const minutes = Math.floor(diffSeconds / 60);
             const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `hace ${hours} horas`;
             const days = Math.floor(hours / 24);
-            if (days < 7) return `hace ${days} días`;
-            
-            return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            if (hours < 1) { // Si la notificación es de hace menos de 1 hora
+                return "Hace un momento"; 
+            } else if (hours < 24) { // Si es de hace 1 hora o más, pero menos de 24 horas
+                return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
+            } else if (days < 7) { // Menos de una semana
+                return `Hace ${days} día${days > 1 ? 's' : ''}`;
+            } else { // Más de una semana, mostrar fecha completa en formato local de Venezuela
+                return date.toLocaleString('es-ES', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric', 
+                    timeZone: 'America/Caracas' // Especificamos la zona horaria de Venezuela
+                });
+            }
         }
 
         async function markNotificationAsRead(notificationId) {
@@ -119,12 +135,16 @@
                                     displayMessage = displayMessage.substring(0, 57) + '...';
                                 }
                                 
+                                // Parsear la fecha correctamente desde el formato de Firebase Timestamp
                                 const notificationDate = (notif.timestamp && notif.timestamp._seconds !== undefined) 
-                                    ? formatRelativeTime(new Date(notif.timestamp._seconds * 1000 + (notif.timestamp._nanoseconds || 0) / 1000000)) 
-                                    : 'Fecha desconocida';
+                                    ? new Date(notif.timestamp._seconds * 1000 + (notif.timestamp._nanoseconds || 0) / 1000000) 
+                                    : new Date(notif.createdAt); // Fallback a createdAt si timestamp no está disponible
+
+                                // Usa formatRelativeTime para el tiempo relativo
+                                const displayTime = formatRelativeTime(notificationDate);
 
                                 listItem.innerHTML = `
-                                    <span style="font-size:0.9em; color:#666;">${notificationDate}</span><br>
+                                    <span style="font-size:0.9em; color:#666;">${displayTime}</span><br>
                                     ${displayMessage}
                                 `;
                                 
@@ -235,8 +255,6 @@
             });
 
             // Solo agrega el listener para evitar cierre si estamos en desktop y el dropdown está activo
-            // En responsive, no necesitamos que los clics dentro del dropdown impidan el cierre global
-            // porque no estamos mostrando el dropdown en responsive.
             if (window.innerWidth >= 768) {
                 notificationDropdown.addEventListener('click', function(event) {
                     event.stopPropagation();
@@ -250,7 +268,7 @@
 
         // --- Listener global para cerrar menús al hacer clic fuera ---
         document.addEventListener('click', function(event) {
-      
+        
             if (window.innerWidth >= 768) { // Solo aplica esta lógica en desktop
                 const isClickOutsideHamburgerMenu = !openMenuButton.contains(event.target) && !navbarNav.contains(event.target);
                 const isClickOutsideNotificationDropdown = !notificationBell.contains(event.target) && !notificationDropdown.contains(event.target);
@@ -268,7 +286,9 @@
 
         // Opcional: Si la ventana cambia de tamaño entre responsive y desktop, recargar la lógica
         window.addEventListener('resize', () => {
-        
+        // En resize, la lógica de fetchNotifications ya maneja si debe rellenar la lista o no.
+        // Podrías agregar un `fetchNotifications()` aquí si quieres que la lista se actualice inmediatamente 
+        // al pasar de móvil a escritorio, pero puede ser excesivo. La recarga de página es común.
         });
     });
 </script>

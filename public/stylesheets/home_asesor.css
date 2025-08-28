@@ -117,7 +117,6 @@ h2 {
 
 p {
     line-height: 1.6;
-    color: #555;
     margin-bottom: 15px;
     font-size: 1em;
 }
@@ -156,46 +155,6 @@ ul.features-list {
     border-bottom: none;
 }
 
-.main-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1em 2em;
-    width: 100%;
-    margin-top: 2em;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box;
-}
-
-.footer-content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0;
-}
-
-.footer-content p {
-    margin: 0.5em 0;
-    font-size: 0.9em;
-    color: white;
-}
-
-.logout-button-footer {
-    padding: 0.7em 1.2em;
-    background-color: #555;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-    display: inline-block;
-    margin-top: 1em;
-}
-
-.logout-button-footer:hover {
-    background-color: #777;
-}
 
 @media (max-width: 600px) {
     .main-header {
@@ -268,12 +227,5 @@ ul.features-list {
         font-size: 1.2em;
         margin-right: 10px;
         width: 25px;
-        color: #666; 
-    }
-
-    .logout-button-footer {
-        padding: 8px 12px;
-        font-size: 0.8em;
-        border-radius: 4px;
     }
 }

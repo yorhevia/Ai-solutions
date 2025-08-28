@@ -46,10 +46,12 @@
                 <section>
                     <h3>Información Financiera Básica</h3>
                     <div class="form-group">
+                        <!-- 'name="ingresos"' tal como lo tienes en tu registro -->
                         <label for="ingresos">Ingresos Anuales (aproximado en dólares):</label>
                         <input type="number" id="ingresos" name="ingresos">
                     </div>
                     <div class="form-group">
+                        <!-- 'name="ahorros"' tal como lo tienes en tu registro -->
                         <label for="ahorros">Ahorros Totales (aproximado en dólares):</label>
                         <input type="number" id="ahorros" name="ahorros">
                     </div>
@@ -61,6 +63,7 @@
                         <label for="objetivo_principal">Mi objetivo financiero principal es:</label>
                         <select id="objetivo_principal" name="objetivo_principal">
                             <option value="">-- Seleccionar --</option>
+                            <!-- Valores tal como los tienes en tu registro -->
                             <option value="jubilacion">Planificación para la jubilación</option>
                             <option value="compra de vivienda">Compra de una vivienda</option>
                             <option value="educacion de hijos">Educación de mis hijos</option>
@@ -79,14 +82,17 @@
                     <h3>Perfil de Riesgo (Opcional)</h3>
                     <p>¿Cómo te sientes con la posibilidad de que tus inversiones suban o bajen de valor?</p>
                     <div class="form-group">
+                        <!-- Valores tal como los tienes en tu registro -->
                         <input type="radio" id="riesgo_conservador" name="perfil_riesgo" value="conservador">
                         <label for="riesgo_conservador">Prefiero inversiones seguras con bajo riesgo.</label>
                     </div>
                     <div class="form-group">
+                        <!-- Valores tal como los tienes en tu registro -->
                         <input type="radio" id="riesgo_moderado" name="perfil_riesgo" value="moderado">
                         <label for="riesgo_moderado">Estoy dispuesto a asumir un riesgo moderado para obtener mayores rendimientos.</label>
                     </div>
                     <div class="form-group">
+                        <!-- Valores tal como los tienes en tu registro -->
                         <input type="radio" id="riesgo_agresivo" name="perfil_riesgo" value="agresivo">
                         <label for="riesgo_agresivo">Busco el mayor rendimiento posible y estoy dispuesto a asumir un riesgo alto.</label>
                     </div>
@@ -101,5 +107,30 @@
         </footer>
     </div>
 
-  </body>
+    <!-- JavaScript para manejar la visibilidad del campo "Otro objetivo" -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const objetivoPrincipalSelect = document.getElementById('objetivo_principal');
+            const otroObjetivoDiv = document.getElementById('otro_objetivo_div');
+            const otroObjetivoInput = document.getElementById('otro_objetivo');
+
+            function toggleOtroObjetivo() {
+                if (objetivoPrincipalSelect.value === 'otro') { // 'otro' en minúsculas
+                    otroObjetivoDiv.style.display = 'block';
+                    otroObjetivoInput.setAttribute('required', 'required');
+                } else {
+                    otroObjetivoDiv.style.display = 'none';
+                    otroObjetivoInput.removeAttribute('required');
+                    otroObjetivoInput.value = ''; // Limpiar el valor si no es "Otro"
+                }
+            }
+
+            // Ejecutar al cargar la página para reflejar el estado inicial
+            toggleOtroObjetivo();
+
+            // Escuchar cambios en el select
+            objetivoPrincipalSelect.addEventListener('change', toggleOtroObjetivo);
+        });
+    </script>
+</body>
 </html>

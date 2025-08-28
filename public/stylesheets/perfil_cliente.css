@@ -7,7 +7,7 @@ html, body { /* Aseguramos que tanto html como body ocupen el 100% y no desborde
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f8; /* Un gris muy claro de fondo */
+    background-color:#e6f7ff;
     color: #333;
     display: flex; /* Mantenemos flex en body para que sus hijos (navbar, wrapper, footer) se apilen correctamente */
     flex-direction: column;
@@ -54,7 +54,8 @@ body {
 }
 
 .info-item {
-    display: flex;
+    display: inline-flexbox;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
 }
@@ -70,13 +71,15 @@ body {
 .info-item span {
     font-weight: bold;
     width: 150px;
-    display: inline-block;
+    display: inline-flexbox; /* Asegura que el span ocupe solo el espacio necesario */
     color: #555;
+    
 }
 
 .info-item .value {
     color: #333;
     flex-grow: 1;
+    
 }
 
 .info-item.optional .icon,

@@ -11,7 +11,7 @@
 <body>
     <header class="main-header">
         <div class="header-left">
-            <a href="/logout" class="nav-link">Cerrar Sesión</a>
+            <a href="/logout" class="nav-link">Cerrar Sesión
                 <i class="fas fa-arrow-left"></i>
             </a>
             <h2>Gestión de Verificaciones</h2>
@@ -36,63 +36,71 @@
                     <% asesoresPendientes.forEach(asesor => { %>
                         <%
                         // Identificación (KYC)
-                        if (asesor.verification && asesor.verification.status === 'pendiente') { %>
+                        if (asesor.kyc_status === 'pendiente') { %>
                             <tr>
                                 <td><%= asesor.nombre %> <%= asesor.apellido %></td>
                                 <td>Identificación (KYC)</td>
                                 <td>
-                                    <% if (asesor.verification.photos && asesor.verification.photos.front) { %>
-                                        <a href="<%= asesor.verification.photos.front %>" target="_blank">Ver Documento</a>
-                                    <% } else { %>
+                                    <% let kycUrlsFound = false; %>
+                                    <% if (asesor.kyc_front_url) { kycUrlsFound = true; %>
+                                        <a href="<%= asesor.kyc_front_url %>" target="_blank">Ver Documento Frontal</a><br>
+                                    <% } %>
+                                    <% if (asesor.kyc_back_url) { kycUrlsFound = true; %>
+                                        <a href="<%= asesor.kyc_back_url %>" target="_blank">Ver Documento Trasero</a><br>
+                                    <% } %>
+                                    <% if (asesor.kyc_selfie_url) { kycUrlsFound = true; %>
+                                        <a href="<%= asesor.kyc_selfie_url %>" target="_blank">Ver Selfie</a>
+                                    <% } %>
+                                    <% if (!kycUrlsFound) { %>
                                         No disponible
                                     <% } %>
                                 </td>
-                                <td class="status-pendiente">Pendiente</td>
+                                <td class="status-<%= asesor.kyc_status %>"><%= asesor.kyc_status %></td>
                                 <td>
-                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="kyc" data-action="verificar">Aprobar</button>
-                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="kyc" data-action="rechazar">Rechazar</button>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor.id %>" data-type="kyc" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor.id %>" data-type="kyc" data-action="rechazar">Rechazar</button>
                                 </td>
                             </tr>
                         <% } %>
 
                         <%
                         // Credenciales Profesionales - Título
-                        if (asesor.verificacion && asesor.verificacion.titulo && asesor.verificacion.titulo.estado === 'pendiente') { %>
+                        if (asesor.title_status === 'pendiente') { %>
                             <tr>
                                 <td><%= asesor.nombre %> <%= asesor.apellido %></td>
                                 <td>Título Profesional</td>
                                 <td>
-                                    <% if (asesor.verificacion.titulo.urlDocumento) { %>
-                                        <a href="<%= asesor.verificacion.titulo.urlDocumento %>" target="_blank">Ver Título</a>
+                                    <% if (asesor.title_document_url) { %>
+                                        <a href="<%= asesor.title_document_url %>" target="_blank">Ver Título</a>
                                     <% } else { %>
                                         No disponible
                                     <% } %>
                                 </td>
-                                <td class="status-pendiente">Pendiente</td>
+                                <td class="status-<%= asesor.title_status %>"><%= asesor.title_status %></td>
                                 <td>
-                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="titulo" data-action="verificar">Aprobar</button>
-                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="titulo" data-action="rechazar">Rechazar</button>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor.id %>" data-type="titulo" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor.id %>" data-type="titulo" data-action="rechazar">Rechazar</button>
                                 </td>
                             </tr>
                         <% } %>
 
                         <%
                         // Credenciales Profesionales - Certificación
-                        if (asesor.verificacion && asesor.verificacion.certificacion && asesor.verificacion.certificacion.estado === 'pendiente') { %>
+                        if (asesor.certification_status === 'pendiente') { %>
                             <tr>
                                 <td><%= asesor.nombre %> <%= asesor.apellido %></td>
                                 <td>Certificación Profesional</td>
                                 <td>
-                                    <% if (asesor.verificacion.certificacion.urlDocumento) { %>
-                                        <a href="<%= asesor.verificacion.certificacion.urlDocumento %>" target="_blank">Ver Certificación</a>
+                                    <% if (asesor.certification_document_url) { %>
+                                        <a href="<%= asesor.certification_document_url %>" target="_blank">Ver Certificación</a>
                                     <% } else { %>
                                         No disponible
                                     <% } %>
                                 </td>
-                                <td class="status-pendiente">Pendiente</td>
+                                <td class="status-<%= asesor.certification_status %>"><%= asesor.certification_status %></td>
                                 <td>
-                                    <button class="action-button approve-button" data-asesor-id="<%= asesor._id %>" data-type="certificacion" data-action="verificar">Aprobar</button>
-                                    <button class="action-button reject-button" data-asesor-id="<%= asesor._id %>" data-type="certificacion" data-action="rechazar">Rechazar</button>
+                                    <button class="action-button approve-button" data-asesor-id="<%= asesor.id %>" data-type="certificacion" data-action="verificar">Aprobar</button>
+                                    <button class="action-button reject-button" data-asesor-id="<%= asesor.id %>" data-type="certificacion" data-action="rechazar">Rechazar</button>
                                 </td>
                             </tr>
                         <% } %>
@@ -112,15 +120,13 @@
     const approveButtons = document.querySelectorAll('.approve-button');
     const rejectButtons = document.querySelectorAll('.reject-button'); 
 
-
-    // --- MANEJADOR PARA LOS BOTONES DE APROBAR Y RECHAZAR (AHORA SIMILARES)
     const actionButtons = document.querySelectorAll('.approve-button, .reject-button');
 
     actionButtons.forEach(button => {
         button.addEventListener('click', async function() {
             const asesorId = this.dataset.asesorId;
             const type = this.dataset.type;
-            const action = this.dataset.action; // 'verificar' o 'rechazar'
+            const action = this.dataset.action;
 
             let confirmationMessage = '';
             let successMessage = '';
@@ -131,14 +137,13 @@
                 successMessage = `¡Documento de ${type} aprobado con éxito!`;
                 errorMessage = `Error al procesar la aprobación:`;
             } else if (action === 'rechazar') {
-                // Mensaje genérico para el rechazo
                 confirmationMessage = `¿Estás seguro de que deseas RECHAZAR la verificación de ${type} para el asesor ${asesorId}? Se enviará un mensaje genérico al asesor.`;
                 successMessage = `¡Documento de ${type} rechazado con éxito!`;
                 errorMessage = `Error al procesar el rechazo:`;
             }
 
             if (!confirm(confirmationMessage)) {
-                return; // Si el usuario cancela, no hacemos nada
+                return;
             }
 
             try {
@@ -151,7 +156,6 @@
                         asesorId: asesorId,
                         type: type,
                         action: action,
-                        // selectedReason y customNotes ya no se envían
                     })
                 });
 
